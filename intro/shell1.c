@@ -1,30 +1,32 @@
+/* Figure 1.7: Read commands from standard input and execute them. */
+
 #include "apue.h"
 #include <sys/wait.h>
 
-int
-main(void)
-{
-	char	buf[MAXLINE];	/* from apue.h */
-	pid_t	pid;
-	int		status;
+int main(void) {
+  char buf[MAXLINE]; /* from apue.h */
+  pid_t pid;
+  int status;
 
-	printf("%% ");	/* print prompt (printf requires %% to print %) */
-	while (fgets(buf, MAXLINE, stdin) != NULL) {
-		if (buf[strlen(buf) - 1] == '\n')
-			buf[strlen(buf) - 1] = 0; /* replace newline with null */
+  while (1) {
+    printf("%% "); /* print prompt (printf requires %% to print %) */
+    if (fgets(buf, MAXLINE, stdin) == NULL)
+      break;
 
-		if ((pid = fork()) < 0) {
-			err_sys("fork error");
-		} else if (pid == 0) {		/* child */
-			execlp(buf, buf, (char *)0);
-			err_ret("couldn't execute: %s", buf);
-			exit(127);
-		}
+    if (buf[strlen(buf) - 1] == '\n')
+      buf[strlen(buf) - 1] = 0; /* replace newline with null */
 
-		/* parent */
-		if ((pid = waitpid(pid, &status, 0)) < 0)
-			err_sys("waitpid error");
-		printf("%% ");
-	}
-	exit(0);
+    if ((pid = fork()) < 0) {
+      err_sys("fork error");
+    } else if (pid == 0) { /* child */
+      execlp(buf, buf, (char *)0);
+      err_ret("couldn't execute: %s", buf);
+      exit(127);
+    }
+
+    /* parent */
+    if ((pid = waitpid(pid, &status, 0)) < 0)
+      err_sys("waitpid error");
+  }
+  exit(0);
 }
