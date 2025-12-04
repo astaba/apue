@@ -1,0 +1,3 @@
+The second pitfall is the two critical phases the shell takes: interpreting all token-blocks by setting the final descriptor table of the shell process, then and only then spawn. The child process inherit the modified shell FD table by fork, then execve vampirizes child into a.out with same PID as child process which is no more and same FD table of mother process.
+FIRST WRITE!
+SECOND WRITE!

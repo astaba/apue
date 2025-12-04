@@ -1,11 +1,11 @@
+/* Figure 3.1: Tets whether standard input is capable of seeking. */
+
 #include "apue.h"
 
-int
-main(void)
-{
-	if (lseek(STDIN_FILENO, 0, SEEK_CUR) == -1)
-		printf("cannot seek\n");
-	else
-		printf("seek OK\n");
-	exit(0);
+int main(void) {
+  if (lseek(STDIN_FILENO, 0, SEEK_CUR) == -1)
+    printf("cannot seek\n");
+  else
+    printf("seek OK\n");
+  exit(0);
 }
