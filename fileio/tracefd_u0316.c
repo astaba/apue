@@ -1,4 +1,4 @@
-/* apue.3e/fileio/tracefd.c */
+/* apue.3e/fileio/tracefd_u0316 */
 /* Create on: Wed Dec  3 04:23:17 +01 2025 */
 /* Description: Trace open file descriptors */
 /* NOTE: Internally opendir will run:
@@ -21,22 +21,22 @@ int main(int argc, char *argv[argc + 1]) {
   if (dirp == NULL)
     err_sys("opendir error");
 
-  struct dirent *entry;
+  struct dirent *dent;
   char linkpath[256];
   char target[256];
   ssize_t len;
 
   printf("Open file descriptors for PID %d:\n", getpid());
 
-  while ((entry = readdir(dirp)) != NULL) {
-    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+  while ((dent = readdir(dirp)) != NULL) {
+    if (!strcmp(dent->d_name, ".") || !strcmp(dent->d_name, ".."))
       continue;
-    snprintf(linkpath, sizeof(linkpath), "%s/%s", dirpath, entry->d_name);
+    snprintf(linkpath, sizeof(linkpath), "%s/%s", dirpath, dent->d_name);
     len = readlink(linkpath, target, sizeof(target) - 1);
     if (len == -1)
       err_sys("readlink error");
     target[len] = '\0';
-    printf("\tfd %-3s → %s\n", entry->d_name, target);
+    printf("\tfd %-3s → %s\n", dent->d_name, target);
   }
 
   closedir(dirp);

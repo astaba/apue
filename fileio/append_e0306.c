@@ -1,4 +1,4 @@
-/* apue.3e/fileio/append.c */
+/* apue.3e/fileio/append_e0306.c */
 /* Create on: Thu Dec  4 19:54:38 +01 2025 */
 /* Exercise 3.6: If you open a file for read–write with the append flag, can you
  * still read from anywhere in the file using lseek? Can you use lseek to

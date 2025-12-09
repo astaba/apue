@@ -2,7 +2,17 @@ ROOT=..
 PLATFORM=$(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS =	fileflags hole mycat seek nohole tracefd mydup2 append
+TEMPFILES += file.hole file.nohole
+
+PROGS = \
+		fileflags_f0311 \
+		hole_f0302 \
+		mycat_f0305 \
+		seek_f0301 \
+		nohole_uf0302 \
+		tracefd_u0316 \
+		mydup2_e0302 \
+		append_e0306
 
 all:	$(PROGS) setfl.o
 
@@ -10,6 +20,6 @@ all:	$(PROGS) setfl.o
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
 
 clean:
-	rm -f $(PROGS) $(TEMPFILES) *.o *.out file.hole file.nohole
+	rm -f $(PROGS) $(TEMPFILES) *.o *.out
 
 include $(ROOT)/Make.libapue.inc

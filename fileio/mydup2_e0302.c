@@ -1,3 +1,4 @@
+/* apue.3e/fileio/mydup2_e0302.c */
 /* apue.3e/fileio/mydp2.c */
 /* Created on: Wed Dec  3 05:45:11 +01 2025 */
 /* Exercise 3.2: Write your own dup2 function that behaves the same way as the
@@ -11,36 +12,44 @@
 int my_dup2(int oldfd, int newfd) {
   int current_fd, i, count = 0;
   int temp_fds[MAX_TEMP_FDS];
+  int output;
 
-  /* Validate oldfd */
+  /* (1) Make sure oldfd is a valid file descriptor */
   if ((current_fd = dup(oldfd)) == -1)
     return -1;
-  /* oldfd is valid therefore close its duplicate */
-  close(current_fd);
+  else /* Since oldfd is valid close its duplicate */
+    close(current_fd);
 
-  /* If they match nothing to do */
+  /* (2) Check if oldfd and newfd are the same file descriptor */
   if (oldfd == newfd)
     return newfd;
 
-  /* POSIX requirement: close the newfd. Failing to do this will prevent oldfd
-   * from ever getting its newfd since during its fd selection process from the
-   * smallest free, dup() skips open ones outright. */
+  /* (3) Close the newfd in case it happens to be open (POSIX requirement).
+   * Failing to do this will prevent oldfd from ever getting its newfd since
+   * during its fd selection process from the smallest free, dup() skips open
+   * ones outright. */
   close(newfd);
 
+  /* (4) Loop until dup() returns newfd while storing useless valid fds to
+   * cleanup */
   for (;;) {
-    current_fd = dup(oldfd);
+    if ((current_fd = dup(oldfd)) == -1) /* errno is set by dup() */ {
+      output = -1; /* Failure */
+      break;
+    }
 
-    if (current_fd == -1)
-      return -1; /* errno is set by dup() */
+    if (current_fd == newfd) /* dup() output matches target fd */ {
+      output = newfd; /* Success */
+      break;
+    }
 
-    if (current_fd == newfd)
-      break; /* Success */
-
-    /* Store intermediate fds */
-    if (count >= MAX_TEMP_FDS) /* Artificial limit, not POSIX. */ {
+    /* dup() output is valid fd but doesn't match the target fd. Store
+     * intermediate fds (for later cleanup) up until an artificial limit */
+    if (count >= MAX_TEMP_FDS) {
       close(current_fd);
       errno = EMFILE;
-      return -1;
+      output = -1; /* Failure */
+      break;
     }
 
     temp_fds[count++] = current_fd;
@@ -50,7 +59,7 @@ int my_dup2(int oldfd, int newfd) {
     close(temp_fds[i]);
   }
 
-  return newfd;
+  return output;
 }
 
 /* Test driver */

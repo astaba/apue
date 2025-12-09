@@ -1,4 +1,5 @@
-/* Figure 3.11 Print file flags for specified descriptor */
+/* apue.3e/fileio/fileflags_f0311.c */
+/* Figure 3.11 Print file status flags for specified descriptor */
 
 /* #include "apue.h" */
 #include "../include/apue.h"
