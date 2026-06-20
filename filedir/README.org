@@ -1,0 +1,1370 @@
+#+TITLE: Ch04 File and Directories
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: From “Advanced Programming in the UNIX® Environment Third Edition” W. Richard Stevens Stephen A. Rago.
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#42-stat-fstat-fstatat-and-lstat-functions][4.2 =stat=, =fstat=, =fstatat=, and =lstat= Functions]]
+- [[#43-file-types][4.3 File Types]]
+  - [[#the-complete-logical-decomposition-of-statst_mode][The Complete Logical Decomposition of =stat.st_mode=]]
+- [[#44-set-user-id-and-set-group-id][4.4 Set-User-ID and Set-Group-ID]]
+  - [[#the-setuid-metaphor][The =setuid= Metaphor]]
+  - [[#the-group-magic-tool-setgid][The Group-Magic Tool (=setgid=)]]
+  - [[#final-refined-distinctions][Final Refined Distinctions]]
+- [[#45-file-access-permissions][4.5 File Access Permissions]]
+- [[#46-ownership-of-new-files-and-directories][4.6 Ownership of New Files and Directories]]
+- [[#47-access-and-faccessat-functions][4.7 =access= and =faccessat= Functions]]
+  - [[#metaphoric-explanation-of-access-power][Metaphoric explanation of =access= power]]
+  - [[#example][Example]]
+- [[#48-umask-function][4.8 =umask= Function]]
+- [[#49-chmod-fchmod-and-fchmodat-functions][4.9 =chmod=, =fchmod=, and =fchmodat= Functions]]
+- [[#410-sticky-bit][4.10 Sticky Bit]]
+- [[#411-chown-fchown-fchownat-and-lchown-functions][4.11 =chown=, =fchown=, =fchownat=, and =lchown= Functions]]
+- [[#412-file-size][4.12 File size]]
+  - [[#mapping-stat-and-ls--ls-to-struct-stat][Mapping =stat= and =ls -ls= to =struct stat=]]
+  - [[#detailed-breakdown-of-the-size-fields][Detailed Breakdown of the Size Fields]]
+  - [[#summary-of-the-relationship][Summary of the Relationship]]
+- [[#413-file-truncation][4.13 File Truncation]]
+- [[#414-file-systems][4.14 File Systems]]
+- [[#415-link-linkat-unlink-unlinkat-and-remove-functions][4.15 =link=, =linkat=, =unlink=, =unlinkat=, and =remove= Functions]]
+  - [[#example-1][Example]]
+- [[#416-rename-and-renameat-functions][4.16 =rename= and =renameat= Functions]]
+- [[#417-symbolic-links][4.17 Symbolic Links]]
+- [[#418-creating-and-reading-symbolic-links][4.18 Creating and Reading Symbolic Links]]
+- [[#419-file-times][4.19 File Times]]
+  - [[#the-ls-command-and-the-time-fields-from-struct-stat][The =ls= command and the time fields from =struct stat=]]
+- [[#420-futimens-utimensat-and-utimes-functions][4.20 =futimens=, =utimensat=, and =utimes= Functions]]
+  - [[#example-2][Example]]
+  - [[#the-point-of-utimens-and-the-uncontrollable-st_ctim][The Point of =utimens= and the Uncontrollable =st_ctim=]]
+- [[#421-mkdir-mkdirat-and-rmdir-functions][4.21 =mkdir=, =mkdirat=, and =rmdir= Functions]]
+- [[#422-reading-directories][4.22 Reading Directories]]
+  - [[#example-3][Example]]
+- [[#423-chdir-fchdir-and-getcwd-functions][4.23 =chdir=, =fchdir=, and =getcwd= Functions]]
+  - [[#change-directory][Change directory]]
+  - [[#retreive-working-directory][Retreive working directory]]
+- [[#424-device-special-files][4.24 Device Special Files]]
+  - [[#example-4][Example]]
+- [[#exercises][Exercises]]
+
+* 4.2 =stat=, =fstat=, =fstatat=, and =lstat= Functions
+
+*Reference:* manual page inode(7), readdir(3), ftw(3).
+
+The discussion in this chapter centers on the four stat functions and
+the information they return.
+
+#+begin_src c
+  #include <sys/stat.h>
+  int stat(const char *restrict pathname, struct stat *restrict buf );
+  int fstat(int fd, struct stat *buf );
+  int lstat(const char *restrict pathname, struct stat *restrict buf );
+  int fstatat(int fd, const char *restrict pathname,
+  struct stat *restrict buf, int flag);
+  /* All four return: 0 if OK, −1 on error */
+#+end_src
+
+- =inode struct=:
+
+#+begin_src c
+#include <sys/stat.h>
+
+struct stat {
+  mode_t st_mode;          /* file type & mode (permissions) */
+  ino_t st_ino;            /* i-node number (serial number) */
+  dev_t st_dev;            /* device number (file system) */
+  dev_t st_rdev;           /* device number for special files */
+  nlink_t st_nlink;        /* number of links */
+  uid_t st_uid;            /* user ID of owner */
+  gid_t st_gid;            /* group ID of owner */
+  off_t st_size;           /* logical size in bytes, for regular files */
+  struct timespec st_atim; /* time of last access */
+  struct timespec st_mtim; /* time of last modification (data block) */
+  struct timespec st_ctim; /* time of last file status change (this inode) */
+  blksize_t st_blksize;    /* best I/O block size */
+  blkcnt_t st_blocks;      /* number of 512-byte disk-blocks allocated */
+};
+
+/* The st_rdev, st_blksize, and st_blocks fields are not required by POSIX.1.
+ * They are defined as part of the XSI option in the Single UNIX Specification.
+ */
+#+end_src
+
+* 4.3 File Types
+
+Figure 4.1 File type macros in =<sys/stat.h>=
+
+| Macro      | Type of file           |
+|------------+------------------------|
+| S_ISREG()  | regular file           |
+| S_ISDIR()  | directory file         |
+| S_ISCHR()  | character special file |
+| S_ISBLK()  | block special file     |
+| S_ISFIFO() | pipe or FIFO           |
+| S_ISLNK()  | symbolic link          |
+| S_ISSOCK() | socket                 |
+
+Historically, early versions of the UNIX System didn’t provide the
+=S_ISxxx= macros. Instead, we had to logically AND the =st_mode= value
+with the mask =S_IFMT= and then compare the result with the constants
+whose names are =S_IFxxx=. Most systems define this mask and the
+related constants in the file =<sys/stat.h>=.  If we examine this file,
+*we’ll find the =S_ISDIR= macro defined something like*:
+
+#+begin_src c
+  #define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
+#+end_src
+
+*Reference:* manual page inode(7).
+
+- [[file:file_types.c][Figure 4.3 file_types.c]]: This program prints the type of file for
+  each command-line argument. It makes extensive use of the macro
+  =S_ISxxx(...)= form. Compare it with the use of =S_IFMT= and
+  =S_IFxxx= at [[file:yftree_walk.c::case FTW_F:][File-tree-walk]] to perform the same tests.
+
+Sample output from Figure 4.3 is:
+
+#+begin_example
+$ ./file_types /etc/passwd /etc /dev/log /dev/tty /var/lib/oprofile/opd_pipe /dev/sr0 /dev/cdrom
+/etc/passwd: regular
+/etc: directory
+/dev/log: socket
+/dev/tty: character special
+/var/lib/oprofile/opd_pipe: fifo
+/dev/sr0: block special
+/dev/cdrom: symbolic link
+#+end_example
+
+** The Complete Logical Decomposition of =stat.st_mode=
+:PROPERTIES:
+:CUSTOM_ID: the-complete-logical-decomposition-of-st_mode
+:END:
+
+*Reference:* manual page inode(7).
+
+*** 1. The File Definition Type (The Upper Part)
+:PROPERTIES:
+:CUSTOM_ID: the-file-definition-type-the-upper-part
+:END:
+This section of the integer defines the fundamental identity of the
+file, which the system kernel uses to determine how to handle I/O calls
+(e.g., whether to treat it as a stream, a block device, a directory
+entry, etc.).
+
+- *Mask:* =S_IFMT= (=0170000=)
+- *Role:* Used to isolate the type bits via a bitwise AND operation
+  (=st_mode & S_IFMT=).
+- *Use:* The resulting value is compared against specific constants
+  (=S_IFREG=, =S_IFDIR=, etc.) or checked using the portable =S_IS...=
+  macros.
+
+*** 2. The File Access Mode (The Lower Part)
+:PROPERTIES:
+:CUSTOM_ID: the-file-access-mode-the-lower-part
+:END:
+This is the collection of bits that govern access control and execution
+behavior. The entire lower block is masked by =07777=.
+
+This part is correctly subdivided into two components:
+
+**** A. Special Mode Bits (The Flags)
+:PROPERTIES:
+:CUSTOM_ID: a.-special-mode-bits-the-flags
+:END:
+These are the three bits above the traditional permissions and are
+masked by =07000=. They change the way the file or directory behaves
+when executed or accessed.
+
+- =S_ISUID= (=04000=): Set-User-ID. If set on an executable file,
+  running the file grants the permissions of the owner.
+- =S_ISGID= (=02000=): Set-Group-ID. If set on an executable, running it
+  grants the permissions of the file's group. If set on a directory,
+  files created in that directory inherit the group ownership of the
+  directory.
+- =S_ISVTX= (=01000=): Sticky Bit. If set on a directory, only the owner
+  of a file (or the root user) can rename or delete files within that
+  directory.
+
+**** B. Permission Bits (The Triplet)
+:PROPERTIES:
+:CUSTOM_ID: b.-permission-bits-the-triplet
+:END:
+These are the nine lowest bits, masked by =0777=.
+
+- These are the traditional Read, Write, and Execute permissions for the
+  three user classes:
+  - *Owner* (=0700=)
+  - *Group* (=0070=)
+  - *Other* (=0007=)
+
+* 4.4 Set-User-ID and Set-Group-ID
+
+** The =setuid= Metaphor
+*** The Lamp and the Ordinary Pencil
+:PROPERTIES:
+:CUSTOM_ID: the-lamp-and-the-ordinary-pencil
+:END:
+When you run a program it becomes a process and a distinction must be
+done between the *User* and the *Tool*. Let's assume this: a =passwd=
+program without any =setuid=, just as lame as =ls=.
+
+#+begin_example
+$ ls -l /bin/ls
+-rwxr-xr-x 1 root root 142312 Jan 23 14:30 /bin/ls
+
+$ ls -l /bin/passwd
+-rwxr-xr-x 1 root root 64152 May 30  2024 /bin/passwd
+#+end_example
+
+- *The Lamp (=ls=)*: You are the *Real User* (the person holding the
+  lamp) and the *Effective User* (the person whose permissions the lamp
+  uses). Since most of the room (the Linux filesystem) has "Read" (+r)
+  signs everywhere, your lamp works perfectly. You can see anything that
+  allows "looking."
+
+- *The Ordinary Pencil (=passwd= without setuid)*: You pick up the
+  pencil. You are the *Effective User*. You try to write your new
+  password into the Great Ledger (=/etc/passwd=) with the pencil using
+  the permission of its User: You, the *REAL User* initiator of the
+  shell session. But the Ledger has a strict rule: /"Only the King
+  (root) may write here."/
+
+#+begin_example
+$ ls -l /etc/passwd
+-rw-r--r-- 1 root root 1613 Apr  3 01:39 /etc/passwd
+#+end_example
+
+Even though you own the pencil, the Ledger rejects your hand. The
+pencil is useless for its one job.
+
+*** The Magic Pencil: =setuid= Bit
+:PROPERTIES:
+:CUSTOM_ID: the-magic-pencil-setuid-bit
+:END:
+This is where the =s= in =-rwsr-xr-x= changes the laws of physics in
+Unix.
+
+#+begin_example
+$ ls -l /bin/passwd
+-rwsr-xr-x 1 root root 64152 May 30  2024 /bin/passwd
+#+end_example
+
+When a program has the *setuid* bit set and is owned by =root=, it
+becomes a *"Magic Tool."* ──→ *The Metaphor:* When you pick up the
+Magic Pencil (=passwd=), a transformation occurs. To the outside
+world, you are still "You" (the *Real User ID*). But the moment you
+start writing with that specific pencil, the system sees the *hand of
+the King* (the *Effective User ID*).
+
+1. *The Initiation:* You launch =/bin/passwd=.
+2. *The Persona Shift:* Because of that little =s=, the kernel says:
+   /"I don't care who initiated this session; while this specific tool
+   is running, the actor is 'root'."/
+3. *The Ledger Access:* You point the pencil at =/etc/passwd=. The
+   Ledger checks the permissions: /"Is the King writing? Yes."/ It
+   allows the modification.
+4. *The Completion:* As soon as you put the pencil down (the process
+   ends), the magic wears off. You are just a regular user again.
+
+** The Group-Magic Tool (=setgid=)
+:PROPERTIES:
+:CUSTOM_ID: the-group-magic-tool-setgid
+:END:
+Let's say as root administrator you create a directory for people to
+share music.  You create a group “melo” for them, make a directory
+“concert” and change the group ID of “concert” from root to “melo”.
+
+At this point everbody belonging to “melo” group is happy to listen
+and share music in the “concert” directory. Troubles arise when a
+member “A” creates a music file.  That file is created with UID and
+GID of “A” which could be other than “melo”.  Then other members will
+never be able to play that new file.
+
+To solve this the administrator set the GID bit on the “concert”
+directory: =drwxrwsr-w= (don't bother about the last 3 bits irrelevant
+to our current demonstration).  Now each time a member of “melo”
+creates a file inside it, the GID lent to the program performing the
+modification (=touch= for example) won't be the REAL User GID but the
+directoty GID which is “melo”.
+
+** Final Refined Distinctions
+:PROPERTIES:
+:CUSTOM_ID: final-refined-distinctions
+:END:
+| Bit           | Metaphor               | Technical Effect       |
+|---------------+------------------------+------------------------|
+| *setuid*      | *The King's Signature* | The program runs       |
+|               |                        | with the authority     |
+|               |                        | of the *File Owner*.   |
+|---------------+------------------------+------------------------|
+| *setgid*      | *The Guild's Seal*     | The program runs       |
+|               |                        | with the authority     |
+|               |                        | of the *File Group*.   |
+|---------------+------------------------+------------------------|
+| *Sticky (+t)* | *The Security Tag*     | In a shared folder,    |
+|               |                        | only the *Owner* can   |
+|               |                        | delete their own file. |
+|---------------+------------------------+------------------------|
+
+The "Lamp vs. Pencil" logic perfectly explains why =passwd= /must/ be
+setuid root: it's a tool designed to perform a task that the user
+themselves is forbidden from doing. It's a controlled "leak" of power.
+
+* TODO 4.5 File Access Permissions
+
+* TODO 4.6 Ownership of New Files and Directories
+
+* 4.7 =access= and =faccessat= Functions
+
+#+begin_src c
+  #include <unistd.h>
+  int access(const char *pathname, int mode);
+  int faccessat(int fd, const char *pathname, int mode, int flag);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+The mode is either the value =F_OK= to test if a file exists, or the
+bitwise OR of any of the flags shown in Figure 4.7.
+
+| mode | Description                 |
+|------+-----------------------------|
+| R_OK | test for read permission    |
+| W_OK | test for write permission   |
+| X_OK | test for execute permission |
+
+If the *setuid* bit is the "Magic Disguise" that lets a peasant walk
+into the King's Ledger room, =access()= is the eagle-eyed guard at the
+door who asks to see your *original ID card*.
+
+** Metaphoric explanation of =access= power
+*** The "ID Card" Duel: =access()= vs. =open()=
+:PROPERTIES:
+:CUSTOM_ID: the-id-card-duel-access-vs.-open
+:END:
+In the metaphor, when a program is running with the "Magic Pencil"
+(setuid root), the process has two identities simultaneously:
+
+1. *The Real UID (RUID):* The person who actually launched the tool
+   (The Peasant).
+
+2. *The Effective UID (EUID):* The identity the tool is currently
+   using (The King).
+
+**** How =open()= sees you:
+:PROPERTIES:
+:CUSTOM_ID: how-open-sees-you
+:END:
+=open()= only cares about the *Effective UID*. If the Magic Pencil is
+active, =open()= sees the King's signature and says, "Welcome, Your
+Majesty," and opens =/etc/passwd=. It is successfully "fooled" by the
+disguise because that is exactly what it was designed to do.
+
+**** How =access()= sees you:
+:PROPERTIES:
+:CUSTOM_ID: how-access-sees-you
+:END:
+=access()= is different. It ignores the Magic Disguise entirely. It
+checks permissions based on the *Real UID*.
+
+- Even if the Magic Pencil is in your hand, =access()= looks past it
+  and says, "Wait a minute... you're just a peasant. You don't have
+  write access to this ledger."
+
+- It returns =EACCES= (Permission denied).
+
+*** The Security "Guard" Pattern
+:PROPERTIES:
+:CUSTOM_ID: the-security-guard-pattern
+:END:
+This is why =access()= is a critical security tool for developers
+writing setuid programs. If you are writing a tool that allows a user
+to specify a file to work on, you don't want them to trick your "Magic
+Tool" into editing the King's secret files.
+
+*The Workflow:*
+
+1. The user says: "Hey Magic Tool, edit =/etc/shadow= for me."
+2. The Magic Tool calls =access("/etc/shadow", W_OK)=.
+3. =access()= checks the *Real User RUID* (owner of the process) not
+   the *EUID* and says: "No way, this guy isn't root."
+4. The Magic Tool can then safely say: "I refuse to perform this magic
+   for you."
+
+*** A Warning for the Systems Programmer
+:PROPERTIES:
+:CUSTOM_ID: a-warning-for-the-systems-programmer
+:END:
+While =access()= is great for checking the "Peasant's" rights, it
+carries a famous danger in the Linux/Unix world: the *TOCTOU*
+(Time-of-Check to Time-of-Use) race condition.
+
+1. *Check:* You call =access()= and the guard says, "The Peasant has
+   permission for this file."
+2. *Race:* In the microsecond /after/ the guard checks but /before/ you
+   use the pencil, a malicious user swaps that file for a symbolic link
+   to =/etc/passwd=.
+3. *Use:* You call =open()=, and now you are writing to the King's
+   Ledger!
+
+This is why, in the "Deep Level," modern Linux developers often prefer
+using =open()= first and then inspecting the file descriptor, or using
+=faccessat()= with specific flags.
+
+** Example
+:PROPERTIES:
+:CUSTOM_ID: check-for-access-right
+:END:
+- Reference: [[file:access_file.c][Figure 4.8 access_file.c]];
+
+The program runs internally two *libc* functions: =access(2)= and
+=open(2)=.  The purpose of the =access_file= program is to show that
+if you were to write a program that modifies the system in any way you
+want to make sure a malicious user won't be able to rise your programs
+privilege to perform action reserved to the *root*.  Those two
+functions don't check for *effective user's* and *real user's
+permission* the same way.  You'll notice =access(2)= is more strict
+and better for security.
+
+In this example the user name just happens to be "/moony/".
+
+#+begin_example
+ 1  $ ll access_file
+ 2  -rwxr-xr-x 1 moony moony 16840 Feb  1 12:35 access_file*
+ 3
+ 4  $ ./access_file access_f0408.c
+ 5  access(2): OK for reading
+ 6  open(2): OK for reading
+ 7
+ 8  $ ll /etc/shadow
+ 9  -rw-r----- 1 root shadow 914 Jan 23 23:31 /etc/shadow
+10
+11  $ ./access_file !$
+12  ./access_file /etc/shadow
+13  access(2): error for /etc/shadow: Permission denied
+14  open(2): error for /etc/shadow: Permission denied
+15
+16  $ su
+17  Password:
+18  # chown root access_file
+19  # ll access_file
+20  -rwxr-xr-x 1 root moony 16840 Feb  1 12:35 access_file*
+21  # chmod u+s access_file
+22  # ll access_file
+23  -rwsr-xr-x 1 root moony 16840 Feb  1 12:35 access_file*
+24  # exit
+25  exit
+26
+27  $ ./access_file /etc/shadow
+28  access(2): error for /etc/shadow: Permission denied
+29  open(2): OK for reading
+30
+31  $ ll access_file
+32  -rwsr-xr-x 1 root moony 16840 Feb  1 12:35 access_file*
+#+end_example
+
+- *Line 28 (=access=) fails* because it stubbornly checks the *RUID*
+  (you), and you don't have permission for =/etc/shadow=.
+- *Line 29 (=open=) succeeds* because it checks the *EUID* (root), and
+  root has permission for everything.
+
+* 4.8 =umask= Function
+
+#+begin_src c
+  #include <sys/stat.h>
+  mode_t umask(mode_t cmask);
+  /* Returns: previous file mode creation mask */
+#+end_src
+
+- [[file:mode_mask.c][Figure 4.9 mode_mask.c]]: This program creates two files: one with a
+  umask of 0 and one with a umask that disables all the group and
+  other permission bits.
+
+If we run this program, we can see how the permission bits have been
+set.
+
+#+begin_example
+$ umask               # first print the current file mode creation mask
+002
+
+$ ./mode_mask
+
+$ ls -l foo bar
+-rw------- 1 sar      # 0 Dec 7 21:20 bar
+-rw-rw-rw- 1 sar      # 0 Dec 7 21:20 foo
+
+$ umask               # see if the file mode creation mask changed
+002
+#+end_example
+
+* 4.9 =chmod=, =fchmod=, and =fchmodat= Functions
+
+#+begin_src c
+  #include <sys/stat.h>
+  int chmod(const char *pathname, mode_t mode);
+  int fchmod(int fd, mode_t mode);
+  int fchmodat(int fd, const char *pathname, mode_t mode, int flag);
+  /* All three return: 0 if OK, −1 on error */
+#+end_src
+
+Recall the final state of the files foo and bar when we ran the
+program in Figure 4.9 to demonstrate the umask function:
+
+#+begin_example
+$ ls -l foo bar
+-rw------- 1 sar 0 Dec 7 21:20 bar
+-rw-rw-rw- 1 sar 0 Dec 7 21:20 foo
+#+end_example
+
+- [[file:change_mode.c][Figure 4.12 change_mode.c ]] This program modifies the mode of these
+  two files.
+
+* 4.10 Sticky Bit
+
+Later versions of the UNIX System referred to this as the *saved-text
+bit*; hence the constant =S_ISVTX=.
+
+If the bit is set for a directory, a file in the directory can be
+removed or renamed only if the user has write permission for the
+directory and meets one of the following criteria:
+
+- Owns the file
+- Owns the directory
+- Is the superuser
+
+The directories =/tmp= and =/var/tmp= are typical candidates for the
+sticky bit — they are directories in which any user can typically
+create files.  The permissions for these two directories are often
+read, write, and execute for everyone (user, group, and other).  But
+users should not be able to delete or rename files owned by others.
+
+- *The Metaphor:* Imagine a public park where anyone can bring toys
+  (files) and leave them there. Because everyone has Write (+w)
+  permission to the park, anyone could technically steal or break
+  (delete) someone else's toy.
+
+- *The =+t= Fix:* The Sticky Bit acts like a *"Security Tag."* It
+  says: /"Everyone can put things here, but ONLY the person who
+  brought the toy (or the King) is allowed to take it away."/ Even if
+  you have the power to "write" in the park, you can't touch another
+  person's "toys."
+
+* 4.11 =chown=, =fchown=, =fchownat=, and =lchown= Functions
+
+#+begin_src c
+  #include <unistd.h>
+  int chown(const char *pathname, uid_t owner, gid_t group);
+  int fchown(int fd, uid_t owner, gid_t group);
+  int fchownat(int fd, const char *pathname, uid_t owner, gid_t group,
+                  int flag);
+  int lchown(const char *pathname, uid_t owner, gid_t group);
+  /* All four return: 0 if OK, −1 on error */
+#+end_src
+
+* 4.12 File size
+:PROPERTIES:
+:CUSTOM_ID: file-size
+:END:
+#+begin_src C
+#+end_src
+
+This is an excellent question. The confusion between the different
+"sizes" reported by =stat= and =ls= is extremely common and cuts right
+to the heart of how disk space is allocated on modern filesystems.
+
+You are seeing the difference between the file's *logical size* (what
+the programmer cares about) and its *physical size* (what the kernel
+cares about).
+
+Here is the mapping between the shell commands and the =struct stat=
+members, clarifying the role of each "size" field:
+
+** Mapping =stat= and =ls -ls= to =struct stat=
+
+|  =struct stat=   | =stat=           |   =ls -ls=    | Meaning & Role                        |
+|      Field       | Output Field     | Output Field  |                                       |
+|       <c>        |                  |      <c>      |                                       |
+|------------------+------------------+---------------+---------------------------------------|
+|    =st_size=     | =Size: 16816=    | Last column:  | *Logical Size:* The exact number of   |
+|     (bytes)      |                  |    =16816=    | bytes contained within the file as    |
+|                  |                  |               | written by the application.           |
+|                  |                  |               | This is what you would read if you    |
+|                  |                  |               | opened the file and read until EOF.   |
+|------------------+------------------+---------------+---------------------------------------|
+|   =st_blocks=    | =Blocks: 40=     | First column: | *Physical Size (512-byte units):*     |
+| (512-byte units) |                  |     =20=      | The total number of disk blocks       |
+|                  |                  |               | allocated to hold the file's content. |
+|                  |                  |               | Crucially, the units used here are    |
+|                  |                  |               | often 512-byte sectors/blocks,        |
+|                  |                  |               | even if the filesystem uses           |
+|                  |                  |               | 4096-byte blocks.                     |
+|------------------+------------------+---------------+---------------------------------------|
+|   =st_blksize=   | =IO Block: 4096= |      Not      | *Preferred I/O Block Size:*           |
+|     (bytes)      |                  |   displayed   | The filesystem's optimal size for     |
+|                  |                  |               | transferring data. On modern systems  |
+|                  |                  |               | like Linux, this is typically 4096    |
+|                  |                  |               | bytes (the page size). The kernel     |
+|                  |                  |               | prefers to read and write data in     |
+|------------------+------------------+---------------+---------------------------------------|
+
+** Detailed Breakdown of the Size Fields
+:PROPERTIES:
+:CUSTOM_ID: detailed-breakdown-of-the-size-fields
+:END:
+*** 1. The Logical Size (=st_size=)
+:PROPERTIES:
+:CUSTOM_ID: the-logical-size-st_size
+:END:
+- *Value:* 16816 bytes
+- *Source:* =st_size=
+- *What it represents:* This is the size that the user created. If you
+  run =wc -c changemod=, you will get 16816. This number is independent
+  of the disk's block geometry.
+
+*** 2. The Physical Size (=st_blocks= and =Blocks: 40=)
+:PROPERTIES:
+:CUSTOM_ID: the-physical-size-st_blocks-and-blocks-40
+:END:
+- *Value:* 40 blocks
+- *Source:* =st_blocks=
+- *What it represents:* This is the /true/ amount of disk space consumed
+  by the file.
+  - *Calculation:* Total space consumed = =st_blocks= \(\times\) 512
+    bytes/block
+  - *Your Example:*
+    \(40 \times 512 \text{ bytes} = 20,480 \text{ bytes}\).
+- *Why is this 40?*
+  - The file is 16,816 bytes long.
+  - The filesystem's preferred size is 4096 bytes (=st_blksize=).
+  - To store 16,816 bytes, the system needs:
+    - \(16,816 / 4,096 \approx 4.10\) blocks.
+    - Since you can't allocate a fraction of a block, the system rounds
+      up to *5 blocks* of 4096 bytes each.
+  - Total allocated space: \(5 \times 4,096 = 20,480 \text{ bytes}\).
+  - =st_blocks= reports the allocated space in *512-byte units*:
+    \(20,480 /  512 = \mathbf{40}\).
+
+*** 3. The =ls -ls= Size Column (=20=)
+:PROPERTIES:
+:CUSTOM_ID: the-ls--ls-size-column-20
+:END:
+- *Value:* 20 (units)
+- *Source:* =st_blocks=
+- *What it represents:* This column (the first one) is usually a
+  human-readable attempt to report the size, but it is often reported in
+  *kilobytes (KB)* or using a different, larger block size than 512
+  bytes.
+  - Historically, =ls= used 1024-byte blocks. In modern Linux, =ls=
+    often uses 1024-byte blocks by default for this output column.
+  - *Calculation (assuming 1024-byte units):*
+    \(20,480 \text{ bytes} /  1024 \text{ bytes/unit} = \mathbf{20}\).
+- *The key confusion:* The =ls -ls= command uses =st_blocks= (which is
+  \(40 \times 512\)), but then often displays the result in
+  \(1024 \text{ byte}\) units (\(\mathbf{20}\)). This column's unit is
+  actually determined by the =BLOCK_SIZE= environment variable or the
+  system's default, and can be different from =st_blksize=.
+
+** Summary of the Relationship
+:PROPERTIES:
+:CUSTOM_ID: summary-of-the-relationship
+:END:
+The relationship between the fields is purely mathematical:
+
+1. *Logical Size (=st_size=):* How much data the user wrote (16,816
+   bytes).
+2. *Allocation Unit (=st_blksize=):* How big the blocks on the disk are
+   (4,096 bytes).
+3. *Physical Allocation (Calculated):* The logical size rounded up to
+   the nearest multiple of the allocation unit (20,480 bytes).
+4. *=stat= Blocks (=st_blocks=):* The physical allocation expressed in
+   512-byte units (40).
+5. *=ls -ls= First Column:* The physical allocation expressed in
+   1024-byte units (20).
+
+* 4.13 File Truncation
+
+Sometimes we would like to truncate a file by chopping off data at the
+end of the file.  Emptying a file, which we can do with the =O_TRUNC=
+flag to =open=, is a special case of truncation.
+
+#+begin_src c
+  #include <unistd.h>
+  int truncate(const char *pathname, off_t length);
+  int ftruncate(int fd, off_t length);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+* TODO 4.14 File Systems
+
+* 4.15 =link=, =linkat=, =unlink=, =unlinkat=, and =remove= Functions
+
+We can use either the =link= function or the =linkat= function to
+create a link to an existing file.
+
+#+begin_src c
+  #include <unistd.h>
+  int link(const char *existingpath, const char *newpath);
+  int linkat(int efd, const char *existingpath, int nfd,
+             const char *newpath, int flag);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+These functions create a new directory entry, =newpath=, that
+references the existing file =existingpath=. If the =newpath= already
+exists, an error is returned. Only the last component of the =newpath=
+is created. The rest of the path must already exist.
+
+To remove an existing directory entry, we call the =unlink= function.
+
+#+begin_src c
+  #include <unistd.h>
+  int unlink(const char *pathname);
+  int unlinkat(int fd, const char *pathname, int flag);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+These functions remove the directory entry and decrement the link
+count of the file referenced by pathname. If there are other links to
+the file, the data in the file is still accessible through the other
+links. The file is not changed if an error occurs.
+
+We can also unlink a file or a directory with the =remove=
+function. For a file, =remove= is identical to =unlink=. For a
+directory, =remove= is identical to =rmdir=.
+
+#+begin_src c
+  #include <stdio.h>
+  int remove(const char *pathname);
+  /* Returns: 0 if OK, −1 on error */
+#+end_src
+
+*ISO C specifies the =remove= function to delete a file*. The name was
+changed from the historical UNIX name of unlink because most non-UNIX
+systems that implement the C standard didn’t support the concept of
+links to a file at the time.
+
+** Example
+
+- [[file:unlink_file.c][Figure 4.16 unlink_file.c]]: Open a file and then unlink it
+
+As you can see from the test run after opening a file, unlinking it
+merely deletes its entry in the directory block. Its i-node lives on
+with a decremented reference count. If the i-node's reference count
+drops to zero the i-node will be deleted and the data block pointed to
+reclaimed only after the file is closed or the process terminates.
+
+#+begin_example
+$ ls -l tempfile
+-rw-r--r-- 1 owner owner 537214986 Dec  8 01:33 tempfile
+
+$ df /home
+Filesystem      1K-blocks     Used Available Use% Mounted on
+/dev/sdd       1055762868 31153176 970906220   4% /
+
+$ ./unlink &
+[1] 406321
+file unlinked
+
+$ ls -l tempfile
+ls: cannot access 'tempfile': No such file or directory
+
+$ df /home
+Filesystem      1K-blocks     Used Available Use% Mounted on
+/dev/sdd       1055762868 31153176 970906220   4% /
+
+$ done
+[1]+  Done                    ./unlink
+
+$ df /home
+Filesystem      1K-blocks     Used Available Use% Mounted on
+/dev/sdd       1055762868 30628544 971430852   4% /
+#+end_example
+
+* 4.16 =rename= and =renameat= Functions
+
+A file or a directory is renamed with either the =rename= or
+=renameat= function.
+
+#+begin_src c
+  #include <stdio.h>
+  int rename(const char *oldname, const char *newname);
+  int renameat(int oldfd, const char *oldname, int newfd,
+  const char *newname);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+* TODO 4.17 Symbolic Links
+
+* 4.18 Creating and Reading Symbolic Links
+
+A symbolic link is created with either the =symlink= or =symlinkat=
+function.
+
+#+begin_src c
+  #include <unistd.h>
+  int symlink(const char *actualpath, const char *sympath);
+  int symlinkat(const char *actualpath, int fd, const char *sympath);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+A new directory entry, =sympath=, is created that points to
+=actualpath=. It is not required that =actualpath= exist when the
+symbolic link is created. (We saw this in the example at the end of
+the previous section.) Also, =actualpath= and =sympath= need not
+reside in the same file system.
+
+* 4.19 File Times
+:PROPERTIES:
+:CUSTOM_ID: file-times
+:END:
+
+#+begin_src sh
+$ ls -ltu
+total 64
+lrwxrwxrwx 1 moony moony   14 Dec  8 15:13 myfile -> ./no/such/file
+drwxr-xr-x 2 moony moony 4096 Dec  8 14:48 foo
+-rw-r--r-- 1 moony moony  567 Dec  8 14:46 Makefile
+-rw-r--r-- 1 moony moony 1389 Dec  8 13:59 unlink.c
+...
+-rw-r--r-- 1 moony moony  283 Dec  6 14:33 get_cwd.c
+-rw-r--r-- 1 moony moony  592 Dec  2 00:02 reset_times.c
+-rw-r--r-- 1 moony moony 4253 Dec  2 00:02 ftree_walk.c
+-rw-r--r-- 1 moony moony  137 Dec  2 00:02 change_dir.c
+
+$ ls -ltc
+total 64
+lrwxrwxrwx 1 moony moony   14 Dec  8 15:13 myfile -> ./no/such/file
+drwxr-xr-x 2 moony moony 4096 Dec  8 14:48 foo
+-rw-r--r-- 1 moony moony 1389 Dec  8 13:59 unlink.c
+-rw-r--r-- 1 moony moony  567 Dec  7 12:32 Makefile
+...
+-rw-r--r-- 1 moony moony 4253 Oct 24 04:48 ftree_walk.c
+-rw-r--r-- 1 moony moony  137 Oct 24 04:48 change_dir.c
+-rw-r--r-- 1 moony moony  592 Oct 24 04:48 reset_times.c
+-rw-r--r-- 1 moony moony  283 Oct 24 04:48 get_cwd.c
+
+$ ls -lt
+total 64
+lrwxrwxrwx 1 moony moony   14 Dec  8 15:13 myfile -> ./no/such/file
+drwxr-xr-x 2 moony moony 4096 Dec  8 14:48 foo
+-rw-r--r-- 1 moony moony 1389 Dec  8 13:59 unlink.c
+-rw-r--r-- 1 moony moony  567 Dec  7 12:32 Makefile
+...
+-rw-r--r-- 1 moony moony  283 Mar 20  2014 get_cwd.c
+-rw-r--r-- 1 moony moony 4253 Mar 20  2014 ftree_walk.c
+-rw-r--r-- 1 moony moony  137 Mar 20  2014 change_dir.c
+-rw-r--r-- 1 moony moony  592 Mar 20  2014 reset_times.c
+#+end_src
+
+This is another fantastic observation that targets the practical
+difference between the abstract POSIX standard (=struct stat=) and the
+way shell utilities (=ls=) choose to present that information.
+
+You are seeing the effect of the three timestamp fields in the
+=struct stat=:
+
+1. ~st_atim~: Access Time (last read).
+2. ~st_mtim~: Modification Time (last content change/write).
+3. ~st_ctim~: Change Time (last status change, e.g., permissions,
+   owner, link count, or modification time).
+
+The confusion arises because =ls -l= without any time flags does not
+show the last access time (=st_atim=) or the last change time
+(=st_ctim=); it only shows the last modification time (=st_mtim=).
+
+Here is the mapping and explanation for your three =ls= commands:
+
+** The =ls= command and the time fields from =struct stat=
+
+The =ls= command shows the time field corresponding to the criteria it
+used for sorting.
+
+*** 1. The Default: =ls -lt=
+:PROPERTIES:
+:CUSTOM_ID: the-default-ls--lt
+:END:
+- *Flag Used:* =-t= (Sort by time). When no specific time field is
+  requested for sorting, =ls= defaults to using the *Modification Time
+  (=st_mtim=)* for both sorting and display.
+- *Timestamp Displayed:* *Modification Time (=st_mtim=)*
+
+| File       | Timestamp     | Corresponds to                |
+|            | Displayed     | ~struct stat~ Field           |
+|------------+---------------+-------------------------------|
+| =myfile=   | =Dec 8 15:13= | =st_mtim= (Modification Time) |
+| =foo=      | =Dec 8 14:48= | =st_mtim= (Modification Time) |
+| =unlink.c= | =Dec 8 13:59= | =st_mtim= (Modification Time) |
+
+*Conclusion for =ls -lt=:* This output is sorted and displayed by
+*Modification Time (=st_mtim=)*. The files at the bottom (=get_cwd.c=
+*through =reset_times.c=) show very old dates (Mar 20 2014) because
+*they haven't been modified (written to) in a very long time.
+
+*** 2. The Access Time: =ls -ltu=
+:PROPERTIES:
+:CUSTOM_ID: the-access-time-ls--ltu
+:END:
+- *Flag Used:* =-t= (Sort by time) and =-u= (Use *Access Time* for
+  sorting and display).
+- *Timestamp Displayed:* *Access Time (=st_atim=)*
+
+| File       | Timestamp     | Corresponds to          |
+|            | Displayed     | ~struct stat~ Field     |
+|------------+---------------+-------------------------|
+| =myfile=   | =Dec 8 15:13= | =st_atim= (Access Time) |
+| =foo=      | =Dec 8 14:48= | =st_atim= (Access Time) |
+| =Makefile= | =Dec 8 14:46= | =st_atim= (Access Time) |
+
+*Conclusion for =ls -ltu=:* The files at the bottom of the previous
+list (like =ftree_walk.c=, =change_dir.c=, etc.) are now much newer
+(Oct 24 04:48 or Dec 2 00:02) because you accessed (read) their
+contents more recently than they were modified. The sort order and the
+displayed time are based on *=st_atim=*.
+
+*** The Caveat: =noatime=
+:PROPERTIES:
+:CUSTOM_ID: the-caveat-noatime
+:END:
+Due to the performance overhead of constantly updating =st_atim= on
+every read (which requires a write operation to the disk/SSD
+metadata), many modern Linux filesystems (especially laptop and
+desktop systems) use the =noatime= or =relatime= mount options by
+default.
+
+- =noatime=: Access time updates are completely disabled (always
+  shows the same time as =st_mtim= or =st_ctim=).
+- =relatime=: Access time updates are suppressed unless the file's
+  modification time is older than the current access time, or if the
+  last access time is already very old (e.g., 24 hours). This is a
+  compromise to improve performance while still giving a rough idea of
+  recent access.
+
+So, while *in principle* =st_atim= should be the most recent, *in
+practice* on many modern systems, its updates are intentionally
+delayed or suppressed for performance reasons.
+
+*** 3. The Status Change Time: =ls -ltc=
+:PROPERTIES:
+:CUSTOM_ID: the-status-change-time-ls--ltc
+:END:
+- *Flag Used:* =-t= (Sort by time) and =-c= (Use *Change Time* for
+  sorting and display).
+- *Timestamp Displayed:* *Change Time (=st_ctim=)*
+
+| File       | Timestamp     | Corresponds to          |
+|            | Displayed     | ~struct stat~ Field     |
+|------------+---------------+-------------------------|
+| =myfile=   | =Dec 8 15:13= | =st_ctim= (Change Time) |
+| =foo=      | =Dec 8 14:48= | =st_ctim= (Change Time) |
+| =unlink.c= | =Dec 8 13:59= | =st_ctim= (Change Time) |
+
+*Conclusion for =ls -ltc=:* =st_ctim= is updated whenever the file's
+inode changes. This happens if the file is modified (=st_mtim=
+updates, which also updates =st_ctim=), or if its permissions, owner,
+or link count changes.
+
+Notice that the bottom files in this list (=ftree_walk.c=,
+=change_dir.c=, =reset_times.c=) show a time of *Oct 24 04:48*, which
+is newer than the =Mar 20 2014= time from =ls -lt=, but older than the
+access time from =ls -ltu=. This suggests that some status change
+(like a permission change or a hard link update) happened around
+October 24th, even though the content hasn't been written since
+March 2014.
+
+*** Summary Table
+:PROPERTIES:
+:CUSTOM_ID: summary-table
+:END:
+| =ls= Command        | Sorting Criteria              | Time Field Displayed | =struct stat= Field |
+|---------------------+-------------------------------+----------------------+---------------------|
+| *=ls -l= (Default)* | Sort by Name (if =-t= absent) | Modification Time    | =st_mtim=           |
+| *=ls -lt=*          | Sort by Modification Time     | Modification Time    | =st_mtim=           |
+| *=ls -ltu=*         | Sort by Access Time           | Access Time          | =st_atim=           |
+| *=ls -ltc=*         | Sort by Change Time           | Change Time          | =st_ctim=           |
+|---------------------+-------------------------------+----------------------+---------------------|
+
+The key takeaway is that *=ls -l= (or =ls -lt=) shows the Modification
+Time (=st_mtim=) by default, as that is the time most users care about
+(when was the content last updated).*
+
+* 4.20 =futimens=, =utimensat=, and =utimes= Functions
+
+The =futimens= and =utimensat= functions provide nanosecond
+granularity for specifying timestamps, using the =timespec= structure
+(the same structure used by the =stat= family of functions; see
+Section 4.2).
+
+#+begin_src c
+  #include <sys/stat.h>
+  int futimens(int fd, const struct timespec times[2]);
+  int utimensat(int fd, const char *path, const struct timespec times[2],
+  int flag);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+In both functions, the first element of the =times= array argument
+contains *the access time*, and the second element contains *the
+modification time*. The two time values are calendar times, which
+count seconds since the Epoch, as described in Section 1.10.  Partial
+seconds are expressed in nanoseconds.
+
+Both =futimens= and =utimensat= are included in POSIX.1. A third
+function, =utimes=, is included in the *Single UNIX Specification as
+part of the XSI option*.
+
+#+begin_src c
+  #include <sys/time.h>
+  int utimes(const char *pathname, const struct timeval times[2]);
+  /* Returns: 0 if OK, −1 on error */
+#+end_src
+
+The =utimes= function operates on a =pathname=. The times argument is
+a pointer to an array of two timestamps — access time and modification
+time — *but they are expressed in seconds and microseconds*:
+
+Note that we are unable to specify a value for the changed-status
+time, =st_ctim= — the time the i-node was last changed — *as this
+field is automatically updated when the utime function is called*.
+
+** Example
+
+- [[file:reset_times.c][Figure 4.21 reset_times.c]]: This program truncates files to zero
+  length using the =O_TRUNC= option of the =open= function, but does
+  not change their access time or modification time.  To do this, the
+  program first obtains the times with the =stat= function, truncates
+  the file, and then resets the times with the =futimens= function.
+
+#+begin_src sh
+$ stat ftree_walk.c > stamp_0.txt
+
+$ ./reset_times ftree_walk.c change_dir.c get_cwd.c devrdev.c
+
+$ stat ftree_walk.c > stamp_1.txt
+
+$ diff -u stamp_0.txt stamp_1.txt
+--- stamp_0.txt 2025-12-08 20:06:21.093687955 +0100
++++ stamp_1.txt 2025-12-08 20:10:07.388840596 +0100
+@@ -1,8 +1,8 @@
+   File: ftree_walk.c
+-  Size: 4253           Blocks: 16         IO Block: 4096   regular file
++  Size: 0              Blocks: 0          IO Block: 4096   regular empty file
+ Device: 8,48   Inode: 209909      Links: 1
+ Access: (0644/-rw-r--r--)  Uid: ( 1002/   moony)   Gid: ( 1002/   moony)
+ Access: 2025-12-08 18:27:43.846920289 +0100
+ Modify: 2014-03-20 01:38:24.000000000 +0000
+-Change: 2025-10-24 04:48:58.609540292 +0100
++Change: 2025-12-08 18:43:20.450018158 +0100
+  Birth: 2025-10-24 04:48:58.609540292 +0100
+#+end_src
+
+** The Point of =utimens= and the Uncontrollable =st_ctim=
+:PROPERTIES:
+:CUSTOM_ID: the-point-of-utimens-and-the-uncontrollable-st_ctim
+:END:
+
+#+begin_quote
+*Question:* What is the point of only changing =st_atim= and =st_mtim=
+when, as =./reset_times='s output shows, =st_ctim= is controled by the
+system?
+
+#+end_quote
+
+That is the perfect question to ask after observing the output of the
+=reset_times= program! You've noticed a crucial behavior of the Unix
+filesystem that explains *why* the =utimes=/=futimens= family of
+functions exists.
+
+The essence of the answer lies in understanding the *kernel's integrity
+mandate* versus the *application's need for control.*
+
+The point of =utimens= (or the older =utime=/=utimes=) is to allow the
+application to explicitly manipulate the *Access Time (=st_atim=)* and
+the *Modification Time (=st_mtim=)* without having to perform a full
+read or write.
+
+*** 1. The Kernel's Mandate: =st_ctim= is Sacred
+:PROPERTIES:
+:CUSTOM_ID: the-kernels-mandate-st_ctim-is-sacred
+:END:
+The *Change Time (=st_ctim=)* is the timestamp that tracks the integrity
+and metadata of the file's definition (i-node metadata). The kernel
+considers =st_ctim= to be a *system-controlled audit trail*.
+
+Any operation that fundamentally changes the file's definition must be
+recorded by the kernel, and the application is *never* allowed to lie
+about when that change happened.
+
+| Event that Forces      | Rationale                       |
+| ~st_ctim~  Update      |                                 |
+|------------------------+---------------------------------|
+| ~open(..., O_TRUNC)~   | The file size is changed to 0,  |
+|                        | and disk blocks are freed.      |
+|                        | This is a massive metadata      |
+|                        | change.                         |
+|------------------------+---------------------------------|
+| ~chmod= or =chown~     | Permissions or ownership        |
+|                        | (metadata) change.              |
+|------------------------+---------------------------------|
+| ~utimens= / =futimens~ | An explicit system call is made |
+|                        | to change the metadata          |
+|                        | (=st_atim= or =st_mtim=).       |
+|                        | This itself is an inode         |
+|                        | modification, so the kernel     |
+|                        | /must/ record it.               |
+|------------------------+---------------------------------|
+
+*Conclusion:* =st_ctim= will update automatically whenever the inode
+record is touched by an explicit system call (like =futimens=). You
+cannot prevent this update, because if you could, you could use
+=futimens= to change =st_mtim= to an old date without the system
+recording that the change itself occurred today, thereby compromising
+audit integrity.
+
+*** 2. Analysis of Your =reset_times= Program Output
+:PROPERTIES:
+:CUSTOM_ID: analysis-of-your-reset_times-program-output
+:END:
+Let's look at the =ftree_walk.c= file before and after running =./reset_times=:
+
+| Field     |        Before | After =reset_times= | Explanation                 |
+|           | =reset_times= | Current Time:       | of the Change               |
+|           |               | Dec 8 18:43         |                             |
+|           |           <r> | <l>                 |                             |
+|-----------+---------------+---------------------+-----------------------------|
+| *Size*    |          4253 | 0                   | =open(..., O_TRUNC)=        |
+|           |               |                     | forcefully sets the size    |
+|           |               |                     | to zero. This is a          |
+|           |               |                     | content change.             |
+|-----------+---------------+---------------------+-----------------------------|
+| ~st_atim~ |    2025-12-08 | 2025-12-08          | The =stat= call /before/    |
+|           |      18:27:43 | 18:27:43            | truncation read this time.  |
+|           |               |                     | The =futimens= call         |
+|           |               |                     | successfully reset it to    |
+|           |               |                     | the original value.         |
+|-----------+---------------+---------------------+-----------------------------|
+| ~st_mtim~ |    2014-03-20 | 2014-03-20          | The =stat= call read this   |
+|           |      01:38:24 | 01:38:24            | time. The =futimens= call   |
+|           |               |                     | successfully reset it to    |
+|           |               |                     | the original value.         |
+|-----------+---------------+---------------------+-----------------------------|
+| ~st_ctim~ |    2025-10-24 | 2025-12-08          | *The Key Change!*           |
+|           |      04:48:58 | 18:43:20            | The kernel updated this     |
+|           |               |                     | automatically because the   |
+|           |               |                     | metadata was changed by:    |
+|           |               |                     | 1. =O_TRUNC= (size/blocks)  |
+|           |               |                     | 2. =futimens= (timestamps). |
+|           |               |                     | The kernel must record the  |
+|           |               |                     | time /when/ these status    |
+|           |               |                     | changes occurred.           |
+|-----------+---------------+---------------------+-----------------------------|
+
+*** 3. What is the Point of =futimens=?
+:PROPERTIES:
+:CUSTOM_ID: what-is-the-point-of-futimens
+:END:
+The purpose of =utimens=/=futimens= is not to deceive the auditor
+(=st_ctim=), but to *restore or set the logical times (=st_atim= and
+=st_mtim=) for specific use cases:*
+
+**** A. Copying Files (Restoration)
+:PROPERTIES:
+:CUSTOM_ID: a.-copying-files-restoration
+:END:
+When utilities like =cp= or =tar= copy a file, they first create the
+file, copy the data, and then call =futimens= to set the new file's
+=st_mtim= back to the *original file's =st_mtim=*.
+
+- *Goal:* Preserve the original file's creation/modification history for
+  the user.
+- *Result:* The new file's =st_mtim= matches the original, but its
+  =st_ctim= (Change Time) reflects the current moment, documenting when
+  the copy /actually/ took place.
+
+**** B. Touch Files (Explicit Setting)
+:PROPERTIES:
+:CUSTOM_ID: b.-touch-files-explicit-setting
+:END:
+The =touch= utility uses this family of functions.
+
+- *Goal:* Update =st_mtim= to the current time /without/ rewriting the
+  entire file content, thus avoiding unnecessary disk I/O.
+
+In summary, the inability to change =st_ctim= is a *security and
+auditing guarantee*. The kernel /guarantees/ that =st_ctim= accurately
+reflects the last moment the file's definition changed, regardless of
+what the application attempts to do to the other two timestamps
+
+* 4.21 =mkdir=, =mkdirat=, and =rmdir= Functions
+
+Directories are created with the mkdir and mkdirat functions, and deleted with the
+rmdir function.
+
+#+begin_src c
+  #include <sys/stat.h>
+  int mkdir(const char *pathname, mode_t mode);
+  int mkdirat(int fd, const char *pathname, mode_t mode);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+These functions create a new, empty directory. The entries for /dot/
+and /dot-dot/ are created automatically.  The specified file access
+permissions, =mode=, are modified by the file mode creation mask of
+the process.
+
+A common mistake is to specify the same =mode= as for a file: read and
+write permissions only.  But for a directory, we normally want at
+least one of the execute bits enabled, to allow access to filenames
+within the directory. (See Exercise 4.16.)
+
+An empty directory is deleted with the =rmdir= function. Recall that
+an empty directory is one that contains entries only for /dot/ and
+/dot-dot/.
+
+#+begin_src c
+  #include <unistd.h>
+  int rmdir(const char *pathname);
+  /* Returns: 0 if OK, −1 on error */
+#+end_src
+
+* 4.22 Reading Directories
+
+#+begin_src c
+  #include <dirent.h>
+  DIR *opendir(const char *pathname);
+  DIR *fdopendir(int fd);
+  /* Both return: pointer if OK, NULL on error */
+
+  struct dirent *readdir(DIR *dp);
+  /* Returns: pointer if OK, NULL at end of directory or error */
+
+  void rewinddir(DIR *dp);
+  int closedir(DIR *dp);
+  /* Returns: 0 if OK, −1 on error */
+
+  long telldir(DIR *dp);
+  /* Returns: current location in directory associated with dp */
+
+  void seekdir(DIR *dp, long loc);
+#+end_src
+
+** Example
+
+- [[file:ftree_walk.c][Figure 4.22 ftree_walk.c]]; This program uses the previous
+  directory-related routines to traverses a file hierarchy. The goal
+  is to produce a count of the various types of files shown in Figure
+  4.4 (Counts and percentages of different file types). It takes a
+  single argument — the starting pathname — and recursively descends
+  the hierarchy from that point.
+- [[file:yftree_walk.c][Practice yftree_walk.c]]; Rehearse and explanations.
+
+* 4.23 =chdir=, =fchdir=, and =getcwd= Functions
+
+** Change directory
+
+Every process has a current working directory. This directory is where
+the search for all relative pathnames starts (i.e., with all pathnames
+that do not begin with a slash). When a user logs in to a UNIX system,
+the current working directory normally starts at the directory
+specified by the sixth field in the =/etc/passwd= file — the user ’s
+home directory. *The current working directory is an attribute of a
+process; the home directory is an attribute of a login name*.
+
+We can change the current working directory of the calling process by
+calling the =chdir= or =fchdir= function.
+
+#+begin_src c
+  #include <unistd.h>
+  int chdir(const char *pathname);
+  int fchdir(int fd);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+We can specify the new current working directory either as a
+=pathname= or through an *open file descriptor*.
+
+*** Example
+
+- [[file:change_dir.c][Figure 4.23 change_dir.c]]; this program doesn’t do what we might
+  expect.  Because it is an attribute of a process, the current
+  working directory cannot affect processes that invoke the process
+  that executes the chdir. (We describe the relationship between
+  processes in more detail in Chapter 8.)
+
+** Retreive working directory
+
+#+begin_src c
+  #include <unistd.h>
+  char *getcwd(char *buf, size_t size);
+  /* Returns: buf if OK, NULL on error */
+#+end_src
+
+We must pass to this function the address of a buffer, =buf=, and its
+=size= (in bytes). The buffer must be large enough to accommodate the
+*absolute pathname plus a terminating null byte*, or else an error
+will be returned.
+
+*** Example
+
+- [[file:get_cwd.c][Figure 4.24 get_cwd.c]]: This program changes to a specific directory
+  and then calls =getcwd= to print the working directory.
+
+The =getcwd= function is useful when we have an application that needs
+to return to the location in the file system where it started out. We
+can save the starting location by calling getcwd before we change our
+working directory. After we complete our processing, we can pass the
+pathname obtained from getcwd to chdir to return to our starting
+location in the file system.
+
+* 4.24 Device Special Files
+
+The two fields =st_dev= and =st_rdev= are often confused. The rules
+for their use are simple.
+
+- Every file system is known by its major and minor device numbers,
+  which are encoded in the primitive system data type =dev_t=.  The
+  major number identifies the device driver and sometimes encodes
+  which peripheral board to communicate with; the minor number
+  identifies the specific subdevice.  Recall from Figure 4.13 that a
+  disk drive often contains several file systems. Each file system on
+  the same disk drive would usually have the same major number, but a
+  different minor number.
+
+- We can usually access the major and minor device numbers through two
+  macros defined by most implementations: =major= and
+  =minor=. Consequently, we don’t care how the two numbers are stored
+  in a =dev_t= object.
+
+- The =st_dev= value for every filename on a system is the device
+  number of the file system containing that filename and its
+  corresponding i-node.
+
+- *Only character special files and block special files have an
+  =st_rdev= value*. This value contains the device number for the
+  actual device.
+
+** Example
+
+- [[file:device_num.c][Figure 4.25 device_num.c]]: This program prints the device number for
+  each command-line argument.  Additionally, if the argument refers to
+  a character special file or a block special file, the =st_rdev=
+  value for the special file is printed.
+
+Running this program on Linux gives us the following output:
+
+#+begin_example
+$ ./device_num / /home/sar /dev/tty[01]
+/: dev = 8/3
+/home/sar: dev = 8/4
+/dev/tty0: dev = 0/5 (character) rdev = 4/0
+/dev/tty1: dev = 0/5 (character) rdev = 4/1
+
+$ mount              # which directories are mounted on which devices?
+/dev/sda3 on / type ext3 (rw,errors=remount-ro,commit=0)
+/dev/sda4 on /home type ext3 (rw,commit=0)
+
+$ ls -l /dev/tty[01] /dev/sda[34]
+brw-rw---- 1 root 8, 3 2011-07-01 11:08 /dev/sda3
+brw-rw---- 1 root 8, 4 2011-07-01 11:08 /dev/sda4
+crw--w---- 1 root 4, 0 2011-07-01 11:08 /dev/tty0
+crw------- 1 root 4, 1 2011-07-01 11:08 /dev/tty1
+#+end_example
+
+* Exercises
