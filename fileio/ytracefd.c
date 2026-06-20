@@ -1,14 +1,20 @@
-/* apue.3e/fileio/tracefd_u0316 */
-/* Create on: Wed Dec  3 04:23:17 +01 2025 */
-/* Description: Trace open file descriptors */
-/* NOTE: Internally opendir will run:
+/* =========================================================================
+ * Created on: <Wed Dec  3 04:23:17 +01 2025>
+ * Time-stamp: <Sat Jun 20 17:19:37 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/ytracefd.c -
+ *
+ * My Utility Program for Section 3.16: Trace open file descriptors.
+ *
+ * NOTE: Internally opendir will run:
  * fd = open( "/proc/self/fd", O_RDONLY | O_DIRECTORY);
  * that fd will become the first free (most likely 3) file descriptor.
  * fd 0, 1, 2 often refer to the same terminal, so all point to /dev/pts/N.
  * The filename /dev/pts/N has nothing to do with "fd 0".
  * FDs do not store filenames; they store references to open file objects.
- * Several FDs can point to the same open file object. */
-
+ * Several FDs can point to the same open file object.
+ * ========================================================================= */
 #include "../include/apue.h"
 #include <dirent.h>
 #include <unistd.h>

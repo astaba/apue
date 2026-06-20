@@ -1,14 +1,20 @@
-/* apue.3e/fileio/hole_f0302.c */
-/* Rehearsed: Tue Dec  9 15:34:22 +01 2025 */
-/* Figure 3.2: Create a file with a hole in it by changing the file offset. */
-/* Usage:
+/* =========================================================================
+ * Created on: <Tue Dec  9 15:34:22 +01 2025>
+ * Time-stamp: <Mon Jun 15 18:33:21 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/lseek_hole.c -
+ *
+ * Figure 3.2: Create a file with a hole in it by changing the file
+ * offset. See also [[file:nohole.c]]
+ *
+ * Usage:
  *    $ ./hole
  *    $ ls -l file.hole  # check its size
  *    $ od -c file.hole  # let’s look at the actual contents
  *    $ ./nohole         # Create the nohole file and optionally look inside
  *    $ ls -l file.hole  file.nohole  # Compare sizes
- * */
-
+ * ========================================================================= */
 #include "../include/apue.h"
 #include <fcntl.h>
 

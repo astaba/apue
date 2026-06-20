@@ -1,14 +1,20 @@
-/* apue.3e/fileio/append_e0306.c */
-/* Create on: Thu Dec  4 19:54:38 +01 2025 */
-/* Exercise 3.6: If you open a file for read–write with the append flag, can you
- * still read from anywhere in the file using lseek? Can you use lseek to
- * replace existing data in the file? Write a program to verify this. */
-
-/* My answer: with O_APPEND you can still read from wherever you want using
- * lseek() but when it comes to write lseek() has no effect. Atomic behavior
- * takes precedence to set File Table Entry offset to the last updated file size
- * from v-node before writting at the end, always at the and. */
-
+/* =========================================================================
+ * Created on: <Thu Dec  4 19:54:38 +01 2025>
+ * Time-stamp: <Mon Jun 15 21:44:20 +01 2026 by owner>
+ * Author    : owner
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/exr0306.c -
+ *
+ * Exercise 3.6: If you open a file for read–write with the append
+ * flag, can you still read from anywhere in the file using lseek? Can
+ * you use lseek to replace existing data in the file? Write a program
+ * to verify this.
+ *
+ * My answer: with O_APPEND you can still read from wherever you want
+ * using lseek() but when it comes to write lseek() has no
+ * effect. Atomic behavior takes precedence to set File Table Entry
+ * offset to the last updated file size from v-node before writting at
+ * the end, always at the and.
+ * ========================================================================= */
 #include "../include/apue.h"
 #include <fcntl.h>
 

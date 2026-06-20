@@ -1,8 +1,13 @@
-/* apue.3e/fileio/nohole_uf0302.c */
-/* Rehearsed: Tue Dec  9 15:34:26 +01 2025 */
-/* Utility code to create a nohole file needed by seek.c demonstration */
-/* Created on: Sun Nov  9 15:56:47 +01 2025 */
-
+/* =========================================================================
+ * Created on: <Sun Nov  9 15:56:47 +01 2025> 
+ * Time-stamp: <Mon Jun 15 18:30:14 +01 2026 by owner> 
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/nohole.c -
+ *
+ * Utility code to create a nohole file needed by [[file:lseek_hole.c]]
+ * demonstration.
+ * ========================================================================= */
 /* #include "apue.h" */
 #include "../include/apue.h"
 #include <fcntl.h>

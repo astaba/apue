@@ -1,10 +1,13 @@
-/* apue.3e/fileio/mydup2_e0302.c */
-/* apue.3e/fileio/mydp2.c */
-/* Created on: Wed Dec  3 05:45:11 +01 2025 */
-/* Exercise 3.2: Write your own dup2 function that behaves the same way as the
- * dup2 function described in Section 3.12, without calling the fcntl function.
- * Be sure to handle errors correctly. */
-
+/* =========================================================================
+ * Created on: <Wed Dec  3 05:45:11 +01 2025> 
+ * Time-stamp: <Mon Jun 15 21:39:23 +01 2026 by owner> 
+ * Author    : owner
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/exr0302.c -
+ *
+ * Exercise 3.2: Write your own dup2 function that behaves the same
+ * way as the dup2 function described in Section 3.12, without calling
+ * the fcntl function.  Be sure to handle errors correctly.
+ * ========================================================================= */
 #include "../include/apue.h"
 #include <errno.h>
 #define MAX_TEMP_FDS 1024

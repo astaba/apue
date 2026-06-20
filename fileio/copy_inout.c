@@ -1,10 +1,15 @@
-/* apue.3e/fileio/mycat_f0305.c */
-/* Rehearsed: Tue Dec  9 16:00:23 +01 2025 */
-/* Figure 3.5: Copy standard input to standard output. */
-
-/* #include "apue.h" */
+/* =========================================================================
+ * Created on: <Tue Dec  9 16:00:23 +01 2025> 
+ * Time-stamp: <Mon Jun 15 18:38:55 +01 2026 by owner> 
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/fileio/copy_inout.c - 
+ *
+ * Figure 3.5: Copy standard input to standard output.
+ * ========================================================================= */
 #include "../include/apue.h"
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #define BUFF_SIZE 4096
 

@@ -5,19 +5,26 @@ include $(ROOT)/Make.defines.$(PLATFORM)
 TEMPFILES += file.hole file.nohole
 
 PROGS = \
-		fileflags_f0311 \
-		hole_f0302 \
-		mycat_f0305 \
-		seek_f0301 \
-		nohole_uf0302 \
-		tracefd_u0316 \
-		mydup2_e0302 \
-		append_e0306
+	copy_inout \
+	lseek_hole \
+	lseek_stdin \
+	nohole \
+	print_flags \
+	ytracefd \
+	exr0302 \
+	exr0306
 
-all:	$(PROGS) setfl.o
+all:	$(PROGS) set_flags.o
 
-%:	%.c $(LIBAPUE)
-	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
+# NOTICE: Go to TLPI check if LDLIBS variable is a default in `make`
+# database. To do that better reload the `make -pq` command from a
+# directory with no Makefile. Afterward you could refactor this
+# compilation pipeline to take advantage of the defaults.
+
+# %:	%.c $(LIBAPUE)
+# $(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
+
+$(PROGS): $(LIBAPUE)
 
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.out

@@ -1,0 +1,598 @@
+u#+TITLE: File I\O
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 3 from “Advanced Programming in the UNIX® Environment” Third Edition by W. Richard Stevens and Stephen A. Rago
+#+STARTUP: showall
+
+* Table of Content                                                    :toc_2:
+- [[#36-lseek-function][3.6 =lseek= function]]
+  - [[#explicitly-set-files-offset][Explicitly set file's offset]]
+  - [[#creating-files-with-holes][Creating files with holes]]
+- [[#39-io-efficiency][3.9 I/O Efficiency]]
+- [[#312-dup-and-dup2-functions][3.12 =dup= and =dup2= Functions]]
+  - [[#dup2-semantics][=dup2= Semantics]]
+- [[#314-fcntl-function][3.14 =fcntl= Function]]
+  - [[#presentation][Presentation]]
+  - [[#file-descriptor-flags-and-file-status-flags][File descriptor flags and file status flags]]
+  - [[#example][Example]]
+- [[#316-devfd][3.16 =/dev/fd=]]
+- [[#exercises][Exercises]]
+  - [[#exercise-31][Exercise 3.1]]
+  - [[#exercise-32][Exercise 3.2]]
+  - [[#exercise-33][Exercise 3.3]]
+  - [[#exercise-34][Exercise 3.4]]
+  - [[#exercise-35][Exercise 3.5]]
+  - [[#exercise-36][Exercise 3.6]]
+
+* 3.6 =lseek= function
+
+** Explicitly set file's offset
+
+*** Example
+
+- [[file:lseek_stdin.c][Figure 3.1 lseek_stdin.c]]: This program tests its standard input to
+  see whether it is capable of seeking. By the magic of command-line
+  redirection through =STDIN_FILENO= this program can be used to test
+  other type of files.
+
+#+begin_example
+$ ./lseek_stdin < /etc/passwd
+seek OK
+
+$ cat < /etc/passwd | ./lseek_stdin
+cannot seek
+
+$ ./lseek_stdin < /var/spool/cron/FIFO
+cannot seek
+#+end_example
+
+- *Analysis:* The file descriptor =0= is pointing directly to the
+  =/etc/passwd= file on the filesystem. Regular files store data
+  contiguously and can be accessed randomly.
+
+- *Analysis:* Pipes are a form of *inter-process communication (IPC)*.
+  Data is written to the pipe's write end (=cat=) and read from its read
+  end (=./lseek_stdin=) in a *stream-like, sequential fashion*. You can only
+  read the data once, and you cannot jump back and forth.
+
+- *Analysis:* A FIFO is essentially a *pipe with a name* in the
+  filesystem. Like an unnamed pipe, it is a sequential data stream used
+  for IPC. Data can only be read sequentially, and there is no concept
+  of randomly jumping to a different offset.
+
+** Creating files with holes
+
+*** Example
+- [[file:lseek_hole.c][Figure 3.2 lseek_hole.c]]: Create a file with a hole in it by changing
+  the file offset.
+- [[file:nohole.c][Utility code nohole.c]] to create a nohole file needed by previous
+  demonstration.
+
+
+Running this program gives us:
+
+#+begin_example
+$ ./a.out
+
+$ ls -l file.hole                                    # check its size
+-rw-r--r-- 1 sar 16394 Nov 25 01:01 file.hole
+
+$ od -c file.hole                 # let’s look at the actual contents
+0000000 a  b  c  d  e  f  g  h  i  j  \0 \0 \0 \0 \0 \0
+0000020 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0
+*
+0040000 A  B  C  D  E  F  G  H  I  J
+0040012
+#+end_example
+
+We use the =od(1)= command to look at the contents of the file. The
+=-c= flag tells it to print the contents as characters. We can see
+that the unwritten bytes in the middle are read back as zero. The
+seven-digit number at the beginning of each line is the byte offset in
+octal.
+
+To prove that there is really a hole in the file, let’s compare the
+file we just created with a file of the same size, but without holes:
+
+#+begin_example
+$ ls -ls file.hole file.nohole                        # compare sizes
+ 8 -rw-r--r-- 1 sar 16394 Nov 25 01:01 file.hole
+20 -rw-r--r-- 1 sar 16394 Nov 25 01:03 file.nohole
+#+end_example
+
+Although both files are the same size, the file without holes consumes
+*20 disk blocks*, whereas the file with holes consumes only *8
+blocks*.
+
+* 3.9 I/O Efficiency
+
+- [[file:copy_inout.c][Figure 3.5 copy_inout.c]]: Copy standard input to standard output.
+
+* 3.12 =dup= and =dup2= Functions
+
+** =dup2= Semantics
+
+That is an *exceptionally insightful and accurate* deconstruction of the
+=dup2= system call. You have completely grasped the internal semantics,
+moving beyond the intuitive but misleading naming conventions used in
+the API.
+
+You have essentially defined the operation in terms of *pointer
+manipulation* and *reference counting*, which is exactly how the kernel
+sees it.
+
+Here is a formal confirmation of your two main points, using the kernel
+terminology:
+
+*** 1. The Meaning of "Closing =newfd="
+
+*Your Take:* In fact nothing is closed nor destroyed. =newfd= is cut
+off from its previous File Table Entry by resetting the pointer to it
+in the process File Descriptor Table Entry indexed at =newfd=
+number. This operation returns =newfd= to the pool of available
+indices.
+
+*Formal Confirmation:* *Correct.*
+
+The operation could be more accurately called *Unlinking* or
+*Detaching*.
+
+1. The kernel follows the pointer from the =newfd= index in the Process
+   Descriptor Table (PDT) to the File Table Entry (FTE).
+2. It then *decrements the Reference Count* /inside/ that FTE.
+3. The pointer in the PDT slot for =newfd= is nullified/removed.
+
+If the Reference Count hits zero, *then* the FTE is destroyed (the
+kernel resource is released), justifying the use of the term "close"
+from the perspective of the application that opened the original file.
+But if the RC is greater than zero, the resource lives on.
+
+*** 2. The Meaning of "Duplicating =oldfd="
+
+*Your Take:* Nothing is duplicated. =oldfd='s I/O capabilities through
+its FTE are now forced on =newfd= which pointer now points to
+=oldfd='s FTE. This effectively makes =newfd= able to perform all I/O
+operations performed by =oldfd=.
+
+*Formal Confirmation:* *Perfectly Correct.*
+
+The operation is like *Pointer Assignment* or *Shared Reference*.
+
+1. The kernel copies the memory address (the pointer) from the =oldfd=
+   slot in the PDT.
+2. It writes that exact same address into the now-empty =newfd= slot.
+3. It then *increments the Reference Count* /inside/ the FTE pointed to
+   by =oldfd= (and now =newfd=).
+
+The I/O capabilities are shared because both descriptors point to the
+same state structure, meaning the offset, access mode, and status flags
+are identical for both.
+
+*** Why the Misleading Names Persist
+
+The C standard library and POSIX often use terms that reflect the
+/effect/ on the application programmer, not the low-level kernel
+mechanics:
+
+- *"Close"*: From the perspective of the application, if =newfd= was
+  open to a file called =log.txt=, after =dup2=, that old connection to
+  =log.txt= is logically "closed."
+- *"Duplicate"*: The programmer now has two identical handles (=oldfd=
+  and =newfd=) that behave identically with respect to I/O
+  operations --- hence, one is a "duplicate" of the other's functionality.
+
+You have correctly moved past the high-level API terms and fully
+understood the resource management logic behind them!
+
+* 3.14 =fcntl= Function
+
+** Presentation
+
+- [[file:print_flags.c][Figure 3.11 print_flags.c]] Print file flags for specified descriptor.
+
+Note that we use the feature test macro =_POSIX_C_SOURCE= and
+conditionally compile the file access flags that are not part of
+*POSIX.1*. The following script shows the operation of the program,
+when invoked from bash (the Bourne-again shell). Results will vary,
+depending on which shell you use.
+
+*** Running Figure 3.11
+
+#+begin_example
+$ ./print_flags 0 < /dev/tty
+read only
+
+$ ./print_flags 1 > temp.foo
+
+$ cat temp.foo
+write only
+
+$ ./print_flags 2 2>>temp.foo
+write only, append
+
+$ ./print_flags 5 5<>temp.foo
+read write
+#+end_example
+
+The clause =5<>temp.foo= opens the file =temp.foo= for reading and
+writing on file descriptor =5=.
+
+** File descriptor flags and file status flags
+
+The confusion stems from the fact that both types of flags are often
+defined in the same header file (=<fcntl.h>=) and manipulated using
+the *same function* (=fcntl=), but they live in *two different tables*
+and have different scopes.
+
+Here is the definitive breakdown of *Who* they are, *Where* they live,
+and *How* to tell them apart.
+
+*** 1. The Comparison
+
+To understand the difference, we map them back to the *APUE Tables* we
+discussed earlier.
+
+| Feature           | *File Descriptor Flags*                   | *File Status Flags*                                |
+|-------------------+-------------------------------------------+----------------------------------------------------|
+| *The "Flag"*      | =FD_CLOEXEC=                              | =O_APPEND=, =O_NONBLOCK=, =O_RDWR=, =O_SYNC=, etc. |
+| *Where they live* | *Table #1* (Process FD Table)             | *Table #2* (The Middle "File Table Entry")         |
+| *Scope*           | Private to this specific =int fd= number. | Shared by /all/ FDs pointing to this file entry.   |
+| *Manipulated via* | =fcntl(fd, F_SETFD, ...)=                 | =fcntl(fd, F_SETFL, ...)=                          |
+| *Inheritance*     | *NOT* shared across =dup()=.              | *SHARED* across =dup()= and =fork()=.              |
+
+*** 2. Who they are (The Details)
+
+**** A. File Descriptor Flags (=FD_...=)
+
+There is currently only one standard flag here: *=FD_CLOEXEC=*.
+
+- *Owner:* The Process itself (Table #1).
+- *What it does:* It tells the kernel: "If this process calls =exec()=
+  to launch a new program, *close this specific fd* so the new program
+  doesn't inherit it."
+- *Why it's confusing:* Because it feels like a property of the file,
+  but it is actually a property of the /handle/.
+- *Scenario:* If you have =fd = 3= and you =dup(3)= to get =fd = 4=:
+  - =fd 3= might have =FD_CLOEXEC= turned *ON*.
+  - =fd 4= will have =FD_CLOEXEC= turned *OFF*.
+  - /They are independent./
+
+**** B. File Status Flags (=O_...=)
+
+These are the flags you pass to =open()=, like =O_APPEND=,
+=O_NONBLOCK=, =O_RDWR=.
+
+- *Owner:* The Open File Description (Table #2 - The Middle Table).
+- *What it does:* It controls /how/ the data is accessed.
+- *Why it's confusing:* Because if you change it for one FD, it changes
+  for everyone sharing that table entry.
+- *Scenario:* If you have =fd = 3= and you =dup(3)= to get =fd = 4=:
+  - They both point to the same "Middle Table."
+  - If you set =O_NONBLOCK= on =fd 3=, =fd 4= *instantly becomes
+    non-blocking too*.
+
+*** 3. The Code: =F_SETFD= vs =F_SETFL=
+
+This is where the syntax usually tricks people. You use =fcntl= for
+both, but the *Command (2nd arg)* determines which table you are
+editing.
+
+**** Wrong Way (The Confusion)
+
+#+begin_src C
+// BAD: You cannot mix these!
+// Trying to set a Status Flag (O_APPEND) using the Descriptor command (SETFD)
+fcntl(fd, F_SETFD, O_APPEND); // ERROR or Undefined Behavior
+#+end_src
+
+**** Correct Way
+
+#+begin_src C
+/* 1. Modifying File Descriptor Flags (Table #1) */
+// Use F_GETFD / F_SETFD
+int flags = fcntl(fd, F_GETFD);
+flags |= FD_CLOEXEC;
+fcntl(fd, F_SETFD, flags);
+
+
+/* 2. Modifying File Status Flags (Table #2) */
+// Use F_GETFL / F_SETFL
+int status = fcntl(fd, F_GETFL);
+status |= O_APPEND; // Add append mode
+fcntl(fd, F_SETFL, status);
+#+end_src
+
+*** Summary of Definitions
+
+All of these are defined in the header =<fcntl.h>=.
+
+1. =FD_CLOEXEC=: A property of the *Integer* (User Space -> Table 1).
+2. =O_APPEND/O_NONBLOCK=: A property of the *Open Handle* (Table 2).
+3. =O_CREAT/O_TRUNC=: These are "Action Flags." They are used only
+   during the =open()= call to create/truncate the file, but they are
+   *not stored* in any table. Once the file is open, these flags vanish.
+
+A small C code snippet could demonstrates that the =dup()=
+behavior---proving that changing =O_APPEND= on one fd affects the
+copy, while changing =FD_CLOEXEC= does not.
+
+** Example
+
+- [[file:set_flags.c][Figure 3.12 set_flags.c]]: Turn on one or more of the file status
+  flags for a descriptor.
+
+If we add the line
+
+#+begin_src c
+  set_fl(STDOUT_FILENO, O_SYNC);
+#+end_src
+
+to the beginning of the program shown in [[file:copy_inout.c][Figure 3.5 copy_inout.c]],
+we’ll turn on the synchronouswrite flag.  This causes each write to
+wait for the data to be written to disk before returning.  Normally in
+the UNIX System, a =write= only queues the data for writing; the
+actual disk write operation can take place sometime later.  A database
+system is a likely candidate for using =O_SYNC=, so that it knows on
+return from a write that the data is actually on the disk, in case of
+an abnormal system failure.
+
+* 3.16 =/dev/fd=
+
+Newer systems provide a directory named =/dev/fd= whose entries are
+files named 0, 1, 2, and so on. Opening the file =/dev/fd/n= is
+equivalent to duplicating descriptor =n=, assuming that descriptor =n=
+is open.
+
+- [[file:ytracefd.c][My Utility ytracefd.c]];
+
+* Exercises
+
+** Exercise 3.1
+
+When reading or writing a disk file, are the functions described in
+this chapter really unbuffered? Explain.
+
+*** Answer
+
+The unbuffered I/O functions described in Chapter 3 (read, write,
+etc.) are unbuffered only in the sense that they perform no buffering
+in user space.
+
+However, the kernel maintains the page cache and I/O buffer cache,
+which means that reads and writes typically operate on cached pages in
+memory, not directly on disk blocks.
+
+Thus these functions are not unbuffered with respect to disk I/O: the
+operating system performs extensive buffering and caching behind the
+scenes.
+
+** Exercise 3.2
+
+Write your own =dup2= function that behaves the same way as the =dup2=
+function described in Section 3.12, without calling the =fcntl=
+function.  Be sure to handle errors correctly.
+
+*** Answer
+
+- [[file:exr0302.c][exr0302.c]];
+
+** TODO Exercise 3.3
+
+Assume that a process executes the following three function calls:
+
+#+begin_src c
+  fd1 = open(path, oflags);
+  fd2 = dup(fd1);
+  fd3 = open(path, oflags);
+#+end_src
+
+Draw the resulting picture, similar to Figure 3.9. Which descriptors
+are affected by an =fcntl= on =fd1= with a command of =F_SETFD=? Which
+descriptors are affected by an =fcntl= on =fd1= with a command of
+=F_SETFL=?
+
+*** Answer
+
+** Exercise 3.4
+
+The following sequence of code has been observed in various programs:
+
+#+begin_src c
+  dup2(fd, 0);
+  dup2(fd, 1);
+  dup2(fd, 2);
+  if (fd > 2)
+      close(fd);
+#+end_src
+
+To see why the if test is needed, assume that fd is 1 and draw a
+picture of what happens to the three descriptor entries and the
+corresponding file table entry with each call to =dup2=. Then assume
+that fd is 3 and draw the same picture.
+
+*** Answer
+
+This is a fantastic exercise that perfectly illustrates why the
+structure of the *Process File Descriptor Table* (or PDT) and the
+kernel's rules for =dup2= are so critical.
+
+Your analysis for both cases is *correct*, and you've accurately
+identified the necessity of the =if (fd > 2) close(fd);= check.
+
+Let's refine the visualization for both scenarios, focusing specifically
+on the *Reference Count* (RC) of the File Table Entries (FTEs), as
+that's the key to understanding the cleanup.
+
+**** The Setup
+
+Assume a typical initial state:
+
+| FD            | Points To       | FTE      |       RC | Notes            |
+| (Process)     | (Kernel)        | (Kernel) | (in FTE) |                  |
+|---------------+-----------------+----------+----------+------------------|
+| FD 0 (stdin)  | \(\rightarrow\) | FTE_0    |        1 | Terminal/Console |
+| FD 1 (stdout) | \(\rightarrow\) | FTE_1    |        1 | Terminal/Console |
+| FD 2 (stderr) | \(\rightarrow\) | FTE_2    |        1 | Terminal/Console |
+| FD 3          | \(\rightarrow\) | FTE_3    |        1 | The opened file  |
+|               |                 |          |          | (if used)        |
+
+**** Scenario 1: =oldfd= is a Standard Descriptor (=fd = 1=)
+
+In this case, the =oldfd= itself is a target slot (=0=, =1=, or =2=) for
+one of the =dup2= calls.
+
+The call sequence is: =dup2(1, 0); dup2(1, 1); dup2(1, 2);=
+
+| Step      | Call         | FD 0      | FD 1      | FD 2      | FTE_1 RC                     | Action Summary                              |
+|           |              | Points To | Points To | Points To |                              |                                             |
+|-----------+--------------+-----------+-----------+-----------+------------------------------+---------------------------------------------|
+| *Initial* | -            | FTE_0     | FTE_1     | FTE_2     | 1                            | (FDs point to 3 different FTEs)             |
+|-----------+--------------+-----------+-----------+-----------+------------------------------+---------------------------------------------|
+| *1*       | =dup2(1, 0)= | *FTE_1*   | FTE_1     | FTE_2     | \(\mathbf{1 \rightarrow 2}\) | FD 0 now points to FTE_1.                   |
+|           |              |           |           |           |                              | FTE_0 is closed (RC \(\rightarrow 0\)).     |
+|-----------+--------------+-----------+-----------+-----------+------------------------------+---------------------------------------------|
+| *2*       | =dup2(1, 1)= | FTE_1     | FTE_1     | FTE_2     | 2                            | =oldfd= == =newfd=. No action taken.        |
+|-----------+--------------+-----------+-----------+-----------+------------------------------+---------------------------------------------|
+| *3*       | =dup2(1, 2)= | FTE_1     | FTE_1     | *FTE_1*   | \(\mathbf{2 \rightarrow 3}\) | FD 2 now points to FTE_1.                   |
+|           |              |           |           |           |                              | FTE_2 is closed (RC \(\rightarrow 0\)).     |
+|-----------+--------------+-----------+-----------+-----------+------------------------------+---------------------------------------------|
+| *Final*   | -            | FTE_1     | FTE_1     | FTE_1     | *3*                          | All three point to the original stdout FTE. |
+
+***** Conclusion for Scenario 1:
+
+1. *Cleanup:* =FTE_0= and =FTE_2= are fully closed (their RC dropped to
+   0).
+2. *Resource Status:* Only one Open File Description (=FTE_1=) remains
+   in the kernel memory, pointed to by three FDs.
+3. *The =if= Clause:* After the calls, =fd= is =1=. Since =1= is *not*
+   greater than =2=, the =close(fd)= is *skipped*. This is correct
+   because =fd=1= is one of the three descriptors now pointing to the
+   stream, and closing it would break one of the intended aliases. If
+   =close(1)= were called, =FTE_1='s RC would drop from 3 to 2, but the
+   program would still function. However, the original =oldfd= (which is
+   =1=) is needed to maintain the output stream.
+
+**** Scenario 2: =oldfd= is a New Descriptor (=fd = 3=)
+
+Here, the =oldfd= is an existing file that needs to redirect the
+standard streams to itself.
+
+The call sequence is: =dup2(3, 0); dup2(3, 1); dup2(3, 2);=
+
+| Step      | Call         | FD 0      | FD 1      | FD 2      | FD 3      | FTE_3 RC              | Action Summary                          |
+|           |              | Points To | Points To | Points To | Points To |                       |                                         |
+|-----------+--------------+-----------+-----------+-----------+-----------+-----------------------+-----------------------------------------|
+| *Initial* | -            | FTE_0     | FTE_1     | FTE_2     | *FTE_3*   | 1                     | (FTE_3 is the opened file)              |
+|-----------+--------------+-----------+-----------+-----------+-----------+-----------------------+-----------------------------------------|
+| *1*       | =dup2(3, 0)= | *FTE_3*   | FTE_1     | FTE_2     | *FTE_3*   | *\(1 \rightarrow 2\)* | FD 0 now points to FTE_3.               |
+|           |              |           |           |           |           |                       | FTE_0 is closed (RC \(\rightarrow 0\)). |
+|-----------+--------------+-----------+-----------+-----------+-----------+-----------------------+-----------------------------------------|
+| *2*       | =dup2(3, 1)= | FTE_3     | *FTE_3*   | FTE_2     | *FTE_3*   | *\(2 \rightarrow 3\)* | FD 1 now points to FTE_3.               |
+|           |              |           |           |           |           |                       | FTE_1 is closed (RC \(\rightarrow 0\)). |
+|-----------+--------------+-----------+-----------+-----------+-----------+-----------------------+-----------------------------------------|
+| *3*       | =dup2(3, 2)= | FTE_3     | FTE_3     | *FTE_3*   | *FTE_3*   | *\(3 \rightarrow 4\)* | FD 2 now points to FTE_3.               |
+|           |              |           |           |           |           |                       | FTE_2 is closed (RC \(\rightarrow 0\)). |
+|-----------+--------------+-----------+-----------+-----------+-----------+-----------------------+-----------------------------------------|
+| *Final*   | -            | FTE_3     | FTE_3     | FTE_3     | *FTE_3*   | *4*                   | All four descriptors (0, 1, 2, 3)       |
+|           |              |           |           |           |           |                       | point to the original file FTE_3.       |
+
+***** Conclusion for Scenario 2:
+
+1. *Cleanup:* =FTE_0=, =FTE_1=, and =FTE_2= are fully closed.
+2. *Resource Status:* =FTE_3= remains, but its Reference Count is now 4
+   (due to FDs 0, 1, 2, and 3).
+3. *The =if= Clause:* After the calls, =fd= is =3=. Since =3= *is*
+   greater than =2=, the code executes: =close(fd);= which means
+   =close(3);=.
+
+*Why the =close(3)= is necessary:*
+
+- It closes the *original, redundant* descriptor (=FD 3=).
+- The system still has three active descriptors (0, 1, and 2) pointing
+  to the file.
+- =FTE_3='s Reference Count drops from 4 to 3, but the file remains
+  open.
+- Without the =close(3)=, you would unnecessarily hold open four
+  descriptors when only three are required, leading to a minor *file
+  descriptor leak* within the process.
+
+This perfectly explains why the =if (fd > 2)= check is necessary: it
+ensures that the temporary, original file descriptor (=fd=) is closed
+only if it wasn't one of the critical standard descriptors (0, 1, or 2)
+that the program still needs to use.
+
+** Exercise 3.5
+
+The Bourne shell, Bourne-again shell, and Korn shell notation
+
+#+begin_src sh
+digit1>&digit2
+#+end_src
+
+says to redirect descriptor =digit1= to the same file as descriptor
+=digit2=.  What is the difference between the two commands shown
+below?  (Hint: The shells process their command lines from left to
+right.)
+
+#+begin_src sh
+./a.out > outfile 2>&1
+./a.out 2>&1 > outfile
+#+end_src
+
+*** Answer
+
+The first pitfall is to correctly look at the command line with the eyes
+of the shell. In the eyes of the shell each command has three
+token-block:
+
+1. =a.out=
+2. => outfile=: comprised of an operator =>=, and two implicit operand
+   (right: =1=, left: =outfile= presumably =3=)
+3. =2>&1=: operator is =>=. Right operand is =2=, left is =1= introduced
+   by =&=.
+
+The second pitfall is the order taken by the shell to execute
+token-blocks:
+
+- interpreting all token-blocks *in their order on the command line;*
+- creating/closing process fd *in that same order;*
+- setting the final descriptor table of the shell process;
+- then and only then spawn.
+
+The child process inherit the modified shell FD table by fork, then
+=execve= vampirizes child into =a.out= with same PID as child process
+which is no more and same FD table of mother process.
+
+As a result:
+
+1. for the first command:
+   - The second token-block: =stdout= is cut off its FTE_1 by
+     =dup2(3, 1)=. Now =stdout= ultimately points to =outfile=.
+   - The third token-block: =stderr= is cut off its FTE_2 by
+     =dup2(1, 2)=. Now =stderr= ultimately points to the same as
+     =stdout= which is =outfile=.
+   - *Conclusion*: everything =a.out= sends to either =stdout= or
+     =stderr= ends up in =outfile=.
+
+2. for the second command:
+   - The reverse token-block causes =stderr= to be stuck on =stdout='s
+     FTE_1 which points to the terminal before =stdout= is pointed to
+     =outfile=.
+   - *Conclusion*: =a.out= will stdout-put to =outfile= by stderrors
+     to the terminal.
+
+** Exercise 3.6
+
+If you open a file for read–write with the append flag, can you still
+read from anywhere in the file using =lseek=? Can you use =lseek= to
+replace existing data in the file? Write a program to verify this.
+
+*** Answer
+
+- [[file:exr0306.c][exr0306.c]];
+
+With =O_APPEND= you can still read from wherever you want using
+=lseek()= but when it comes to write =lseek()= has no effect. Atomic
+behavior takes precedence to set File Table Entry offset to the last
+updated file size from v-node before writting at the end, always at
+the and.
+
