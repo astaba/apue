@@ -1,20 +1,21 @@
 /* Figure 1.3: List all the files (i.e., directory entries) in a directory. */
 
-#include "apue.h"
+#include "../include/apue.h"
 #include <dirent.h>
 
 int main(int argc, char *argv[]) {
-  DIR *dp;
-  struct dirent *dirp;
+  DIR *dirp;
+  struct dirent *dent;
 
   if (argc != 2)
     err_quit("usage: ls directory_name");
 
-  if ((dp = opendir(argv[1])) == NULL)
+  if ((dirp = opendir(argv[1])) == NULL)
     err_sys("can't open %s", argv[1]);
-  while ((dirp = readdir(dp)) != NULL)
-    printf("%s\n", dirp->d_name);
 
-  closedir(dp);
+  while ((dent = readdir(dirp)) != NULL)
+    printf("%s\n", dent->d_name);
+
+  closedir(dirp);
   exit(0);
 }

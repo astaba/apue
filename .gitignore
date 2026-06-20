@@ -1,6 +1,7 @@
 # Static library
 libapue.a
 
+DRAFT.*
 # ELF binaries
 *.o
 *.out
@@ -126,3 +127,13 @@ wait1
 winch
 zap
 zombie
+
+filedir/cdpwd_f0424
+filedir/changemod_f0412
+filedir/access_f0408
+filedir/devrdev_f0425
+filedir/myftw_uf0422
+filedir/unlink_f0416
+fileio/file.hole
+fileio/file.nohole
+TAGS
