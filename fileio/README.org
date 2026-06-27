@@ -1,4 +1,4 @@
-u#+TITLE: File I\O
+#+TITLE: File I\O
 #+AUTHOR: Astar Bahouidi
 #+DESCRIPTION: Chapter 3 from “Advanced Programming in the UNIX® Environment” Third Edition by W. Richard Stevens and Stephen A. Rago
 #+STARTUP: showall

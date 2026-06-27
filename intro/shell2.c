@@ -1,10 +1,16 @@
-/* Figure 1.10: Read commands from standard input and execute them. */
-/*
- * This version: catch SIGINT before the kernel execute the default action
- * And handle it with a call to a custom function
- * */
-#include "apue.h"
-#include <stdio.h>
+/* =========================================================================
+ * Created on: <Fri Jun 26 18:47:16 +01 2026>
+ * Time-stamp: <Sat Jun 27 13:50:01 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/intro/shell2.c -
+ *
+ * Figure 1.10: Read commands from standard input and execute
+ * them. This version: catch SIGINT before the kernel execute the
+ * default action and handles it with a call to a custom function
+ * See [[file:shell1.c][Figure 1.7]]
+ * ========================================================================= */
+#include "../include/apue.h"
 #include <sys/wait.h>
 
 static void sig_int(int); /* our signal-catching function */
@@ -41,8 +47,22 @@ int main(void) {
 }
 
 void sig_int(int signo) {
-  printf("\tCaught SIGINT and print another prompt:\n%% ");
-  /* NOTE: Comment out fflush() call and see how preceding printf output gets
-   * split on '\n' accross fgets() input wait and protoshell prompt ... */
+
+  /* Async-Signal UNSAFE:
+   * See [[file:../stdio/README.org::#toy-shell-stdio-experiment]] */
+
+  printf("\t!!! Caught SIGINT !!!\n%% ");
+
+  /* NOTE: Because of standard I/O line-buffering the preceding printf
+   * will only display up until the '\n'. Then fflush() call is
+   * required to flush "%% " from standard I/O internal output buffer
+   * (for stdout stream) to the kernel cache (which of course displays
+   * it right away). */
+
+  /* TEST: To better experiment the way line-buffered I/O is flushed
+   * between internal input buffer and internal output buffer: (1)
+   * change the preceding "%% " prompt to "$ " (or anything different
+   * from the initial one); (2) then comment out the fflush call */
+
   fflush(stdout);
 }

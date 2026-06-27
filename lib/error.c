@@ -30,7 +30,7 @@ void err_sys(const char *fmt, ...) {
 }
 
 /*
- * Nonfatal error unrelated to a system call.
+ * Nonfatal error returning errno.
  * Error code passed as explict parameter.
  * Print a message and return.
  */
@@ -43,7 +43,7 @@ void err_cont(int error, const char *fmt, ...) {
 }
 
 /*
- * Fatal error unrelated to a system call.
+ * Fatal error returning errno.
  * Error code passed as explict parameter.
  * Print a message and terminate.
  */
@@ -71,7 +71,7 @@ void err_dump(const char *fmt, ...) {
 }
 
 /*
- * Nonfatal error unrelated to a system call.
+ * Nonfatal cuctom error.
  * Print a message and return.
  */
 void err_msg(const char *fmt, ...) {
@@ -83,7 +83,7 @@ void err_msg(const char *fmt, ...) {
 }
 
 /*
- * Fatal error unrelated to a system call.
+ * Fatal custom error.
  * Print a message and terminate.
  */
 void err_quit(const char *fmt, ...) {
@@ -107,6 +107,12 @@ static void err_doit(int errnoflag, int error, const char *fmt, va_list ap) {
     snprintf(buf + strlen(buf), MAXLINE - strlen(buf) - 1, ": %s",
              strerror(error));
   strcat(buf, "\n");
+
+  /* HACK: These fflush() calls really shine when (but not only) the
+     calling process redirects output(s) to disk file forcing
+     buffering to shift from line-buffering to full-buffering:
+     fflush() ensures code-logic output order. */
+
   fflush(stdout); /* in case stdout and stderr are the same */
   fputs(buf, stderr);
   fflush(NULL); /* flushes all stdio output streams */

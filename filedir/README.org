@@ -695,6 +695,9 @@ flag to =open=, is a special case of truncation.
 * TODO 4.14 File Systems
 
 * 4.15 =link=, =linkat=, =unlink=, =unlinkat=, and =remove= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-4-15
+:END:
 
 We can use either the =link= function or the =linkat= function to
 create a link to an existing file.

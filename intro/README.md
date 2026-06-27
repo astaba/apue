@@ -14,8 +14,6 @@ The difference in the use of the `const` attribute for the arguments of
 `perror` and `strerror` is due to **data integrity and the contract of the
 function itself.**
 
----
-
 ### 1. Why `perror`'s Argument is `const`
 
 #### Signature: `void perror(const char *msg);`
@@ -32,8 +30,6 @@ internally via `strerror(errno)`) then tails with newline.
 * **Contract:** By making the argument `const`, the compiler guarantees that
 the function will not modify the memory where your message is stored. This
 prevents accidental data corruption in the caller's program.
-
----
 
 ### 2. Why `strerror`'s Argument is NOT `const`
 
@@ -54,8 +50,6 @@ If the signature had been: `char *strerror(const int *errnum_ptr);` (meaning
 it took a pointer to the error number), then the `const` keyword would
 be appropriate to prevent the function from modifying the integer pointed
 to. But since it takes the integer directly, `const` doesn't apply.
-
----
 
 ### Summary of the Difference
 

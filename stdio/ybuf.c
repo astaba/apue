@@ -1,9 +1,8 @@
 /* =========================================================================
- * Created on: <Tue Jun 23 20:56:29 +01 2026>
- * Time-stamp: <Wed Jun 24 19:42:07 +01 2026 by owner>
- * Author    : W. Richard Stevens and Stephen A. Rago from
- *             "Advanced Programming in the UNIX® Environment" Third Edition
- * Desc      : ~/coding/c_prog/apue.3e/stdio/buf.c -
+ * Created on: <Wed Jun 24 19:24:06 +01 2026>
+ * Time-stamp: <Wed Jun 24 20:07:00 +01 2026 by owner>
+ * Author    : owner
+ * Desc      : ~/coding/c_prog/apue.3e/stdio/ybuf.c -
  *
  * Figure 5.11: This program prints the buffering for the three
  * standard streams and for a stream that is associated with a regular
@@ -30,16 +29,31 @@ struct _IO_FILE_modern {
 #define MODERN_IO_LINE_BUF 0x0200
 #define MODERN_IO_UNBUFFERED 0x0002
 
-static void pr_stdio(const char *, FILE *);
+static void pr_stdio(FILE *, const char *, FILE *);
 static int is_unbuffered(FILE *);
 static int is_linebuffered(FILE *);
 static int buffer_size(FILE *);
 
 int main(void) {
-  FILE *fp;
+  FILE *fp_log;
+  char filename[] = "std.log";
 
-  /* NOTE: Since the first I/O operation usually causes the buffers to
-   * be allocated for a stream, by performing I/O on each stream we
+  /* Open a file stream to output standard streams status in the
+   * absence of I/O without using stdout */
+  fp_log = fopen(filename, "w");
+  if (fp_log == NULL)
+    err_sys("fopen() failed");
+
+  /* 1. NOTE: Display buffering status of standard streams without
+   * I/O: It brings about the lazy behavior of Standard I/O
+   * Library. */
+
+  pr_stdio(fp_log, "stdin", stdin);
+  pr_stdio(fp_log, "stdout", stdout);
+  pr_stdio(fp_log, "stderr", stderr);
+
+  /* 2. NOTE: Since the first I/O operation usually causes the buffers
+   * to be allocated for a stream, by performing I/O on each stream we
    * effectively change its buffering status */
 
   fputs("enter any character\n", stdout); /* I/O on stdout */
@@ -48,36 +62,29 @@ int main(void) {
   fputs("one line to standard error\n", stderr); /* I/O on stderr */
 
   /* Display buffering status of standard streams after I/O */
-  pr_stdio("stdin", stdin);
-  pr_stdio("stdout", stdout);
-  pr_stdio("stderr", stderr);
-
-  /* Open file stream on regular disk file */
-  if ((fp = fopen("/etc/passwd", "r")) == NULL)
-    err_sys("fopen error");
-  /* I/O on regular file */
-  if (getc(fp) == EOF)
-    err_sys("getc error");
+  pr_stdio(stdout, "stdin", stdin);
+  pr_stdio(stdout, "stdout", stdout);
+  pr_stdio(stdout, "stderr", stderr);
 
   /* Display buffering status of regular file stream after I/O */
-  pr_stdio("/etc/passwd", fp);
+  pr_stdio(stdout, filename, fp_log);
 
   exit(0);
 }
 
 /**
- * Dsiplay on stdout stream FILE the buffering type of a fp stream
- * FILE together with its buffer size.
+ * Dsiplay on stream FILE the buffering type of a fp FILE together
+ * with its buffer size.
  */
-static void pr_stdio(const char *name, FILE *fp) {
-  printf("stream = %s, ", name);
+static void pr_stdio(FILE *stream, const char *name, FILE *fp) {
+  fprintf(stream, "stream = %s, ", name);
   if (is_unbuffered(fp))
-    printf("unbuffered");
+    fprintf(stream, "unbuffered");
   else if (is_linebuffered(fp))
-    printf("line buffered");
+    fprintf(stream, "line buffered");
   else /* if neither of above */
-    printf("fully buffered");
-  printf(", buffer size = %d\n", buffer_size(fp));
+    fprintf(stream, "fully buffered");
+  fprintf(stream, ", buffer size = %d\n", buffer_size(fp));
 }
 
 static int is_unbuffered(FILE *fp) {

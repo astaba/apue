@@ -1,0 +1,2327 @@
+#+TITLE: Standard I/O
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 5 from “Advanced Programming in the UNIX® Environment” Third Edition by W. Richard Stevens and Stephen A. Rago
+#+STARTUP: showall
+
+* Table of Content                                                    :toc_2:
+- [[#51-introduction][5.1 Introduction]]
+- [[#52-streams-and-file-objects][5.2 Streams and =FILE= Objects]]
+  - [[#stream-orientation-fwide][Stream Orientation: =fwide=]]
+  - [[#the-file-stream-representation-struct-file][The file stream representation: =struct File=]]
+- [[#53-standard-input-standard-output-and-standard-error][5.3 Standard Input, Standard Output, and Standard Error]]
+- [[#54-buffering][5.4 Buffering]]
+  - [[#the-three-types-of-buffering][The Three types of buffering]]
+  - [[#iso-c-buffering-requirements][ISO C buffering requirements]]
+  - [[#change-the-buffering-with-setbuf-or-setvbuf][Change the buffering with =setbuf= or =setvbuf=]]
+  - [[#force-stream-flushing-with-fflush][Force stream flushing with =fflush=]]
+- [[#55-opening-a-stream][5.5 Opening a Stream]]
+  - [[#opening-a-stream-with-fopen-freopen-and-fdopen][Opening a Stream with =fopen=, =freopen=, and =fdopen=]]
+  - [[#close-a-stream-with-fclose][Close a stream with =fclose=]]
+- [[#56-reading-and-writing-a-stream][5.6 Reading and Writing a Stream]]
+  - [[#character-at-a-time-io][Character-at-a-time I/O]]
+- [[#57-line-at-a-time-io][5.7 Line-at-a-Time I/O]]
+  - [[#line-at-a-time-input-with-fgets-and-gets][Line-at-a-time input with =fgets= and =gets=]]
+  - [[#line-at-a-time-output-with-fputs-and-puts][Line-at-a-time output with =fputs= and =puts=.]]
+  - [[#usage-and-good-practice-for-fgets-and-fputs][Usage and good practice for =fgets= and =fputs=]]
+- [[#58-standard-io-efficiency][5.8 Standard I/O Efficiency]]
+- [[#59-binary-io-with-fread-and-fwrite][5.9 Binary I/O with =fread= and =fwrite=]]
+- [[#510-positioning-a-stream][5.10 Positioning a Stream]]
+- [[#511-formatted-io][5.11 Formatted I/O]]
+  - [[#formatted-output][Formatted Output]]
+  - [[#formatted-input][Formatted Input]]
+- [[#512-implementation-details][5.12 Implementation Details]]
+  - [[#retrieve-fd-backing-up-a-stream-fp-with-fileno][Retrieve =fd= backing up a stream =fp= with =fileno=]]
+  - [[#example-display-buffering-types-metadata][Example: Display Buffering Types Metadata]]
+- [[#513-temporary-files][5.13 Temporary Files]]
+  - [[#temporary-files-names][Temporary files names]]
+  - [[#creation-of-temporary-filename-with-tmpnam][Creation of temporary filename with =tmpnam=]]
+  - [[#safe-creation-of-temporary-stream-file-with-tmpfile][Safe creation of temporary stream file with =tmpfile=]]
+  - [[#secure-creation-of-temporary-fd-and-directory][Secure creation of temporary =fd= and directory]]
+- [[#514-memory-streams][5.14 Memory Streams]]
+  - [[#definitions-and-the-fmemopen-function][Definitions and the =fmemopen= function]]
+  - [[#write-only-streams-with-open_memstream-and-open_wmemstream][Write-only streams with =open_memstream= and =open_wmemstream=]]
+- [[#515-alternatives-to-standard-io][5.15 Alternatives to Standard I/O]]
+- [[#exercises][Exercises]]
+  - [[#exercise-51-redo][Exercise 5.1 REDO]]
+  - [[#exercise-52][Exercise 5.2]]
+  - [[#exercise-53][Exercise 5.3]]
+  - [[#exercise-54][Exercise 5.4]]
+  - [[#exercise-55][Exercise 5.5]]
+  - [[#exercise-56][Exercise 5.6]]
+  - [[#exercise-57][Exercise 5.7]]
+
+* 5.1 Introduction
+
+This section is about:
+- file stream, the abstraction layer, built right above file
+  descriptors layer, to provide buffered I/O and save redundant system
+  calls;
+- various kind of temporary I/O and memory-based I/O (no disk file
+  backup).
+
+* 5.2 Streams and =FILE= Objects
+:PROPERTIES:
+:CUSTOM_ID: section-5-2
+:END:
+
+** Stream Orientation: =fwide=
+
+In Chapter 3, all the I/O routines centered on file descriptors. When
+a file is opened, a file descriptor is returned, and that descriptor
+is then used for all subsequent I/O operations. With the standard I/O
+library, the discussion centers on streams.  When we open or create a
+file with the standard I/O library
+
+#+begin_quote
+/we say that we have associated a stream with the file./
+#+end_quote
+
+Depending on *ASCII character set* or *international character sets*,
+a single character is represented either by a *single byte* or by
+*more than one byte*.  Standard I/O file streams can be used with both
+*single-byte* and *multibyte* (said “wide”) character sets.
+
+A *stream’s orientation* determines whether the characters that are
+read and written are single byte or multibyte.  Initially, when a
+stream is created, it has no orientation. If a multibyte I/O function
+(see <wchar.h>) is used on a stream without orientation, the stream’s
+orientation is set to *wide* or *byte oriented* based on whether the
+first I/O function used on the stream is multibyte type (see
+=<wchar.h>=) or single byte type.
+
+Only two functions can change the orientation once set. The =freopen=
+function (discussed shortly) will clear a stream’s orientation; the
+=fwide= function can be used to set a stream’s orientation.
+
+#+begin_src c
+  #include <stdio.h>
+  #include <wchar.h>
+  int fwide(FILE *fp, int mode);
+  /* Returns: positive if stream is wide oriented,
+              negative if stream is byte oriented,
+              or 0 if stream has no orientation */
+#+end_src
+
+The fwide function performs different tasks, depending on the value of
+the =mode= argument.
+
+- If =mode < 0=, =fwide= will try to make the specified stream byte
+  oriented.
+- If =mode > 0=, =fwide= will try to make the specified stream wide
+  oriented.
+- If =mode == 0=, =fwide= will not try to set the orientation, but
+  will still return a value identifying the stream’s orientation.
+
+Note that =fwide= will not change the orientation of a stream that is
+already oriented. Also note that there is no error return.  Consider
+what would happen if the stream is invalid.  The only recourse we have
+is to clear =errno= before calling =fwide= and check the value of
+=errno= when we return.  Throughout the rest of this book, we will
+deal only with byte-oriented streams.
+
+** The file stream representation: =struct File=
+
+When we open a stream, the standard I/O function =fopen= (Section 5.5)
+returns a pointer to a =FILE= object. This object is normally a
+structure that contains *all the information required by the standard
+I/O library to manage the stream*:
+
+- the file descriptor used for actual I/O;
+- a pointer to a buffer for the stream;
+- the size of the buffer;
+- a count of the number of characters currently in the buffer;
+- an error flag;
+- an EOF flag;
+- and the like.
+
+*Application software should never need to examine a =FILE= object*.
+To reference the stream, *we pass its =FILE= pointer* as an argument
+to each standard I/O function.
+
+#+begin_quote
+Throughout this text, we’ll refer to a pointer to a =FILE= object, the
+type =FILE \*=, as a *file pointer*.
+#+end_quote
+
+* 5.3 Standard Input, Standard Output, and Standard Error
+
+Three streams are predefined and automatically available to a process:
+*standard input*, *standard output*, and *standard error*.
+
+These streams refer to the same files as the file descriptors
+=STDIN_FILENO=, =STDOUT_FILENO=, and =STDERR_FILENO=, respectively,
+which we mentioned in Section 3.2.
+
+These three standard I/O streams are referenced through the predefined
+file pointers =stdin=, =stdout=, and =stderr=.  The file pointers are
+defined in the =<stdio.h>= header.
+
+* 5.4 Buffering
+
+** The Three types of buffering
+
+The goal of the buffering provided by the standard I/O library is to
+use the minimum number of =read= and =write= calls. (Recall Figure
+3.6, which showed the amount of CPU time required to perform I/O using
+various buffer sizes.) Also, this library tries to do its buffering
+automatically for each I/O stream, obviating the need for the
+application to worry about it.
+
+Unfortunately, the single aspect of the standard I/O library that
+generates the most confusion is its buffering.  Three types of
+buffering are provided:
+
+*** Fully buffered
+
+In this case, actual I/O takes place when the standard I/O buffer is
+filled.  Files residing on disk are normally fully buffered by the
+standard I/O library.  The buffer used is usually obtained by one of
+the standard I/O functions calling =malloc= (Section 7.8) the first
+time I/O is performed on a stream.
+
+**** The concept of flush
+:PROPERTIES:
+:CUSTOM_ID: the-concept-of-flush
+:END:
+- See also [[#force-stream-flushing][Force stream flushing]].
+
+The term *flush* describes the writing of a standard I/O buffer.  A
+buffer can be flushed automatically by the standard I/O routines, such
+as when a buffer fills, or we can call the function =fflush= to flush
+a stream.  Unfortunately, in the UNIX environment, flush means two
+different things:
+
+- In terms of the standard I/O library, it means *writing out the
+  contents of a buffer, which may be partially filled.*
+
+- In terms of the terminal driver, such as the =tcflush= function in
+  Chapter 18, it means *to discard the data that’s already stored in a
+  buffer.*
+
+*** Line buffered
+
+In this case, the standard I/O library performs I/O *when a newline
+character is encountered on input or output.* This allows us to output
+a single character at a time (with the standard I/O =fputc= function),
+knowing that actual I/O will take place only when we finish writing
+each line.  *Line buffering is typically used on a stream when it
+refers to a terminal* — standard input and standard output, for
+example.
+
+Line buffering comes with two caveats:
+
+1. *A specific buffer-size for line-buffering:* the size of the buffer
+   that the standard I/O library uses to collect each line is fixed,
+   so I/O might take place if we fill this buffer before writing a
+   newline.
+
+2. *Automatic flush of output streams:* all line-buffered output
+   streams are flushed whenever input is requested through the
+   standard I/O library from either:
+   a) an unbuffered stream or
+   b) a line-buffered stream (that requires data to be requested from
+      the kernel). See [[file:../intro/shell2.c][Figure 1.10]] for practical experiment.
+
+
+The reason for the qualifier on (b) is that the requested data may
+already be in the buffer, which doesn’t require data to be read from
+the kernel (in other words, in this specific case, there would be no
+prior need to flush any output streams). Obviously, any input from an
+unbuffered stream, item (a), requires data to be obtained from the
+kernel.
+
+**** Grammatical review of “qualifier”
+
+In grammar, a qualifier is just a limiting phrase that adds a
+condition or an exception to a rule.  So, when he writes:
+
+#+begin_quote
+/"The reason for the qualifier on (b) is that..."/
+#+end_quote
+
+you can read it exactly as:
+
+#+begin_quote
+/"The reason for the condition in the parentheses on (b) is that..."/
+#+end_quote
+
+In conclusion when Stevens uses the word "qualifier," he is referring
+specifically to that exact text inside the parentheses:
+
+#+begin_quote
+(that requires data to be requested from the kernel)
+#+end_quote
+
+**** The Core Problem: The Invisible Prompt
+
+Automatic flush of output streams is a critical behavior of standard
+I/O library to prevent the computer from asking you a question without
+displaying a prompt.
+
+Let's trace the behavior of the following snippet:
+
+#+begin_src c
+printf("Enter your password: ");  // 1. Output (Line-buffered, no newline!)
+fgets(password, 20, stdin);       // 2. Input  (Line-buffered)
+#+end_src
+
+- *Because =printf= doesn't end with a newline (=\n=)*, the output
+  string sits silently inside the line-buffered output block in
+  memory. It has not been sent to the kernel or your screen yet.
+- If the stdio library didn't coordinate input and output, the very
+  next line of code (=fgets=) would execute immediately.  The kernel
+  would stop your program and wait for you to type your password on a
+  completely blank terminal screen, because the prompt asking for your
+  password is still trapped inside the output memory buffer!
+
+#+begin_example
+Input Request Called
+   │
+   ├─► Case (b) Buffered: Is data already cached in RAM?
+   │    ├──► YES: Grab it from memory. (No prior Output Flush)
+   │    └──► NO:  Go to Kernel after ----─► [FLUSH ALL OUTPUT BUFFERS]
+   │
+   └─► Case (a) Unbuffered: Cache is disabled.
+        └──► ALWAYS: Go to Kernel after --► [FLUSH ALL OUTPUT BUFFERS]
+#+end_example
+
+*** Unbuffered
+
+The standard I/O library does not buffer the characters. If we write
+15 characters with the standard I/O fputs function, for example, we
+expect these 15 characters to be output as soon as possible, probably
+with the =write= function from Section 3.8.
+
+The *standard error stream*, for example, is normally unbuffered so
+that any error messages are displayed as quickly as possible,
+regardless of whether they contain a newline.
+
+** ISO C buffering requirements
+
+ISO C requires the following buffering characteristics:
+
+- *Standard input* and *standard output* are fully buffered, if and only
+  if they do not refer to an interactive device.
+- *Standard error* is never fully buffered.
+
+This, however, doesn’t tell us whether standard input and standard
+output are unbuffered or line buffered if they refer to an interactive
+device and whether standard error should be unbuffered or line
+buffered.  Most implementations default to the following types of
+buffering:
+
+- *Standard error* is always unbuffered.
+- *All other streams* are line buffered if they refer to a terminal
+  device; otherwise, they are fully buffered.
+
+The four platforms discussed in this book follow these conventions for
+standard I/O buffering:
+
+- *standard error* is unbuffered,
+- *streams open to terminal devices* are line buffered,
+- and *all other streams* are fully buffered.
+
+We explore standard I/O buffering in more detail in [[#example-5-11][Section 5.12]]
+(Display Buffering Types Metadata) and [[file:buf.c][Figure 5.11]].
+
+** Change the buffering with =setbuf= or =setvbuf=
+
+*** Functions definiton and usage
+
+If we don’t like these defaults for any given stream, we can change
+the buffering by calling either the =setbuf= or =setvbuf= function.
+
+#+begin_src c
+  #include <stdio.h>
+  void setbuf(FILE *restrict fp, char *restrict buf );
+  int setvbuf(FILE *restrict fp, char *restrict buf, int mode,
+              size_t size);
+  /* Returns: 0 if OK, nonzero on error */
+#+end_src
+
+These functions must be called *after the stream has been opened*
+(obviously, since each requires a valid file pointer as its first
+argument) *but before any other operation is performed on the stream*.
+
+With =setbuf=, *we can turn buffering on or off*. To enable buffering,
+=buf= must point to a buffer of length =BUFSIZ=, a constant defined in
+=<stdio.h>=. Normally, the stream is then fully buffered, but some
+systems may set line buffering if the stream is associated with a
+terminal device. *To disable buffering, we set =buf= to =NULL=.*
+
+With =setvbuf=, *we specify exactly which type of buffering we want.*
+This is done with the mode argument:
+
+- =_IOFBF= fully buffered
+- =_IOLBF= line buffered
+- =_IONBF= unbuffered
+
+If we specify an unbuffered stream, the =buf= and =size= arguments are
+ignored.  If we specify fully buffered or line buffered, =buf= and
+=size= can optionally specify a buffer and its size.  If the stream is
+buffered and =buf= is =NULL=, the standard I/O library will
+automatically allocate its own buffer of the appropriate size for the
+stream.  By appropriate size, we mean the value specified by the
+constant =BUFSIZ=.
+
+Avoid passing =BUFSIZ= manually if you are on Linux — letting the
+system default to =0= allows glibc to choose the modern =st_blksize=
+instead of the older, hardcoded =BUFSIZ= constant.
+
+Some C library implementations use the value from the =st_blksize=
+member of the =stat= structure (see Section 4.2) to determine the
+optimal standard I/O buffer size.  As we will see later in this
+chapter, the GNU C library uses this method.
+
+*** Figure 5.1: Summary of the =setbuf= and =setvbuf= functions
+:PROPERTIES:
+:CUSTOM_ID: figure-5-1
+:END:
+
+Summary of the actions of these two functions and their various
+options.
+
+| Function  | mode     | buf       | Buffer and length       | Type of buffering |
+|-----------+----------+-----------+-------------------------+-------------------|
+| ~setbuf~  |          | non-null  | User ~buf~ of length    | fully buffered or |
+|           |          |           | ~BUFSIZ~                | line buffered     |
+|           |          | ~NULL~    | (no-buffer)             | unbuffered        |
+|-----------+----------+-----------+-------------------------+-------------------|
+|           | ~_IOFBF~ | non-null  | user buf of length size | fully buffered    |
+|           |          | ~NULL~    | system buffer of        |                   |
+|           |          |           | appropriate length      |                   |
+| ~setvbuf~ | ~_IOLBF~ | non-null  | user buf of length size | line buffered     |
+|           |          | ~NULL~    | system buffer of        |                   |
+|           |          |           | appropriate length      |                   |
+|           | ~_IONBF~ | (ignored) | (no-buffer)             | unbuffered        |
+|-----------+----------+-----------+-------------------------+-------------------|
+
+*** Warning about buffering changes
+
+Be aware that if we allocate a standard I/O buffer as an *automatic
+variable within a function*, we have to close the stream before
+returning from the function. (We’ll discuss this point further in
+Section 7.8.) On return, calling stacks would be left using a standard
+I/O library which internal state tries to reference the buffer with a
+dangling pointer. Segmentation Violation.
+
+Also, some implementations use part of the buffer for *internal
+bookkeeping*, so the actual number of bytes of data that can be stored
+in the buffer can be less than size.  *In general, we should let the
+system choose the buffer size and automatically allocate the buffer.*
+When we do this, the *standard I/O library automatically releases the
+buffer when we close the stream.*
+
+** Force stream flushing with =fflush=
+:PROPERTIES:
+:CUSTOM_ID: force-stream-flushing
+:END:
+- See also [[#the-concept-of-flush][The concept of flush]].
+
+At any time, we can force a stream to be flushed.
+
+#+begin_src c
+  #include <stdio.h>
+  int fflush(FILE *fp);
+  /* Returns: 0 if OK, EOF on error */
+#+end_src
+
+The =fflush= function causes any unwritten data for the stream to be
+passed to the kernel.  As a special case, if =fp= is =NULL=, =fflush=
+causes all output streams to be flushed.
+
+* 5.5 Opening a Stream
+
+** Opening a Stream with =fopen=, =freopen=, and =fdopen=
+
+*** Definitions
+
+The =fopen=, =freopen=, and =fdopen= functions open a standard I/O
+stream.
+
+#+begin_src c
+  #include <stdio.h>
+  FILE *fopen(const char *restrict pathname, const char *restrict type);
+  FILE *freopen(const char *restrict pathname, const char *restrict type,
+                FILE *restrict fp);
+  FILE *fdopen(int fd, const char *type);
+  /* All three return: file pointer if OK, NULL on error */
+#+end_src
+
+The differences in these three functions are as follows:
+
+1. The =fopen= function opens a specified file.
+2. The =freopen= function opens a specified file on a specified
+   stream, *closing the stream first if it is already open.* If the
+   stream previously had an orientation, =freopen= clears it.  This
+   function is typically used to open a specified file as one of the
+   predefined streams: =stdin=, =stdout=, or =stderr=.
+3. The =fdopen= function takes an existing file descriptor, which we
+   could obtain from the =open=, =dup=, =dup2=, =fcntl=, =pipe=,
+   =socket=, =socketpair=, or =accept= functions, and associates a
+   standard I/O stream with the descriptor.  This function is often
+   used with descriptors that are returned by the functions that
+   create pipes and network communication channels.  Because *these
+   special types of files* cannot be opened with the standard I/O
+   =fopen= function, we have to call the *device-specific function to
+   obtain a file descriptor,* and then *associate this descriptor with
+   a standard I/O stream using* =fdopen=.
+
+Both =fopen= and =freopen= are part of ISO C; =fdopen= is part of
+POSIX.1, *since ISO C doesn’t deal with file descriptors.*
+
+*** The =type= parameter
+
+**** Figure 5.2
+:PROPERTIES:
+:CUSTOM_ID: figure-5-2
+:END:
+
+Here is Figure 5.2, a list of the different values for the =type=
+parameter with description and the corresponding flags passed to the
+=open= system call behind the scene:
+
+- ="r"= or ="rb"= : open for reading (=O_RDONLY=);
+- ="w"= or ="wb"= : truncate to 0 length or create for writing
+  (=O_WRONLY | O_CREAT | O_TRUNC=);
+- ="a"= or ="ab"= : append; open for writing at end of file, or create
+  for writing (=O_WRONLY | O_CREAT | O_APPEND=);
+- ="r+"= or ="r+b"= or ="rb+"= : open for reading and writing
+  (=O_RDWR=);
+- ="w+"= or ="w+b"= or ="wb+"= : truncate to 0 length or create for
+  reading and writing (=O_RDWR | O_CREAT | O_TRUNC=);
+- ="a+"= or ="a+b"= or ="ab+"= : open or create for reading and
+  writing at end of file (=O_RDWR | O_CREAT | O_APPEND=);
+
+ISO C specifies 15 values for the type argument, shown in [[#figure-5-3][Figure
+5.3]]. Using the character =b= as part of the type allows the standard
+I/O system to *differentiate between a text file and a binary
+file*. Since the UNIX kernel doesn’t differentiate between these types
+of files, *specifying the character =b= as part of the type has no
+effect.*
+
+With =fdopen=, the meanings of the type argument differ slightly:
+- The descriptor has already been opened, so opening for writing does
+  not truncate the file. (If the descriptor was created by the =open=
+  function, for example, and the file already existed, the =O_TRUNC=
+  flag would control whether the file was truncated. *The =fdopen=
+  function cannot simply truncate any file it opens for writing.*)
+- Also, the standard I/O *append mode* cannot create the file (since
+  the file has to exist if a descriptor refers to it).
+
+When a file is opened with a type of *append*, each write will take
+place at the then current end of file.  If multiple processes open the
+same file with the standard I/O append mode, the data from each
+process will be correctly written to the file.
+
+When a file is opened for *reading and writing* (the *plus sign* in
+the =type=), two restrictions apply.
+
+- *Output cannot be directly followed by input* without an intervening
+  =fflush=, =fseek=, =fsetpos=, or =rewind=.
+- *Input cannot be directly followed by output* without an intervening
+  =fseek=, =fsetpos=, or =rewind=, or an *input operation that
+  encounters an end of file.*
+
+**** Figure 5.3: Six ways to open a standard I/O stream
+:PROPERTIES:
+:CUSTOM_ID: figure-5-3
+:END:
+
+We can summarize the six ways to open a stream from [[#figure-5-2][Figure 5.2]] in
+Figure 5.3.
+
+| Restriction                         | r | w | a | r+ | w+ | a+ |
+|-------------------------------------+---+---+---+----+----+----|
+| file must already exist             | • |   |   | •  |    |    |
+| previous contents of file discarded |   | • |   |    | •  |    |
+| stream can be read                  | • |   |   | •  | •  | •  |
+| stream can be written               |   | • | • | •  | •  | •  |
+| stream can be written only at end   |   |   | • |    |    | •  |
+
+*** Default permissions and buffering of opened stream
+
+Note that if a new file is created by specifying a type of either =w=
+or =a=, we are not able to specify the file’s access permission bits,
+as we were able to do with the open function and the creat function in
+Chapter 3. POSIX.1 requires implementations to create the file with
+the following permissions bit set:
+
+=S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH=
+
+Recall from Section 4.8, however, that we can restrict these
+permissions by adjusting our =umask= value.
+
+By default, the stream that is opened is *fully buffered*, unless it
+refers to a *terminal device*, in which case it is *line
+buffered*. Once the stream is opened, but before we do =setbuf= or
+=setvbuf= functions from the previous section.
+
+** Close a stream with =fclose=
+
+An open stream is closed by calling =fclose=.
+
+#+begin_src c
+  #include <stdio.h>
+  int fclose(FILE *fp);
+  /* Returns: 0 if OK, EOF on error */
+#+end_src
+
+- Any buffered output data is flushed before the file is closed.
+- Any input data that may be buffered is discarded.
+- If the standard I/O library had automatically allocated a buffer for
+  the stream, that buffer is released.
+
+When a process terminates normally, either by calling the =exit=
+function directly or by returning from the main function, all standard
+I/O streams with unwritten buffered data are flushed and all open
+standard I/O streams are closed.
+
+* 5.6 Reading and Writing a Stream
+
+Once we open a stream, we can choose from among *three types of
+unformatted I/O* (We describe the *formatted I/O functions,* such as
+=printf= and =scanf=, in [[*5.11 Formatted I/O][Section 5.11]].):
+
+1. *Character-at-a-time I/O.* We can read or write one character at a
+   time, with the standard I/O functions handling all the buffering,
+   if the stream is buffered.
+
+2. *Line-at-a-time I/O.* If we want to read or write a line at a time,
+   we use =fgets= and =fputs=.  Each line is terminated with a newline
+   character, and we have to specify the maximum line length that we
+   can handle when we call =fgets=. We describe these two functions in
+   [[*5.7 Line-at-a-Time I/O][Section 5.7]].
+
+3. *Direct I/O.* This type of I/O is supported by the =fread= and
+   =fwrite= functions.  For each I/O operation, we read or write some
+   number of objects, where each object is of a specified size. These
+   two functions are often used for binary files where we read or
+   write a structure with each operation.  We describe these two
+   functions in [[*5.9 Binary I/O][Section 5.9]].
+
+  #+begin_comment
+  The term /direct I/O/, from the ISO C standard, is known by many
+  names: binary I/O, object-at-a-time I/O, record-oriented I/O, or
+  structure-oriented I/O. Don’t confuse this feature with the
+  =O_DIRECT= open flag supported by FreeBSD and Linux—they are
+  unrelated.
+  #+end_comment
+
+** Character-at-a-time I/O
+
+*** Character Input with =getc=, =fgetc= and =getchar=
+
+Three functions allow us to read one character at a time.
+
+#+begin_src c
+  #include <stdio.h>
+  int getc(FILE *fp);
+  int fgetc(FILE *fp);
+  int getchar(void);
+  /* All three return: next character if OK,
+     EOF on end of file or error */
+#+end_src
+
+The function getchar is defined to be equivalent to =getc(stdin)=. The
+difference between =getc= and =fgetc= is *that =getc= can be
+implemented as a macro,* whereas =fgetc= cannot be implemented as a
+macro. This means three things.
+
+1. The argument to =getc= should not be an expression with side
+   effects, because it could be evaluated more than once.
+
+2. Since =fgetc= is guaranteed to be a function, we can take its
+   address. This allows us to pass the address of =fgetc= as an
+   argument to another function.
+
+3. Calls to =fgetc= probably take longer than calls to =getc=, as it
+   usually takes more time to call a function.
+
+*** Unsigned Char Within Int
+:PROPERTIES:
+:CUSTOM_ID: unsigned-char-within-int
+:END:
+
+These three functions return the next character as an =unsigned char=
+converted to an =int=.  The reason for specifying unsigned is so that
+the high-order bit, if set, doesn’t cause the return value to be
+negative. The reason for requiring an integer return value is so that
+all possible character values can be returned, along with an
+indication that either an error occurred or the end of file has been
+encountered.
+
+The constant =EOF= in =<stdio.h>= is required to be a negative value.
+Its value is often −1.  This representation also means that we cannot
+store the return value from these three functions in a character
+variable and later compare this value with the constant =EOF=.
+
+*** Handle errors with =ferror=, =feof= and =clearerr=
+
+Note that these functions *return the same value whether an error
+occurs or the end of file is reached.* To distinguish between the two,
+we must call either =ferror= or =feof=.
+
+#+begin_src c
+  #include <stdio.h>
+
+  int ferror(FILE *fp);
+  int feof(FILE *fp);
+  /* Both return: nonzero (true) if condition is true,
+     0 (false) otherwise */
+
+  void clearerr(FILE *fp);
+#+end_src
+
+In most implementations, two flags are maintained for each stream in
+the =FILE= object:
+
+- An error flag
+- An end-of-file flag
+
+Both flags are cleared by calling =clearerr=.
+
+*** Push characters back with =ungetc=
+
+After reading from a stream, we can push back characters by calling
+=ungetc=.
+
+#+begin_src c
+  #include <stdio.h>
+  int ungetc(int c, FILE *fp);
+  /* Returns: c if OK, EOF on error */
+#+end_src
+
+The characters that are pushed back are returned by subsequent reads
+on the stream in *reverse order of their pushing.* Be aware, however,
+that although ISO C allows an implementation to support any amount of
+pushback, an implementation is required to provide only a single
+character of pushback. *We should not count on more than a single
+character.*
+
+The character that we push back does not have to be the same character
+that was read.  We are not able to push back =EOF=.  When we reach the
+end of file, however, we can push back a character.  The next read
+will return that character, and the read after that will return =EOF=.
+This works because a successful call to =ungetc= clears the
+end-of-file indication for the stream.
+
+Pushback is often used when we’re reading an input stream and breaking
+the input into words or tokens of some form. Sometimes we need to peek
+at the next character to determine how to handle the current
+character.  It’s then easy to push back the character that we peeked
+at, for the next call to =getc= to return.  If the standard I/O
+library didn’t provide this pushback capability, we would have to
+store the character in a variable of our own, along with a flag
+telling us to use this character instead of calling =getc= the next
+time we need a character.
+
+#+begin_center
+When we push characters back with =ungetc=, they are not written back
+to the underlying file or device. Instead, they are kept incore in the
+standard I/O library’s buffer for the stream.
+#+end_center
+
+*** Character Output with =putc=, =fputc= and =putchar=
+
+Output functions are available that correspond to each of the input
+functions we’ve already described.
+
+#+begin_src c
+  #include <stdio.h>
+  int putc(int c, FILE *fp);
+  int fputc(int c, FILE *fp);
+  int putchar(int c);
+  /* All three return: c if OK, EOF on error */
+#+end_src
+
+As with the input functions, =putchar(c)= is equivalent to =putc(c,
+stdout)=, and =putc= can be implemented as a macro, whereas =fputc=
+cannot be implemented as a macro.
+
+* 5.7 Line-at-a-Time I/O
+:PROPERTIES:
+:CUSTOM_ID: section-5-7
+:END:
+
+** Line-at-a-time input with =fgets= and =gets=
+
+Line-at-a-time input is provided by the two functions, =fgets= and
+=gets=.
+
+#+begin_src c
+  #include <stdio.h>
+  char *fgets(char *restrict buf, int n, FILE *restrict fp);
+  /* WARNING: gets is an obsolescent interface in SUSv4 */
+  char *gets(char *buf );
+  /* Both return: buf if OK, NULL on end of file or error */
+#+end_src
+
+Both specify the address of the buffer to read the line into. The
+=gets= function reads from standard input, whereas =fgets= reads from
+the specified stream.
+
+With =fgets=, we have to specify the size of the buffer, =n=.  This
+function reads up through and including the next newline, but no more
+than =n − 1= characters, into the buffer. The buffer is terminated with
+a null byte.  If the line, including the terminating newline, is longer
+than =n − 1=, only a partial line is returned, but the buffer is always
+null terminated. Another call to =fgets= will read what follows on the
+line.
+
+*The =gets= function should never be used:*
+a) The problem is that it doesn’t allow the caller to specify the
+   buffer size.  This allows the buffer to overflow if the line is
+   longer than the buffer, writing over whatever happens to follow the
+   buffer in memory.  For a description of how this flaw was used as
+   part of the Internet worm of 1988, see the June 1989 issue (vol. 32,
+   no. 6) of Communications of the ACM.
+b) An additional difference with =gets= is that it doesn’t store the
+   newline in the buffer, as =fgets= does.
+
+#+begin_comment
+This difference in newline handling between the two functions goes way
+back in the evolution of the UNIX System. Even the Version 7 manual
+(1979) states “gets deletes a newline, fgets keeps it, all in the
+name of backward compatibility.”
+#+end_comment
+
+Even though ISO C requires an implementation to provide =gets=, *you
+should use =fgets= instead.* In fact, =gets= is marked as an
+obsolescent interface in SUSv4 and has been omitted from the latest
+version of the ISO C standard (ISO/IEC 9899:2011).
+
+** Line-at-a-time output with =fputs= and =puts=.
+
+Line-at-a-time output is provided by fputs and puts.
+
+#+begin_src c
+  #include <stdio.h>
+  int fputs(const char *restrict str, FILE *restrict fp);
+  int puts(const char *str);
+  /* Both return: non-negative value if OK, EOF on error */
+#+end_src
+
+The function =fputs= writes the null-terminated string to the
+specified stream. *The null byte at the end is not written.* Note that
+this need not be line-at-a-time output, since the string need not
+contain a newline as the last non-null character.  Usually, this is
+the case — the last non-null character is a newline — but it’s not
+required.
+
+The =puts= function writes the null-terminated string to the standard
+output, without writing the null byte. But =puts= *then writes a
+newline character to the standard output.*
+
+** Usage and good practice for =fgets= and =fputs=
+
+The =puts= function is not unsafe, like its counterpart
+gets. *Nevertheless, we’ll avoid using it, to prevent having to
+remember whether it appends a newline.* If we always use =fgets= and
+=fputs=, we know that we always have to deal with the newline
+character at the end of each line.
+
+* 5.8 Standard I/O Efficiency
+
+Using the functions from the previous section, we can get an idea of
+the efficiency of the standard I/O system. The program in [[file:getcputc.c][Figure 5.4]]
+is like the one in [[file:~/coding/c_prog/apue.3e/fileio/copy_inout.c][Figure 3.5]]: it simply copies standard input to
+standard output, using =getc= and =putc=. These two routines can be
+implemented as macros.
+
+We can make another version of this program that uses =fgetc= and
+=fputc=, which should be functions, not macros. (We don’t show this
+trivial change to the source code.)
+
+Finally, we have a version that reads and writes lines, shown in
+[[file:fgetsfputs.c][Figure 5.5]].
+
+Note that we do not close the standard I/O streams explicitly in
+either [[file:getcputc.c][Figure 5.4]] or [[file:fgetsfputs.c][Figure 5.5]]. Instead, we know that the exit
+function will flush any unwritten data and then close all open
+streams. (We’ll discuss this in Section 8.5.) It is interesting to
+compare the timing of these three programs with the timing data from
+Figure 3.6. *We show this data when operating on the same file (98.5
+MB with 3 million lines) in [[#figure-5-6][Figure 5.6]].*
+
+For each of the three standard I/O versions, the user CPU time is
+larger than the best read version from Figure 3.6, because:
+- the *character-at-a-time* standard I/O versions have a loop that is
+  executed 100 million times
+- in the *line-at-a-time* version the loop is executed 3,144,984 times
+- In the =read()= version, its loop is executed only 25,224 times (for
+  a buffer size of 4,096).
+This difference in clock times stems from the difference in user times
+and the difference in the times spent waiting for I/O to complete, as
+the system times are comparable.
+
+The system CPU time is about the same as before, because roughly the
+same number of kernel requests are being made. One advantage of using
+the standard I/O routines is that we don’t have to worry about
+buffering or choosing the optimal I/O size. We do have to determine
+the maximum line size for the version that uses =fgets=, but that’s
+easier than trying to choose the optimal I/O size.
+
+The final column in [[*Figure 5.6 Timing results using standard I/O routines][Figure 5.6]] is the number of bytes of text space —
+the machine instructions generated by the C compiler — for each of the
+=main= functions. We can see that the version using =getc= and =putc=
+takes the same amount of space as the one using the =fgetc= and
+=fputc= functions. Usually, =getc= and =putc= are implemented as
+macros, but in the GNU C library implementation the macro simply
+expands to a function call.
+
+*The version using line-at-a-time I/O is almost twice as fast as the
+version using character-at-a-time I/O.* If the =fgets= and =fputs=
+functions are implemented using =getc= and =putc= (see Section 7.7 of
+Kernighan and Ritchie [1988], for example), then we would expect the
+timing to be similar to the =getc= version.  Actually, we might expect
+the line-at-a-time version to take longer, since we would be adding
+the overhead of 200 million extra function calls to the existing 6
+million ones.  What is happening with this example is that *the
+line-at-a-time functions are implemented using =memccpy(3)=.* Often,
+the =memccpy= function is implemented in assembly language instead of
+C, for efficiency.
+
+The last point of interest with these timing numbers is that the
+=fgetc= version is so much faster than the =BUFFSIZE = 1= version from
+Figure 3.6. Both involve the same number of function calls — about 200
+million — yet the fgetc version is more than 16 times faster in terms
+of user CPU time and almost 39 times faster in terms of clock time.
+The difference is that the version using =read= executes 200 million
+function calls, which in turn execute 200 million *system calls.* With
+the =fgetc= version, we still execute 200 million function calls, but
+this translates into only 25,224 system calls. System calls are
+usually much more expensive than ordinary function calls.
+
+As a disclaimer, you should be aware that these timing results are
+valid only on the single system they were run on. The results depend
+on many implementation features that aren’t the same on every UNIX
+system. Nevertheless, having a set of numbers such as these, and
+explaining why the various versions differ, helps us understand the
+system better.
+
+From this section and Section 3.9, we’ve learned that the standard I/O
+library is not much slower than calling the =read= and =write=
+functions directly. For most nontrivial applications, the largest
+amount of user CPU time is taken by the application, not by the
+standard I/O routines.
+
+**** Figure 5.6 Timing results using standard I/O routines
+:PROPERTIES:
+:CUSTOM_ID: figure-5-6
+:END:
+
+| Function         |  User CPU | System CPU | Clock time |     Bytes of |
+|                  | (seconds) |  (seconds) |  (seconds) | program text |
+|------------------+-----------+------------+------------+--------------|
+| best time        |      0.05 |       0.29 |       3.18 |              |
+| from Figure 3.6  |           |            |            |              |
+|------------------+-----------+------------+------------+--------------|
+| fgets, fputs     |      2.27 |       0.30 |       3.49 |          143 |
+|------------------+-----------+------------+------------+--------------|
+| getc, putc       |      8.45 |       0.29 |      10.33 |          114 |
+|------------------+-----------+------------+------------+--------------|
+| fgetc, fputc     |      8.16 |       0.40 |      10.18 |          114 |
+|------------------+-----------+------------+------------+--------------|
+| single byte time |    134.61 |     249.94 |     394.95 |              |
+| from Figure 3.6  |           |            |            |              |
+
+* 5.9 Binary I/O with =fread= and =fwrite=
+
+The functions from [[*Character-at-a-time I/O][Section 5.6]] operated with one character at a time,
+and the functions from [[*5.7 Line-at-a-Time I/O][Section 5.7]] operated with one line at a
+time. If we’re doing binary I/O, we often would like to read or write
+an entire structure at a time. To do this using =getc= or =putc=, we
+have to loop through the entire structure, one byte at a time, reading
+or writing each byte. We can’t use the line-at-a-time functions, since
+=fputs= stops writing when it hits a null byte, and there might be
+null bytes within the structure. Similarly, =fgets= won’t work
+correctly on input if any of the data bytes are nulls or
+newlines. Therefore, the following two functions are provided for
+binary I/O.
+
+#+begin_src c
+  #include <stdio.h>
+  size_t fread(void *restrict ptr, size_t size, size_t nobj,
+               FILE *restrict fp);
+  size_t fwrite(const void *restrict ptr, size_t size, size_t nobj,
+                FILE *restrict fp);
+  /* Both return: number of objects read or written */
+#+end_src
+
+These functions have two common uses:
+
+1. *Read or write a binary array.* For example, to write elements 2
+   through 5 of a floating-point array, we could write
+
+  #+begin_src c
+    float data[10];
+    if (fwrite(&data[2], sizeof(float), 4, fp) != 4)
+      err_sys("fwrite error");
+  #+end_src
+
+  Here, we specify =size= as the size of each element of the array and
+   =nobj= as the number of elements.
+
+2. *Read or write a structure.* For example, we could write
+
+  #+begin_src c
+    struct {
+      short count;
+      long total;
+      char name[NAMESIZE];
+    } item;
+
+    if (fwrite(&item, sizeof(item), 1, fp) != 1)
+      err_sys("fwrite error");
+  #+end_src
+
+  Here, we specify =size= as the size of structure and =nobj= as 1 (the
+   number of objects to write).
+
+The obvious generalization of these two cases is to read or write an
+array of structures. To do this, =size= would be the /sizeof/ the
+structure, and =nobj= would be the number of elements in the array.
+
+Both =fread= and =fwrite= return the number of objects read or written:
+- *For the read case,* this number can be less than =nobj= if an error
+  occurs or if the end of file is encountered. In this situation,
+  =ferror= or =feof= must be called.
+- *For the write case,* if the return value is less than the requested
+  =nobj=, an error has occurred.
+
+A fundamental problem with binary I/O is that *it can be used to read
+only data that has been written on the same system.* This was OK many
+years ago, when all the UNIX systems were PDP-11s, but the norm today
+is to have heterogeneous systems connected together with networks. It
+is common to want to write data on one system and process it on
+another. These two functions won’t work, for two reasons:
+
+1. The offset of a member within a structure can differ between
+   compilers and systems because of different alignment
+   requirements. Indeed, some compilers have an option allowing
+   structures to be packed tightly, to save space with a possible
+   runtime performance penalty, or aligned accurately, to optimize
+   runtime access of each member. This means that even on a single
+   system, the binary layout of a structure can differ, depending on
+   compiler options.
+
+2. The binary formats used to store multibyte integers and
+   floating-point values differ among machine architectures.
+
+We’ll touch on some of these issues when we discuss sockets in
+Chapter 16. The real solution for exchanging binary data among
+different systems is to use an agreed-upon canonical format. Refer to
+Section 8.2 of Rago [1993] or Section 5.18 of Stevens, Fenner, &
+Rudoff [2004] for a description of some techniques various network
+protocols use to exchange binary data.
+
+We’ll return to the =fread= function in Section 8.14 when we use it to
+read a binary structure, the UNIX process accounting records.
+
+* 5.10 Positioning a Stream
+
+There are three ways to position a standard I/O stream:
+
+1. The two functions =ftell= and =fseek=. They have been around since
+   Version 7, but they assume that a file’s position can be stored in
+   a long integer.
+
+2. The two functions =ftello= and =fseeko=. They were introduced in
+   the *Single UNIX Specification* to allow for file offsets that
+   might not fit in a long integer. They replace the long integer with
+   the =off_t= data type.
+
+3. The two functions =fgetpos= and =fsetpos=. They were introduced by
+   *ISO C.* They use an abstract data type, =fpos_t=, that records a
+   file’s position. This data type can be made as big as necessary to
+   record a file’s position.
+
+*When porting applications to non-UNIX systems, use =fgetpos= and
+=fsetpos=.*
+
+#+begin_src c
+  #include <stdio.h>
+  long ftell(FILE *fp);
+  /* Returns: current file position indicator if OK, −1L on error */
+  int fseek(FILE *fp, long offset, int whence);
+  /* Returns: 0 if OK, −1 on error */
+  void rewind(FILE *fp);
+#+end_src
+
+For a binary file, a file’s position indicator is measured in bytes
+from the beginning of the file. The value returned by =ftell= for a
+binary file is this byte position. To position a binary file using
+=fseek=, we must specify a byte offset and indicate how that offset is
+interpreted. The values for =whence= are the same as for the =lseek=
+function from Section 3.6:
+- =SEEK_SET= means from the beginning of the file,
+- =SEEK_CUR= means from the current file position, and
+- =SEEK_END= means from the end of file.
+*ISO C* doesn’t require an implementation to support the =SEEK_END=
+specification for a binary file, as some systems require a binary file
+to be padded at the end with zeros to make the file size a multiple of
+some magic number. Under the UNIX System, however, =SEEK_END= is
+supported for binary files.
+
+For text files, the file’s current position may not be measurable as a
+simple byte offset. Again, this is mainly under non-UNIX systems that
+might store text files in a different format. To position a text file:
+1. =whence= has to be =SEEK_SET=, and
+2. only two values for =offset= are allowed:
+   - =0=: meaning rewind the file to its beginning;
+   - or a *value that was returned by* =ftell= for that file. A stream
+     can also be set to the beginning of the file with the =rewind=
+     function.
+
+The =ftello= function is the same as =ftell=, and the =fseeko=
+function is the same as =fseek=, except that the type of the offset is
+=off_t= instead of long.
+
+#+begin_src c
+  #include <stdio.h>
+  off_t ftello(FILE *fp);
+  /* Returns: current file position indicator if OK, (off_t)−1 on error */
+  int fseeko(FILE *fp, off_t offset, int whence);
+  /* Returns: 0 if OK, −1 on error */
+#+end_src
+
+Recall the discussion of the =off_t= data type in Section 3.6.
+Implementations can define the =off_t= type to be larger than 32 bits.
+
+As we mentioned earlier, the =fgetpos= and =fsetpos= functions were
+introduced by the *ISO C standard.*
+
+#+begin_src c
+  #include <stdio.h>
+  int fgetpos(FILE *restrict fp, fpos_t *restrict pos);
+  int fsetpos(FILE *fp, const fpos_t *pos);
+  /* Both return: 0 if OK, nonzero on error */
+#+end_src
+
+The =fgetpos= function stores the current value of the file’s position
+indicator in the object pointed to by =pos=. This value can be used in
+a later call to =fsetpos= to reposition the stream to that location.
+
+* 5.11 Formatted I/O
+
+** Formatted Output
+
+*** Formatted Output API: the =printf= functions family
+
+Formatted output is handled by the five =printf= functions.
+
+#+begin_src c
+  #include <stdio.h>
+  int printf(const char *restrict format, ...);
+  int fprintf(FILE *restrict fp, const char *restrict format, ...);
+  int dprintf(int fd, const char *restrict format, ...);
+  /* All three return: number of characters output if OK, negative value
+     if output error */
+  int sprintf(char *restrict buf, const char *restrict format, ...);
+  /* Returns: number of characters stored in array if OK, negative value
+     if encoding error */
+  int snprintf(char *restrict buf, size_t n,
+  const char *restrict format, ...);
+  /* Returns: number of characters that would have been stored in array
+     if buffer was large enough, negative value if encoding error */
+#+end_src
+
+1. =printf= function writes to the standard output.
+
+2. =fprintf= writes to the specified stream.
+
+3. =sprintf= places the formatted characters in the array =buf= and
+   automatically appends a null byte at the end of the array, but this
+   null byte is not included in the return value. Note that it’s
+   possible for =sprintf= to overflow the buffer pointed to by
+   =buf=. The caller is responsible for ensuring that the buffer is
+   large enough.
+
+4. Because buffer overflows can lead to program instability and even
+   security violations, =snprintf= was introduced.  With it, the size
+   of the buffer is an explicit parameter; any characters that would
+   have been written past the end of the buffer are discarded
+   instead. The =snprintf= function returns the number of characters
+   that would have been written to the buffer had it been big
+   enough. As with =sprintf=, the return value doesn’t include the
+   terminating null byte. If =snprintf= returns a positive value less
+   than the buffer size =n=, then the output was not truncated.  If an
+   encoding error occurs, =snprintf= returns a negative value.
+
+5. =dprintf= writes to the specified file descriptor.  Although
+   =dprintf= doesn’t deal with a file pointer, we include it with the
+   rest of the related functions that handle formatted output. Note
+   that using =dprintf= removes the need to call =fdopen= to convert a
+   file descriptor into a file pointer for use with =fprintf=.
+
+*** The printf conversion specification
+
+The *format specification* controls how the remainder of the arguments
+will be encoded and ultimately displayed. Each argument is encoded
+according to a *conversion specification* that starts with a percent
+sign (=%=). Except for the conversion specifications, other characters
+in the format are copied unmodified. A *conversion specification* has
+four optional components, shown in square brackets below:
+
+=%[flags][fldwidth][precision][lenmodifier]convtype=
+
+**** Figure 5.7 The flags component of a conversion specification
+:PROPERTIES:
+:CUSTOM_ID: figure-5-7
+:END:
+
+| Flag    | Description                                              |
+|---------+----------------------------------------------------------|
+| '       | (apostrophe)                                             |
+|         | format integer with thousands grouping characters        |
+| +       | always display sign of a signed conversion               |
+| (space) | prefix by a space if no sign is generated                |
+| ‘#’     | convert using alternative form                           |
+|         | (include 0x prefix for hexadecimal format, for example)  |
+| 0       | prefix with leading zeros instead of padding with spaces |
+
+**** The fldwidth component of a conversion specification
+
+The =fldwidth= component specifies a minimum field width for the
+conversion. If the conversion results in fewer characters, it is
+padded with spaces. *The field width is a non-negative decimal integer
+or an asterisk (=*=).*
+
+**** The precision component of a conversion specification
+
+The =precision= component specifies the minimum number of digits to
+appear for integer conversions, the minimum number of digits to appear
+to the right of the decimal point for floating-point conversions, or
+the maximum number of bytes for string conversions. The precision is a
+period (=.=) followed by a *optional non-negative decimal integer or
+an asterisk (=*=).*
+
+**** Dynamic parameter
+
+Either the *field width* or *precision* (or both) can be an
+asterisk. In this case, an integer argument specifies the value to be
+used. The argument appears directly before the argument to be
+converted.
+
+**** Figure 5.8 The lenmodifier component of a conversion specification
+:PROPERTIES:
+:CUSTOM_ID: figure-5-8
+:END:
+
+The =lenmodifier= component specifies the size of the
+argument. Possible values are summarized in Figure 5.8.
+
+| Length modifier | Description                               |
+|-----------------+-------------------------------------------|
+| hh              | signed or unsigned char                   |
+| h               | signed or unsigned short                  |
+| l               | signed or unsigned long or wide character |
+| ll              | signed or unsigned long long              |
+| j               | intmax_t or uintmax_t                     |
+| z               | size_t                                    |
+| t               | ptrdiff_t                                 |
+| L               | long double                               |
+
+**** Figure 5.9 The convtype component of a conversion specification
+:PROPERTIES:
+:CUSTOM_ID: figure-5-9
+:END:
+
+The =convtype= component is not optional. It controls how the argument is
+interpreted. The various conversion types are summarized in Figure 5.9.
+
+| Conversion | Description                                                    |
+| type       |                                                                |
+|------------+----------------------------------------------------------------|
+| d,i        | signed decimal                                                 |
+| o          | unsigned octal                                                 |
+| u          | unsigned decimal                                               |
+| x,X        | unsigned hexadecimal                                           |
+| f,F        | double floating-point number                                   |
+| e,E        | double floating-point number in exponential format             |
+| g,G        | interpreted as f, F, e, or E, depending on value converted     |
+| a,A        | double floating-point number in hexadecimal exponential format |
+| c          | character (with l length modifier, wide character)             |
+| s          | string (with l length modifier, wide character string)         |
+| p          | pointer to a void                                              |
+| n          | pointer to a signed integer into which is written the number   |
+|            | of characters written so far                                   |
+| %          | a % character                                                  |
+| C          | wide character (XSI option, equivalent to lc)                  |
+| S          | wide character string (XSI option, equivalent to ls)           |
+
+**** Alternative Conversion Specification Syntax
+
+With the normal conversion specification, conversions are applied to
+the arguments in the order they appear after the format argument.  An
+alternative conversion specification syntax allows the arguments to be
+named explicitly with the sequence =%n$= representing the nth
+argument. Note, however, that the two syntaxes can’t be mixed in the
+same format specification. With the alternative syntax, arguments are
+numbered starting at one. If either the field width or precision is to
+be supplied by an argument, the asterisk syntax is modified to =*m$=,
+where =m= specifies the position of the argument supplying the value.
+
+*** The =vprintf= functions family
+
+When you need to call the =printf= family functions in a context where
+*format-string argument (=format=) and its optional variadic arguments
+(=...=) are unknown at compile time* only to be set dynamically at
+execution time, the =vprintf= family variants is provided.
+
+#+begin_src c
+  #include <stdarg.h>
+  #include <stdio.h>
+  int vprintf(const char *restrict format, va_list arg);
+  int vfprintf(FILE *restrict fp, const char *restrict format,
+               va_list arg);
+  int vdprintf(int fd, const char *restrict format, va_list arg);
+  /* All three return: number of characters output if OK, negative value
+     if output error */
+  int vsprintf(char *restrict buf, const char *restrict format,
+               va_list arg);
+  /* Returns: number of characters stored in array if OK, negative value
+     if encoding error */
+  int vsnprintf(char *restrict buf, size_t n,
+                const char *restrict format, va_list arg);
+  /* Returns: number of characters that would have been stored in array
+     if buffer was large enough, negative value if encoding error */
+#+end_src
+
+We use the =vsnprintf= function in the [[file:~/coding/c_prog/apue.3e/lib/error.c][error routines]] (=err_doit=) in
+Appendix B.
+
+Refer to Section 7.3 of Kernighan and Ritchie [1988] for additional
+details on handling variable-length argument lists with ISO
+Standard C. Be aware that the variable-length argument list routines
+provided with ISO C—the =<stdarg.h>= header and its associated
+routines — differ from the =<varargs.h>= routines that were provided
+with older UNIX systems.
+
+** Formatted Input
+
+*** Formatted Input API: the =scanf= functions family
+
+Formatted input is handled by the three =scanf= functions.
+
+#+begin_src c
+  #include <stdio.h>
+  int scanf(const char *restrict format, ...);
+  int fscanf(FILE *restrict fp, const char *restrict format, ...);
+  int sscanf(const char *restrict buf, const char *restrict format, ...);
+  /* All three return: number of input items assigned,
+     EOF if input error or end of file before any conversion */
+#+end_src
+
+The =scanf= family is used to parse an input string and convert
+character sequences into variables of specified types.
+- The arguments following the format contain the addresses of the
+  variables to initialize with the results of the conversions.
+
+The format specification controls how the arguments are converted for
+assignment:
+- The percent sign (=%=) indicates the beginning of a conversion
+  specification.
+- *Except for the conversion specifications and white space,* other
+  characters in the format have to match the input. *If a character
+  doesn’t match, processing stops,* leaving the remainder of the input
+  unread.
+
+*** The scanf conversion specification
+:PROPERTIES:
+:CUSTOM_ID: the-scanf-conversion-specification
+:END:
+
+There are three optional components to a conversion specification,
+shown in square brackets below:
+
+=%[*][fldwidth][m][lenmodifier]convtype=
+
+**** The optional leading asterisk as suppresion indicator
+
+The optional *leading asterisk* is used to suppress conversion. Input
+is converted as specified by the rest of the conversion specification,
+but the result is not stored in an argument.
+
+**** The fldwidth component of a conversion specification
+
+The =fldwidth= component specifies the maximum field width in
+characters.
+
+**** The lenmodifier component of a conversion specification
+
+The =lenmodifier= component specifies the size of the argument to be
+initialized with the result of the conversion. The same length
+modifiers supported by the =printf= family of functions are supported
+by the =scanf= family of functions (see [[#figure-5-8][Figure 5.8]] for a list of the
+length modifiers).
+
+**** Figure 5.10 The convtype component of a conversion specification
+:PROPERTIES:
+:CUSTOM_ID: figure-5-10
+:END:
+
+The =convtype= field is similar to the conversion type field used by
+the =printf= family, but there are some differences. One difference is
+that *results that are stored in unsigned types can optionally be
+signed on input.* For example, −1 will scan as 4294967295 into an
+unsigned integer. Figure 5.10 summarizes the conversion types
+supported by the =scanf= family of functions.
+
+| Conversion type | Description                                            |
+|-----------------+--------------------------------------------------------|
+| d               | signed decimal, base 10                                |
+| i               | signed decimal, base determined by format of input     |
+| o               | unsigned octal (input optionally signed)               |
+| u               | unsigned decimal, base 10 (input optionally signed)    |
+| x,X             | unsigned hexadecimal (input optionally signed)         |
+| a,A,e,E,f,F,g,G | floating-point number                                  |
+| c               | character (with l length modifier, wide character)     |
+| s               | string (with l length modifier, wide character string) |
+| [               | matches a sequence of listed characters, ending with ] |
+| [^              | matches all characters except the ones listed,         |
+|                 | ending with ]                                          |
+| p               | pointer to a void                                      |
+| n               | pointer to a signed integer into which is              |
+|                 | written the number of characters read so far           |
+| %               | a % character                                          |
+| C               | wide character (XSI option, equivalent to lc)          |
+| S               | wide character string (XSI option, equivalent to ls)   |
+
+Figure 5.10 The conversion type component of a conversion specification
+
+**** Dynamic conversion buffer with =m= component
+
+The optional =m= character between the field width and the length
+modifier is called the *assignment-allocation character.* It can be
+used with the =%c=, =%s=, and =%[= *conversion specifiers* to force a
+memory buffer to be allocated to hold the converted string. In this
+case, the corresponding argument should be the address of a pointer to
+which the address of the allocated buffer will be copied. If the call
+succeeds, *the caller is responsible for freeing the buffer* by
+calling the =free= function when the buffer is no longer needed.
+
+**** Alternative Conversion Specification Syntax
+
+The =scanf= family of functions also supports the alternative
+conversion specification syntax allowing the arguments to be named
+explicitly: the sequence =%n$= represents the *nth argument*.  With
+the =printf= family of functions, the same numbered argument can be
+referenced in the format string more than once.  In this case,
+however, the *Single UNIX Specification* states that the behavior is
+undefined with the =scanf= family of functions.
+
+*** The =vscanf= functions family
+
+Like the =printf= family, the =scanf= family supports functions that
+use variable argument lists as specified by =<stdarg.h>=.
+
+#+begin_src c
+  #include <stdarg.h>
+  #include <stdio.h>
+  int vscanf(const char *restrict format, va_list arg);
+  int vfscanf(FILE *restrict fp, const char *restrict format,
+              va_list arg);
+  int vsscanf(const char *restrict buf, const char *restrict format,
+              va_list arg);
+  /* All three return: number of input items assigned,
+     EOF if input error or end of file before any conversion */
+#+end_src
+
+Refer to your UNIX system manual for additional details on the =scanf=
+family of functions.
+
+* 5.12 Implementation Details
+
+To look at the implementation of the standard I/O library on your
+system, start with the header =<stdio.h>=. This will show how the
+=FILE= object is defined, the definitions of the per-stream flags, and
+any standard I/O routines, such as =getc=, that are defined as
+macros. Section 8.5 of Kernighan and Ritchie [1988] has a sample
+implementation that shows the flavor of many implementations on UNIX
+systems. Chapter 12 of Plauger [1992] provides the complete source
+code for an implementation of the standard I/O library. The
+implementation of the GNU standard I/O library is also publicly
+available.
+
+** Retrieve =fd= backing up a stream =fp= with =fileno=
+
+As we’ve mentioned, under the UNIX System, the standard I/O library
+ends up calling the I/O routines that we described in Chapter 3. *Each
+standard I/O stream has an associated file descriptor,* and we can
+obtain the descriptor for a stream by calling =fileno=.
+
+Note that =fileno= is not part of the *ISO C standard*, but rather an
+extension supported by *POSIX.1.*
+
+#+begin_src c
+  #include <stdio.h>
+  int fileno(FILE *fp);
+  /* Returns: the file descriptor associated with the stream */
+#+end_src
+
+We need this function if we want to call the =dup= or =fcntl=
+functions, for example.
+
+** Example: Display Buffering Types Metadata
+:PROPERTIES:
+:CUSTOM_ID: example-5-11
+:END:
+
+The program in [[file:buf.c][Figure 5.11 buf.c]] prints the buffering for the three
+standard streams and for a stream that is associated with a regular
+file.
+
+*** Troubleshooting Platform Version
+
+Note that we perform I/O on each stream before printing its buffering
+status, since the first I/O operation usually causes the buffers to be
+allocated for a stream. The structure members and the constants used
+in this example are defined by the implementations of the standard I/O
+library used on the four platforms described in this book.
+
+Be aware that implementations of the standard I/O library vary, and
+programs like this example are nonportable, since they embed knowledge
+specific to particular implementations.
+
+**** Why the version from APUE.3e won't compile in 2026
+
+Historically, =FILE= (which maps to =struct _IO_FILE= on Linux) was
+fully transparent. Its fields---like =_flags=, =_IO_buf_base=, and
+=_IO_buf_end=---were exposed in standard header files, allowing
+hackers and book authors alike to inspect internal buffer limits
+directly.
+
+However, in recent versions of the GNU C Library (=glibc=), these
+internal fields were completely hidden from user-space applications to
+mitigate *FILE Structure Exploitation Attacks* (where attackers
+overwrite the stream's internal buffer pointers or virtual method jump
+tables (=vtable=) to hijack program execution).
+
+Because the structures are now sealed, macros like =_IO_UNBUFFERED=
+are missing, and code like =fp->_flags= or =fp->_IO_buf_end= will fail
+to compile.
+
+**** Porting APUE.3e Section 5.12 to Modern Linux
+
+To make this example compile perfectly on modern Clang/GCC without
+breaking the spirit of Stevens' exercise, we have to look up the
+modern flag masks or fallback on system-specific header parsing.
+
+On standard Linux systems using =glibc=, the internal buffer
+properties can still be safely audited by casting =FILE *= to the
+underlying, complete system structure type (=struct _IO_FILE=).
+
+- [[file:buf.c][Figure 5.11 buf.c]]: Author version modernized to 2026.
+- [[file:ybuf.c][Figure 5.11 ybuf.c]] My version which display standard streams status
+  before allocation of internal buffers.
+
+*** Test run
+
+If we run the program in [[file:ybuf.c][Figure 5.11 ybuf.c]] twice, once with the three
+standard streams connected to the terminal and once with the three
+standard streams redirected to files, we get the following result:
+
+#+begin_example
+$ ./ybuf            # stdin, stdout and stderr connected to terminal
+enter any character
+                    # we type a newlne
+one line to standard error
+stream = stdin, line buffered, buffer size = 1024
+stream = stdout, line buffered, buffer size = 1024
+stream = stderr, unbuffered, buffer size = 1
+stream = std.log, fully buffered, buffer size = 4096
+
+$ cat std.log       # Standard stream status without I/O
+stream = stdin, fully buffered, buffer size = 0
+stream = stdout, fully buffered, buffer size = 0
+stream = stderr, unbuffered, buffer size = 0
+
+$ ./ybuf < /etc/group > std.out 2> std.err
+                    # we run it again with all three streams redirected
+$ cat std.log       # Standard stream status without I/O
+stream = stdin, fully buffered, buffer size = 0
+stream = stdout, fully buffered, buffer size = 0
+stream = stderr, unbuffered, buffer size = 0
+
+$ cat std.err
+one line to standard error
+
+$ cat std.out
+enter any character
+stream = stdin, fully buffered, buffer size = 4096
+stream = stdout, fully buffered, buffer size = 4096
+stream = stderr, unbuffered, buffer size = 1
+stream = std.log, fully buffered, buffer size = 4096
+#+end_example
+
+*** Analysis
+
+a. Before performing I/O on standard stream, we see that =stdin= and
+   =stdout= initially have a buffer size of =0=. *This is because
+   =glibc= is lazy.* It does not allocate the actual internal I/O
+   memory buffers until you make the /very first read or write call/
+   on that stream.
+
+b. We can see that the default for this system is to have =stdin= and
+   =stdout= *line buffered when they’re connected to a terminal.*
+
+c. The *line buffer is 1,024 bytes.* Note that this doesn’t restrict
+   us to *1,024-byte* input and output lines; that’s just the size of
+   the buffer. Writing a *2,048-byte* line to standard output will
+   require two =write= system calls.
+
+d. When we redirect these two streams to regular files, they become
+   fully buffered, with buffer sizes equal to the preferred I/O size —
+   the =st_blksize= value from the =stat= structure — for the file
+   system.
+
+e. We also see that:
+   - =stderr= *is always unbuffered,* as it should be, and that
+   - *regular file* defaults to *fully buffered.*
+
+* 5.13 Temporary Files
+
+- [[info:libc#Temporary Files][libc#Temporary Files]]
+
+** Temporary files names
+
+The *ISO C* standard defines two functions that are provided by the
+standard I/O library to assist in creating temporary files.
+
+#+begin_src c
+  #include <stdio.h>
+  char *tmpnam(char *ptr);
+  /* Returns: pointer to unique pathname */
+  FILE *tmpfile(void);
+  /* Returns: file pointer if OK, NULL on error */
+#+end_src
+
+The =tmpnam= function *generates a string that is a valid pathname and
+that does not match the name of any existing file.* This function
+generates a different pathname each time it is called, up to =TMP_MAX=
+times. =TMP_MAX= is defined in =<stdio.h>=.
+
+Although *ISO C* defines =TMP_MAX=, the *C standard requires only that
+its value be at least 25.* The *Single UNIX Specification,* however,
+requires that XSI-conforming systems support a value of at least
+10,000. This minimum value allows an implementation to use four digits
+(0000–9999), *although most implementations on UNIX systems use
+alphanumeric characters.*
+
+** Creation of temporary filename with =tmpnam=
+
+The =tmpnam= *function is marked obsolescent in SUSv4,* but the *ISO
+C* standard continues to support it.
+
+- If =ptr= is =NULL=, the generated pathname is stored in a static
+  area, and a pointer to this area is returned as the value of the
+  function. Subsequent calls to =tmpnam= can overwrite this static
+  area. (Thus, if we call this function more than once and we want to
+  save the pathname, we have to save a copy of the pathname, not a
+  copy of the pointer.)
+- If =ptr= is not =NULL=, it is assumed that it points to an array of
+  at least =L_tmpnam= characters. (The constant =L_tmpnam= is defined
+  in =<stdio.h>=.) The generated pathname is stored in this array, and
+  =ptr= is returned as the value of the function.
+
+Use of =tmpnam= and =tempnam= create a security vulnerability called a
+*TOCTOU race* (time to create time to use): a window exists between
+the time that the unique pathname is returned and the time that an
+application creates a file with that name. During this timing window,
+another process can create a file of the same name. *The =tmpfile= and
+=mkstemp= functions should be used instead, as they don’t suffer from
+this problem.*
+
+** Safe creation of temporary stream file with =tmpfile=
+
+The =tmpfile= function *creates a temporary binary file* (type =wb+=)
+that is *automatically removed when it is closed or on program
+termination.* Under the UNIX System, it makes no difference that this
+file is a binary file.
+
+*** Example
+
+- [[file:tempfiles.c][Figure 5.12 tempfiles.c]] demonstrates these two functions.
+
+If we execute the program in Figure 5.12, we get
+
+#+begin_example
+$ ./tempfiles
+/tmp/fileT0Hsu6
+/tmp/filekmAsYQ
+one line of output
+#+end_example
+
+The conceptual pattern used by =tmpfile= follows this algorithm:
+- Generate a unique name;
+- =open= / =create= a file;
+- Immediately =unlink= it;
+Recall from [[file:~/coding/c_prog/apue.3e/filedir/README.org::#section-4-15][Section 4.15]] that unlinking a file does not delete its
+contents until the file is closed.  This way, when the file is closed,
+either explicitly or on program termination, the contents of the file
+are deleted.
+
+** Secure creation of temporary =fd= and directory
+
+The *Single UNIX Specification* defines two additional functions as
+part of the *XSI option* for dealing with temporary files: =mkdtemp=
+and =mkstemp=.
+
+#+begin_comment
+Older versions of the Single UNIX Specification defined the =tempnam=
+function as a way to create a temporary file in a caller-specified
+location. *It is marked obsolescent in SUSv4.*
+#+end_comment
+
+#+begin_src c
+  #include <stdlib.h>
+  char *mkdtemp(char *template);
+  /* Returns: pointer to directory name if OK, NULL on error */
+  int mkstemp(char *template);
+  /* Returns: file descriptor if OK, −1 on error */
+#+end_src
+
+The =mkdtemp= function *creates a directory with a unique name,* and
+the =mkstemp= function *creates a regular file with a unique name.*
+The name is selected using the template string. This string is a
+pathname whose last six characters are set to =XXXXXX=.  The function
+replaces these placeholders with different characters to create a
+unique pathname. If successful, *these functions modify the template
+string to reflect the name of the temporary file.*
+
+The directory created by =mkdtemp= is created with the following
+access permission bits set: =S_IRUSR | S_IWUSR | S_IXUSR=. Note that
+the file mode creation mask of the calling process can restrict these
+permissions further. If directory creation is successful, =mkdtemp=
+*returns the name of the new directory.*
+
+The =mkstemp= function *creates a regular file with a unique name and
+opens it.* The file descriptor returned by =mkstemp= is open for
+reading and writing. The file created by =mkstemp= is created with
+access permissions =S_IRUSR | S_IWUSR=.
+
+Unlike =tmpfile=, the temporary file created by =mkstemp= *is not
+removed automatically for us.* If we want to remove it from the file
+system namespace, we need to unlink it ourselves.
+
+*** Example
+
+- [[file:mkstemp.c][Figure 5.13 mkstemp.c]] shows how to use (and how not to use) the
+  =mkstemp= function.
+
+If we execute the program in Figure 5.13, we get
+
+#+begin_example
+$ ./mkstemp
+trying to create first temp file...
+temp name = /tmp/dirUmBT7h
+file exists
+trying to create second temp file...
+Segmentation fault
+#+end_example
+
+The difference in behavior comes from the way the two template strings
+are declared:
+- For the first template, the name is allocated on the stack, because
+  we use an array variable.
+- For the second name, however, we use a pointer. In this case, only
+  the memory for the pointer itself resides on the stack; the compiler
+  arranges for the string to be stored in the read-only segment of the
+  executable. When the =mkstemp= function tries to modify the string,
+  a segmentation fault occurs.
+
+* 5.14 Memory Streams
+
+[[info:libc#String Streams][libc#String Streams]]
+
+** Definitions and the =fmemopen= function
+
+As we’ve seen, the standard I/O library buffers data in memory, so
+operations such as character-at-a-time I/O and line-at-a-time I/O are
+more efficient. We’ve also seen that we can provide our own buffer for
+the library to use by calling =setbuf= or =setvbuf=.
+
+In *Version 4, the Single UNIX Specification* added support for
+*memory streams.* These are *standard I/O streams for which there are
+no underlying files,* although they are still accessed with =FILE=
+pointers. All I/O is done by transferring bytes to and from buffers in
+main memory. As we shall see, even though these streams look like file
+streams, *several features make them more suited for manipulating
+character strings.*
+
+Three functions are available to create *memory streams.* The first is
+=fmemopen=.
+
+#+begin_src c
+  #include <stdio.h>
+  FILE *fmemopen(void *restrict buf, size_t size,
+                 const char *restrict type);
+  /* Returns: stream pointer if OK, NULL on error */
+#+end_src
+
+The =fmemopen= function allows the caller to provide a buffer to be
+used for the memory stream: the =buf= argument points to the beginning
+of the buffer and the =size= argument specifies the size of the buffer
+in bytes. If the =buf= argument is null, then the =fmemopen= function
+allocates a buffer of size bytes. In this case, the buffer will be
+freed when the stream is closed.
+
+*** Figure 5.14: The type argument for opening a memory stream
+:PROPERTIES:
+:CUSTOM_ID: figure-5-14
+:END:
+
+The type argument controls how the stream can be used.  The possible
+values for type are summarized in Figure 5.14.
+
+| type             | Description                                             |
+|------------------+---------------------------------------------------------|
+| r or rb          | open for reading                                        |
+| w or wb          | open for writing                                        |
+| a or ab          | append; open for writing at first null byte             |
+| r+ or r+b or rb+ | open for reading and writing                            |
+| w+ or w+b or wb+ | truncate to 0 length and open for reading and writing   |
+| a+ or a+b or ab+ | append; open for reading and writing at first null byte |
+
+Note that these values correspond to the ones for file-based standard
+I/O streams, but there are some subtle differences:
+
+1. First, whenever a memory stream is opened for append, the current
+   file position is set to *the first null byte in the buffer.* If the
+   buffer contains no null bytes, then the current position is set to
+   one byte past the end of the buffer. When a stream is not opened
+   for append, the current position is set to the beginning of the
+   buffer. Because the append mode determines the end of the data by
+   the first null byte, memory streams aren’t well suited for storing
+   binary data (which might contain null bytes before the end of the
+   data).
+
+2. Second, if the =buf= argument is a null pointer, it makes no sense
+   to open the stream for only reading or only writing. Because the
+   buffer is allocated by fmemopen in this case, there is no way to
+   find the buffer ’s address, so to open the stream only for writing
+   means we could never read what we’ve written. Similarly, to open
+   the stream only for reading means we can only read the contents of
+   a buffer into which we can never write.
+
+3. Third, a null byte is written at the current position in the stream
+   whenever we increase the amount of data in the stream’s buffer and
+   call =fclose=, =fflush=, =fseek=, =fseeko=, or =fsetpos=.
+
+*** Example
+
+It’s instructive to look at how writes to a memory stream operate on a
+buffer we provide. [[file:memstr.c][Figure 5.15]] shows a sample program that seeds the
+buffer with a known pattern to see how writes to the stream behave.
+
+When we run the program on Linux, we get the following:
+
+#+begin_src sh
+$ ./memstr
+                           # overwrite the buffer with a’s
+initial buffer contents:   # fmemopen places a null byte at beginning of buffer
+before flush:              # buffer is unchanged until stream is flushed
+after fflush: hello, world
+len of string in buf = 12              # null byte added to end of string
+                                       # now overwrite the buffer with b’s
+after fseek: bbbbbbbbbbbbhello, world  # fseek causes flush
+len of string in buf = 24              # null byte appended again
+                                       # now overwrite the buffer with c’s
+after fclose: hello, worldcccccccccccccccccccccccccccccccccc
+len of string in buf = 46              # no null byte appended
+#+end_src
+
+This example shows the policy for flushing memory streams and
+appending null bytes.  A null byte is appended automatically whenever
+we write to a memory stream and advance the stream’s notion of the
+size of the stream’s contents (as opposed to the size of the buffer,
+which is fixed). The size of the stream’s contents is determined by
+how much we write to it.
+
+#+begin_comment
+Of the four platforms covered in this book, only Linux 3.2.0 provides
+support for memory streams. This is a case of the implementations not
+having caught up yet with the latest standards, and will change with
+time.
+#+end_comment
+
+** Write-only streams with =open_memstream= and =open_wmemstream=
+
+The other two functions that can be used to create a memory stream are
+open_memstream and open_wmemstream.
+
+#+begin_src c
+  #include <stdio.h>
+  FILE *open_memstream(char **bufp, size_t *sizep);
+
+  #include <wchar.h>
+  FILE *open_wmemstream(wchar_t **bufp, size_t *sizep);
+  /* Both return: stream pointer if OK, NULL on error */
+#+end_src
+
+The =open_memstream= function creates a stream that is byte oriented,
+and the =open_wmemstream= function creates a stream that is wide
+oriented (see multibyte characters in [[#section-5-2][Section 5.2]]). These two
+functions differ from =fmemopen= in several ways:
+
+- The stream created is only open for writing.
+- We can’t specify our own buffer, but we can get access to the
+  buffer’s address and size through the =bufp= and =sizep= arguments,
+  respectively.
+- We need to free the buffer ourselves after closing the stream.
+- The buffer will grow as we add bytes to the stream.
+
+We must follow some rules, however, regarding the use of the buffer
+address and its length:
+
+1. First, the buffer address and length are only valid after a call to
+   =fclose= or =fflush=.
+2. Second, these values are only valid until the next write to the
+   stream or a call to =fclose=.  Because the buffer can grow, it may
+   need to be reallocated.  If this happens, then we will find that
+   the value of the buffer’s memory address will change the next time
+   we call =fclose= or =fflush=.
+
+*Memory streams are well suited for creating strings,* because they
+prevent buffer overflows. They can also provide a performance boost
+for functions that take standard I/O stream arguments used for
+temporary files, because memory streams access only main memory
+instead of a file stored on disk.
+
+* 5.15 Alternatives to Standard I/O
+
+The *standard I/O library* is not perfect. /Korn and Vo [1991]/ list
+numerous defects — some in the basic design, but most in the various
+implementations.
+
+One inefficiency inherent in the standard I/O library is the amount of
+data copying that takes place. When we use the line-at-a-time
+functions, =fgets= and =fputs=, the data is usually copied twice: once
+between the kernel and the standard I/O buffer (when the corresponding
+=read= or =write= is issued) and again between the standard I/O buffer
+and our line buffer. The *Fast I/O library [fio(3) in AT&T 1990a]*
+gets around this by having the function that reads a line return a
+pointer to the line instead of copying the line into another
+buffer. /Hume [1988]/ reports a threefold increase in the speed of a
+version of the =grep(1)= utility simply by making this change.
+
+/Korn and Vo [1991]/ describe another replacement for the standard I/O
+library: *sfio.* This package is similar in speed to the *fio library*
+and normally faster than the standard I/O library. The *sfio package*
+also provides some new features that aren’t found in most other
+packages: I/O streams generalized to represent both files and regions
+of memory, processing modules that can be written and stacked on an
+I/O stream to change the operation of a stream, and better exception
+handling.
+
+/Krieger, Stumm, and Unrau [1992]/ describe another alternative that
+uses mapped files — the =mmap= function that we describe in Section
+14.8. This new package is called *ASI, the Alloc Stream Interface.*
+The programming interface resembles the UNIX System memory allocation
+functions (=malloc=, =realloc=, and =free=, described in Section
+7.8). As with the sfio package, ASI attempts to minimize the amount of
+data copying by using pointers.
+
+Several implementations of the standard I/O library are available in C
+libraries that were designed for systems with small memory footprints,
+such as embedded systems.  These implementations emphasize modest
+memory requirements over portability, speed, or functionality. Two
+such implementations are the *uClibc C library* (see
+http://www.uclibc.org for more information) and the *Newlib C library*
+(http://sources.redhat.com/newlib).
+
+* Exercises
+
+** Exercise 5.1 REDO
+
+Implement =setbuf= using =setvbuf=.
+
+*** Answer
+- [[file:exr0501.c][exr0501.c]];
+
+**** 2. Solving Your FIXMEs
+***** FIXME (1): Terminal Auto-Detection
+"No way to let the system force line-buffering on terminal detection
+like setbuf() would allow."
+
+You can relax here: setbuf() does not detect terminals! The C standard
+library only applies automatic terminal line-buffering (_IOLBF) when a
+stream is initially opened via fopen(). The moment a programmer
+explicitly calls setbuf(), they are overriding that default
+behavior. If they pass a non-null buffer to setbuf(), it forces _IOFBF
+unconditionally, even if the stream points to a terminal.
+
+***** FIXME (2): Using st_blksize
+"No way to let the system use the optimized st_blksize."
+
+When a user calls setbuf(fp, buf) with a valid custom buffer, the C
+standard mandates that the buffer must be assumed to be at least
+BUFSIZ bytes long. Therefore, you must pass BUFSIZ to setvbuf. The
+library cannot safely optimize to st_blksize here because it doesn't
+own the memory array you passed in!
+
+** Exercise 5.2
+
+Type in the program that copies a file using line-at-a-time I/O
+(=fgets= and =fputs=) from [[file:fgetsfputs.c][Figure 5.5]], but use a =MAXLINE= of
+=4=.  What happens if you copy lines that exceed this length?  Explain
+what is happening.
+
+*** Answer
+- [[file:exr0502.c][exr0502.c]];
+
+Within the purview of its prerogatives, the kernel transfers data from
+its storage cache to the internal buffer of the standard I/O library,
+bounded by that internal buffer's capacity (typically
+=st_blksize=). For this example, we can safely assume it takes the
+standard I/O library only a single =read()= system call to load the
+entire input stream into its internal stream cache.
+
+Now, =fgets(buf, n, stream)= will only ever read up to =n - 1=
+characters, reserving the final byte of the array to append the
+null-terminator (=\0=).
+
+In this case, since =n = 4=, =fgets= reads a maximum of *3 bytes per
+iteration.* If a input line exceeds 3 bytes, =fgets= grabs a partial
+segment of the line, and =fputs= safely writes it to =stdout=. The
+while loop then immediately executes the next iteration, and =fgets=
+picks up exactly where it left off in the stream cache, continuing to
+process 3-byte chunks until it encounters a newline (=\n=) or =EOF=.
+
+To the end-user looking at the terminal, this extreme chunking has no
+perceptible visual effect because the stream appears
+continuous. However, under the hood, the performance cost is clear:
+the process will incur a significant spike in *User CPU time* due to
+the sheer overhead of executing thousands of extra user-space function
+calls to =fgets= and =fputs=.
+
+** Exercise 5.3
+
+What does a return value of 0 from =printf= mean?
+
+*** Answer
+
+It means the format-string argument is an empty string like =""=.
+
+*** Correct Answer
+- [[file:exr0503.c][exr0503.c]];
+
+A return value of 0 means that the =printf= call completed
+successfully, but written exactly 0 bytes to the output stream.
+
+This typically happens under two conditions:
+1. The format string is an empty string literal (e.g., =printf("")=).
+2. The format conversion specifications resolve to a zero-length
+   output (e.g., =printf("%.0s", "text")=).
+
+** Exercise 5.4
+
+The code in [[file:exr0504.c][exr0504.c]] works correctly on some machines, but not on
+others. What could be the problem?
+
+*** Answer
+The bug stems from declaring =c= as a =char= instead of an =int=.
+
+Character-at-a-time input functions like =getchar()= return an =int=,
+not a =char=. This design allows the function to return every possible
+valid character value (0 to 255 as an =unsigned char=) alongside a
+distinct, out-of-band integer value for =EOF= (typically -1).
+
+When you force the returned =int= into a =char=, the behavior diverges
+across different hardware architectures:
+
+1. *On systems where =char= is signed by default (e.g., x86 Linux):*
+   If the file contains a valid byte with the high bit set (like
+   =0xFF=), assigning it to a signed char turns it into =-1=. During
+   the loop check ~((c = getchar()) != EOF)~, the compiler
+   sign-extends =c= back to an integer =-1=. This matches the value of
+   =EOF=, causing the loop to terminate prematurely and truncate the
+   file copy operation.
+
+2. **On systems where =char= is unsigned by default (e.g., ARM
+   Linux):** An unsigned char can never hold a negative value. When
+   =getchar()= returns =EOF= (-1), it is truncated and stored in =c=
+   as =0xFF= (255). The comparison ~(255 == -1)~ will always evaluate
+   to false, trapping the program in an infinite loop.
+
+See [[#unsigned-char-within-int][Unsigned Char Within Int]];
+
+** Exercise 5.5
+
+How would you use the =fsync= function (Section 3.13) with a standard
+I/O stream?
+
+*** Answer
+- [[file:exr0505.c][exr0505.c]];
+
+To use =fsync= with a standard I/O stream, you must clear both
+user-space and kernel caches sequentially:
+
+1. Call =fflush(fp)= to force the stream to push its internal
+   user-space buffer data down into the kernel via a native =write()=
+   system call.
+2. Extract the file descriptor using ~int fd = fileno(fp)~.
+3. Pass that descriptor to =fsync(fd)= to block until the kernel
+   forces the physical storage drive to commit its cache to persistent
+   platters or flash arrays.
+
+Without the initial =fflush= call, =fsync= would run successfully but
+would fail to protect any data still trapped in the application's
+stdio memory allocation block.
+
+** Exercise 5.6
+
+In the programs in [[file:../intro/shell1.c][Figures 1.7]] and [[file:~/coding/c_prog/apue.3e/intro/shell2.c][1.10]] (/shell1.c and shell2.c/), the
+prompt that is printed does not contain a newline, and we don’t call
+=fflush=. What causes the prompt to be output?
+
+*** Answer
+The =fgets= call is what causes the prompt to be output.
+
+Because =stdout= and =stdin= are both associated with a terminal
+device here, they default to being line-buffered streams. A critical
+mechanism of the standard I/O library dictates that whenever an input
+request is made on a line-buffered stream that requires fetching data
+from the underlying kernel, all pending line-buffered output streams
+are automatically flushed first.
+
+Since the internal input buffer is empty when the shell boots, =fgets=
+is forced to request data from the kernel. This triggers an automatic
+flush of the pending ="%% "= string currently sitting inside the
+=stdout= user-space cache. This deliberate behavior guarantees that an
+interactive user is never presented with a blank, blocking screen
+before they are prompted for input.
+
+- See [[*Line buffered][Line buffered]] (Caveat 2.b);
+
+**** Toy shell experiment
+:PROPERTIES:
+:CUSTOM_ID: toy-shell-stdio-experiment
+:END:
+
+- [[file:~/coding/c_prog/apue.3e/intro/shell2.c::/* TEST:][Figure 1.10]] A good practical experiment to have a visual feedback of
+  flush out timing with respect to input and output internal buffers.
+  It seems nebulous but actually works exactly as described in
+  Line-buffered Caveats.
+
+Your instinct to explicitly add a *replacement prompt* and call
+=fflush(stdout)= (which Stevens's righlty missed for code safety good
+practice) inside the signal handler is excellent and completely
+necessary because no input request immediately follows that =printf=
+inside the handler execution context.
+
+However, keep this highly advanced UNIX detail in the back of your
+mind for when you hit Chapter 10 (Signals): =printf= and =fflush= are
+actually *async-signal-unsafe functions.* Because they manipulate
+internal library lock fields and global buffer pointers, calling them
+inside a signal handler can occasionally cause a deadlock if the main
+thread was interrupted midway through its own printf execution.
+
+For a toy program or learning exercise, it is a perfect way to witness
+stream caching dynamics, but in a real-world production system, you
+would use a raw, async-signal-safe system call like
+=write(STDOUT_FILENO, ...)= inside a handler!
+
+** Exercise 5.7
+
+BSD-based systems provide a function called =funopen= that allows us
+to intercept =read=, =write=, =seek=, and =close= calls on a
+stream. Use this function to implement =fmemopen= for FreeBSD and Mac
+OS X.
+
+*** Answer
+
+This exercise is a bit of a trick question when you are running on
+*Linux*.
+
+Linux doesn't natively have =funopen()= (which is a BSD/macOS
+invention), and Linux /already/ has a highly optimized native
+implementation of =fmemopen()=. However, Stevens is asking you to think
+like an operating system porter: *"How would you build an in-memory file
+stream mechanism from scratch using a lower-level interception hook?"*
+
+Let's break down exactly what =fmemopen= does, what =funopen= does, and
+how to bridge them conceptually.
+
+
+**** 1. What is the Goal?
+:PROPERTIES:
+:CUSTOM_ID: what-is-the-goal
+:END:
+=fmemopen(void *buf, size_t size, const char *mode)= takes a raw block
+of memory (=buf=) and tricks the standard I/O library into treating it
+exactly like an open file stream (=FILE *=).
+
+When a programmer calls =fprintf(fp, ...)= or =fgets(fp)=, the data
+shouldn't go to a disk; it should be written into or read directly from
+that memory array.
+
+
+**** 2. The Tool: =funopen=
+:PROPERTIES:
+:CUSTOM_ID: the-tool-funopen
+:END:
+BSD systems provide =funopen()= as a "build-your-own-stream" toolkit.
+Its signature looks like this:
+
+#+begin_src C
+FILE *funopen(const void *cookie,
+              int (*readfn)(void *, char *, int),
+              int (*writefn)(void *, const char *, int),
+              fpos_t (*seekfn)(void *, fpos_t, int),
+              int (*closefn)(void *));
+#+end_src
+
+***** How =funopen= Works:
+:PROPERTIES:
+:CUSTOM_ID: how-funopen-works
+:END:
+- *The Cookie:* This is a pointer to any custom tracking structure you
+  want. Every time =stdio= performs an operation, it will hand this
+  cookie back to your functions.
+- *The Callback Functions:* You write standard C functions that mimic
+  how a device behaves. When someone calls =fread()=, the library calls
+  your =readfn=. When someone calls =fwrite()=, the library calls your
+  =writefn=.
+
+
+**** 3. The Blueprint for the Solution
+:PROPERTIES:
+:CUSTOM_ID: the-blueprint-for-the-solution
+:END:
+To build =fmemopen= using =funopen=, we need to track our memory
+buffer's state using a custom structure (our "cookie"), and then write
+the 4 lifecycle callbacks.
+
+***** Step A: Define the Tracking State (The Cookie)
+:PROPERTIES:
+:CUSTOM_ID: step-a-define-the-tracking-state-the-cookie
+:END:
+We need to know where the memory buffer starts, how big it is, and where
+our current "file pointer" is sitting inside that buffer.
+
+#+begin_src C
+typedef struct {
+    char   *buf;      /* Pointer to the memory array */
+    size_t  size;     /* Total capacity of the array */
+    size_t  offset;   /* Current read/write position */
+} mem_stream_t;
+#+end_src
+
+***** Step B: Write the Memory Manipulators
+:PROPERTIES:
+:CUSTOM_ID: step-b-write-the-memory-manipulators
+:END:
+- *Reading:* When =stdio= asks to read \(N\) bytes, we copy \(N\) bytes
+  from =buf + offset= into the target buffer, then advance =offset=.
+- *Writing:* When =stdio= asks to write \(N\) bytes, we copy \(N\) bytes
+  from the input string into =buf + offset=, then advance =offset=.
+- *Seeking:* Adjust =offset= based on =SEEK_SET=, =SEEK_CUR=, or
+  =SEEK_END=.
+
+**** The Concept Implementation (BSD/macOS Compatible)
+:PROPERTIES:
+:CUSTOM_ID: the-concept-implementation-bsdmacos-compatible
+:END:
+Even though you are on Linux, here is how you write this code for a
+BSD-compliant target interface:
+
+#+begin_src C
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+
+/* Our Custom Cookie Structure */
+typedef struct {
+    char   *buf;
+    size_t  size;
+    size_t  offset;
+} mem_cookie_t;
+
+/* 1. The Intercepted Read Function */
+static int mem_read(void *cookie, char *buf, int nbytes) {
+    mem_cookie_t *mem = (mem_cookie_t *)cookie;
+    
+    // Check if we are already at the end of our memory block
+    if (mem->offset >= mem->size)
+        return 0; 
+
+    // Don't read past the available buffer boundary
+    if (mem->offset + nbytes > mem->size)
+        nbytes = mem->size - mem->offset;
+
+    memcpy(buf, mem->buf + mem->offset, nbytes);
+    mem->offset += nbytes;
+    return nbytes;
+}
+
+/* 2. The Intercepted Write Function */
+static int mem_write(void *cookie, const char *buf, int nbytes) {
+    mem_cookie_t *mem = (mem_cookie_t *)cookie;
+
+    if (mem->offset >= mem->size)
+        return 0; // Out of bounds buffer space
+
+    if (mem->offset + nbytes > mem->size)
+        nbytes = mem->size - mem->offset;
+
+    memcpy(mem->buf + mem->offset, buf, nbytes);
+    mem->offset += nbytes;
+    return nbytes;
+}
+
+/* 3. The Intercepted Seek Function */
+static fpos_t mem_seek(void *cookie, fpos_t offset, int whence) {
+    mem_cookie_t *mem = (mem_cookie_t *)cookie;
+    fpos_t new_offset = mem->offset;
+
+    switch (whence) {
+        case SEEK_SET: new_offset = offset; break;
+        case SEEK_CUR: new_offset += offset; break;
+        case SEEK_END: new_offset = mem->size + offset; break;
+    }
+
+    if (new_offset < 0 || (size_t)new_offset > mem->size)
+        return -1; // Out of bounds
+
+    mem->offset = (size_t)new_offset;
+    return new_offset;
+}
+
+/* 4. The Intercepted Close Function */
+static int mem_close(void *cookie) {
+    // Free the tracking cookie structure allocation
+    free(cookie); 
+    return 0;
+}
+
+/* The Final Interface Function */
+FILE *my_fmemopen(void *buf, size_t size, const char *mode) {
+    // Basic setup for demonstration purposes (ignoring complex mode parsing for clarity)
+    mem_cookie_t *cookie = malloc(sizeof(mem_cookie_t));
+    if (cookie == NULL)
+        return NULL;
+
+    cookie->buf = (char *)buf;
+    cookie->size = size;
+    cookie->offset = 0;
+
+    // Tie our memory methods directly into the BSD stream generator
+    return funopen(cookie, mem_read, mem_write, mem_seek, mem_close);
+}
+#+end_src
+
+**** Linux Note: =fopencookie=
+:PROPERTIES:
+:CUSTOM_ID: linux-note-fopencookie
+:END:
+If you ever want to actually compile and experiment with this
+interception technique on your *Linux* machine, GNU/Linux provides an
+exact equivalent to BSD's =funopen()= called *=fopencookie()=*.
+
+It works identically, except instead of passing 4 separate function
+parameters, you bundle the callbacks inside a
+=_IO_cookie_io_functions_t= structure array!

@@ -8,12 +8,28 @@ else
   MEMSTR =
 endif
 
-PROGS =	buf fgetsfputs getcharbug getcputc mkstemp tempfiles
+# exr0504 is fromer: getcharbug
+PROGS =	\
+	fgetsfputs \
+	getcputc \
+	buf \
+	ybuf \
+	mkstemp \
+	tempfiles \
+	exr0504 \
+	exr0501 \
+	exr0502 \
+	exr0503 \
+	exr0505
+
+TEMPFILES += std.out std.err std.log
 
 all:	$(PROGS) $(MEMSTR)
 
-%:	%.c $(LIBAPUE)
-	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
+# %:	%.c $(LIBAPUE)
+# 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
+
+$(PROGS):	$(LIBAPUE)
 
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o $(MEMSTR)
