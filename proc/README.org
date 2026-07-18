@@ -53,7 +53,7 @@
 
 * 8.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-8-10
+:CUSTOM_ID: 8-1-introduction
 :END:
 
 We now turn to the process control provided by the UNIX System. This
@@ -68,7 +68,7 @@ perspective.
 
 * 8.2 Process Identifiers
 :PROPERTIES:
-:CUSTOM_ID: section-8-2
+:CUSTOM_ID: 8-2-process-identifiers
 :END:
 
 Every process has a unique process ID, a non-negative integer. Because
@@ -145,7 +145,7 @@ function. The real and effective user and group IDs were discussed in
 
 * 8.3 The =fork= Function
 :PROPERTIES:
-:CUSTOM_ID: section-8-3
+:CUSTOM_ID: 8-3-the-=fork=-function
 :END:
 
 ** Definition and Address Space
@@ -400,7 +400,7 @@ especially systems without hardware support for memory management.
 
 * 8.4 =vfork= Function
 :PROPERTIES:
-:CUSTOM_ID: section-8-4
+:CUSTOM_ID: 8-4-=vfork=-function
 :END:
 
 The function =vfork= has the same calling sequence and same return
@@ -492,7 +492,7 @@ on the implementation issues of =fork= and =vfork=. [[#exercise-8-1][Exercise 8.
 
 * 8.5 =exit= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-8-5
+:CUSTOM_ID: 8-5-=exit=-functions
 :END:
 
 ** Process Termination: normal and abnormal
@@ -640,7 +640,7 @@ parent has terminated and has been subsequently inherited by =init=.
 
 * 8.6 =wait= and =waitpid= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-8-6
+:CUSTOM_ID: 8-6-=wait=-and-=waitpid=-functions
 :END:
 
 When a process terminates, either normally or abnormally, the kernel
@@ -892,7 +892,7 @@ init process ID is not 1.
 
 * 8.7 =waitid= Function
 :PROPERTIES:
-:CUSTOM_ID: section-8-7
+:CUSTOM_ID: 8-7-=waitid=-function
 :END:
 
 The *Single UNIX Specification* includes an additional function to
@@ -962,7 +962,7 @@ the =siginfo= structure.
 
 * 8.8 =wait3= and =wait4= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-8-8
+:CUSTOM_ID: 8-8-=wait3=-and-=wait4=-functions
 :END:
 
 Most UNIX system implementations provide two additional functions:
@@ -1016,7 +1016,7 @@ category; =wait3= *was removed from the specification in Version 3*.
 
 * 8.9 Race Conditions
 :PROPERTIES:
-:CUSTOM_ID: section-8-9
+:CUSTOM_ID: 8-9-race-conditions
 :END:
 
 *For our purposes, a race condition occurs when multiple processes are
@@ -1156,7 +1156,7 @@ goes first if we change the lines following the fork to be
 
 * 8.10 =excec= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-8-10
+:CUSTOM_ID: 8-10-=excec=-functions
 :END:
 
 ** Definitions and Differences of the =exec= Functions
@@ -1564,7 +1564,7 @@ for this child process to finish.
 
 * 8.11 Changing User IDs and Group IDs
 :PROPERTIES:
-:CUSTOM_ID: section-8-11
+:CUSTOM_ID: 8-11-changing-user-ids-and-group-ids
 :END:
 
 In the UNIX System, privileges, such as being able to change the
@@ -1835,7 +1835,7 @@ trouble).
 
 * 8.12 Interpreter Files
 :PROPERTIES:
-:CUSTOM_ID: section-8-12
+:CUSTOM_ID: 8-12-interpreter-files
 :END:
 
 All contemporary UNIX systems support *interpreter files*. These files
@@ -2094,7 +2094,7 @@ for the following reasons.
 
 * 8.13 =system= Function
 :PROPERTIES:
-:CUSTOM_ID: section-8-13
+:CUSTOM_ID: 8-13-=system=-function
 :END:
 
 It is convenient to execute a command string from within a
@@ -2235,32 +2235,32 @@ just calls system for its command-line argument.
 
 * 8.14 Process Accounting
 :PROPERTIES:
-:CUSTOM_ID: section-8-14
+:CUSTOM_ID: 8-14-process-accounting
 :END:
 
 * 8.15 User Identification
 :PROPERTIES:
-:CUSTOM_ID: section-8-15
+:CUSTOM_ID: 8-15-user-identification
 :END:
 
 * 8.16 Process Scheduling
 :PROPERTIES:
-:CUSTOM_ID: section-8-16
+:CUSTOM_ID: 8-16-process-scheduling
 :END:
 
 * 8.17 Process Times
 :PROPERTIES:
-:CUSTOM_ID: section-8-17
+:CUSTOM_ID: 8-17-process-times
 :END:
 
 * 8.18 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-8-18
+:CUSTOM_ID: 8-18-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-8
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 8.1

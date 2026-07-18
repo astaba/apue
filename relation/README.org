@@ -22,67 +22,67 @@
 
 * 9.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-9-1
+:CUSTOM_ID: 9-1-introduction
 :END:
 
 * 9.2 Terminal Logins
 :PROPERTIES:
-:CUSTOM_ID: section-9-2
+:CUSTOM_ID: 9-2-terminal-logins
 :END:
 
 * 9.3 Network Logins
 :PROPERTIES:
-:CUSTOM_ID: section-9-3
+:CUSTOM_ID: 9-3-network-logins
 :END:
 
 * 9.4 Process Groups
 :PROPERTIES:
-:CUSTOM_ID: section-9-4
+:CUSTOM_ID: 9-4-process-groups
 :END:
 
 * 9.5 Sessions
 :PROPERTIES:
-:CUSTOM_ID: section-9-5
+:CUSTOM_ID: 9-5-sessions
 :END:
 
 * 9.6 Controlling Terminal
 :PROPERTIES:
-:CUSTOM_ID: section-9-6
+:CUSTOM_ID: 9-6-controlling-terminal
 :END:
 
 * 9.7 =tcgetpgrp=, =tcsetpgrp=, and =tcgetsid= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-9-7
+:CUSTOM_ID: 9-7-=tcgetpgrp=,-=tcsetpgrp=,-and-=tcgetsid=-functions
 :END:
 
 * 9.8 Job Control
 :PROPERTIES:
-:CUSTOM_ID: section-9-8
+:CUSTOM_ID: 9-8-job-control
 :END:
 
 * 9.9 Shell Execution of Programs
 :PROPERTIES:
-:CUSTOM_ID: section-9-9
+:CUSTOM_ID: 9-9-shell-execution-of-programs
 :END:
 
 * 9.10 Orphaned Process Groups
 :PROPERTIES:
-:CUSTOM_ID: section-9-10
+:CUSTOM_ID: 9-10-orphaned-process-groups
 :END:
 
 * 9.11 FreeBSD Implementation
 :PROPERTIES:
-:CUSTOM_ID: section-9-11
+:CUSTOM_ID: 9-11-freebsd-implementation
 :END:
 
 * 9.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-9-12
+:CUSTOM_ID: 9-12-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-9
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 9.1

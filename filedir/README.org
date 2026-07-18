@@ -68,12 +68,12 @@
 
 * 4.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-4-1
+:CUSTOM_ID: 4-1-introduction
 :END:
 
 * 4.2 =stat=, =fstat=, =fstatat=, and =lstat= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-2
+:CUSTOM_ID: 4-2-=stat=,-=fstat=,-=fstatat=,-and-=lstat=-functions
 :END:
 
 *Reference:* manual page inode(7), readdir(3), ftw(3).
@@ -119,7 +119,7 @@ struct stat {
 
 * 4.3 File Types
 :PROPERTIES:
-:CUSTOM_ID: section-4-3
+:CUSTOM_ID: 4-3-file-types
 :END:
 
 Figure 4.1 File type macros in =<sys/stat.h>=
@@ -229,7 +229,7 @@ These are the nine lowest bits, masked by =0777=.
 
 * 4.4 Set-User-ID and Set-Group-ID
 :PROPERTIES:
-:CUSTOM_ID: section-4-4
+:CUSTOM_ID: 4-4-set-user-id-and-set-group-id
 :END:
 
 ** The =setuid= Metaphor
@@ -345,17 +345,17 @@ themselves is forbidden from doing. It's a controlled "leak" of power.
 
 * 4.5 File Access Per missions
 :PROPERTIES:
-:CUSTOM_ID: section-4-5
+:CUSTOM_ID: 4-5-file-access-per-missions
 :END:
 
 * 4.6 Ownership of New Files and Directories
 :PROPERTIES:
-:CUSTOM_ID: section-4-6
+:CUSTOM_ID: 4-6-ownership-of-new-files-and-directories
 :END:
 
 * 4.7 =access= and =faccessat= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-7
+:CUSTOM_ID: 4-7-=access=-and-=faccessat=-functions
 :END:
 
 #+begin_src c
@@ -511,7 +511,7 @@ In this example the user name just happens to be "/moony/".
 
 * 4.8 =umask= Function
 :PROPERTIES:
-:CUSTOM_ID: section-4-8
+:CUSTOM_ID: 4-8-=umask=-function
 :END:
 
 #+begin_src c
@@ -543,7 +543,7 @@ $ umask               # see if the file mode creation mask changed
 
 * 4.9 =chmod=, =fchmod=, and =fchmodat= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-9
+:CUSTOM_ID: 4-9-=chmod=,-=fchmod=,-and-=fchmodat=-functions
 :END:
 
 #+begin_src c
@@ -568,7 +568,7 @@ $ ls -l foo bar
 
 * 4.10 Sticky Bit
 :PROPERTIES:
-:CUSTOM_ID: section-4-10
+:CUSTOM_ID: 4-10-sticky-bit
 :END:
 
 Later versions of the UNIX System referred to this as the *saved-text
@@ -601,7 +601,7 @@ users should not be able to delete or rename files owned by others.
 
 * 4.11 =chown=, =fchown=, =fchownat=, and =lchown= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-11
+:CUSTOM_ID: 4-11-=chown=,-=fchown=,-=fchownat=,-and-=lchown=-functions
 :END:
 
 #+begin_src c
@@ -616,7 +616,7 @@ users should not be able to delete or rename files owned by others.
 
 * 4.12 File size
 :PROPERTIES:
-:CUSTOM_ID: section-4-12
+:CUSTOM_ID: 4-12-file-size
 :END:
 #+begin_src C
 #+end_src
@@ -736,7 +736,7 @@ The relationship between the fields is purely mathematical:
 
 * 4.13 File Truncation
 :PROPERTIES:
-:CUSTOM_ID: section-4-13
+:CUSTOM_ID: 4-13-file-truncation
 :END:
 
 Sometimes we would like to truncate a file by chopping off data at the
@@ -752,12 +752,12 @@ flag to =open=, is a special case of truncation.
 
 * 4.14 File Systems
 :PROPERTIES:
-:CUSTOM_ID: section-4-14
+:CUSTOM_ID: 4-14-file-systems
 :END:
 
 * 4.15 =link=, =linkat=, =unlink=, =unlinkat=, and =remove= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-15
+:CUSTOM_ID: 4-15-=link=,-=linkat=,-=unlink=,-=unlinkat=,-and-=remove=-functions
 :END:
 
 We can use either the =link= function or the =linkat= function to
@@ -844,7 +844,7 @@ Filesystem      1K-blocks     Used Available Use% Mounted on
 
 * 4.16 =rename= and =renameat= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-16
+:CUSTOM_ID: 4-16-=rename=-and-=renameat=-functions
 :END:
 
 A file or a directory is renamed with either the =rename= or
@@ -860,12 +860,12 @@ A file or a directory is renamed with either the =rename= or
 
 * 4.17 Symbolic Links
 :PROPERTIES:
-:CUSTOM_ID: section-4-17
+:CUSTOM_ID: 4-17-symbolic-links
 :END:
 
 * 4.18 Creating and Reading Symbolic Links
 :PROPERTIES:
-:CUSTOM_ID: section-4-18
+:CUSTOM_ID: 4-18-creating-and-reading-symbolic-links
 :END:
 
 A symbolic link is created with either the =symlink= or =symlinkat=
@@ -886,7 +886,7 @@ reside in the same file system.
 
 * 4.19 File Times
 :PROPERTIES:
-:CUSTOM_ID: section-4-19
+:CUSTOM_ID: 4-19-file-times
 :END:
 
 #+begin_src sh
@@ -1060,7 +1060,7 @@ Time (=st_mtim=) by default, as that is the time most users care about
 
 * 4.20 =futimens=, =utimensat=, and =utimes= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-20
+:CUSTOM_ID: 4-20-=futimens=,-=utimensat=,-and-=utimes=-functions
 :END:
 
 The =futimens= and =utimensat= functions provide nanosecond
@@ -1270,7 +1270,7 @@ what the application attempts to do to the other two timestamps
 
 * 4.21 =mkdir=, =mkdirat=, and =rmdir= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-21
+:CUSTOM_ID: 4-21-=mkdir=,-=mkdirat=,-and-=rmdir=-functions
 :END:
 
 Directories are created with the mkdir and mkdirat functions, and deleted with the
@@ -1305,7 +1305,7 @@ an empty directory is one that contains entries only for /dot/ and
 
 * 4.22 Reading Directories
 :PROPERTIES:
-:CUSTOM_ID: section-4-22
+:CUSTOM_ID: 4-22-reading-directories
 :END:
 
 #+begin_src c
@@ -1339,7 +1339,7 @@ an empty directory is one that contains entries only for /dot/ and
 
 * 4.23 =chdir=, =fchdir=, and =getcwd= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-4-23
+:CUSTOM_ID: 4-23-=chdir=,-=fchdir=,-and-=getcwd=-functions
 :END:
 
 ** Change directory
@@ -1400,7 +1400,7 @@ location in the file system.
 
 * 4.24 Device Special Files
 :PROPERTIES:
-:CUSTOM_ID: section-4-24
+:CUSTOM_ID: 4-24-device-special-files
 :END:
 
 The two fields =st_dev= and =st_rdev= are often confused. The rules
@@ -1457,17 +1457,17 @@ crw------- 1 root 4, 1 2011-07-01 11:08 /dev/tty1
 
 * 4.25 Summary of File Access Per mission Bits
 :PROPERTIES:
-:CUSTOM_ID: section-4-25
+:CUSTOM_ID: 4-25-summary-of-file-access-per-mission-bits
 :END:
 
 * 4.26 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-4-26
+:CUSTOM_ID: 4-26-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-4
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 4.1

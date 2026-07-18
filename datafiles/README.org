@@ -24,62 +24,62 @@
 
 * 6.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-6-1
+:CUSTOM_ID: 6-1-introduction
 :END:
 
 * 6.2 Password File
 :PROPERTIES:
-:CUSTOM_ID: section-6-2
+:CUSTOM_ID: 6-2-password-file
 :END:
 
 * 6.3 Shadow Passwords
 :PROPERTIES:
-:CUSTOM_ID: section-6-3
+:CUSTOM_ID: 6-3-shadow-passwords
 :END:
 
 * 6.4 Group File
 :PROPERTIES:
-:CUSTOM_ID: section-6-4
+:CUSTOM_ID: 6-4-group-file
 :END:
 
 * 6.5 Supplementary Group IDs
 :PROPERTIES:
-:CUSTOM_ID: section-6-5
+:CUSTOM_ID: 6-5-supplementary-group-ids
 :END:
 
 * 6.6 Implementation Differences
 :PROPERTIES:
-:CUSTOM_ID: section-6-6
+:CUSTOM_ID: 6-6-implementation-differences
 :END:
 
 * 6.7 Other Data Files
 :PROPERTIES:
-:CUSTOM_ID: section-6-7
+:CUSTOM_ID: 6-7-other-data-files
 :END:
 
 * 6.8 Login Accounting
 :PROPERTIES:
-:CUSTOM_ID: section-6-8
+:CUSTOM_ID: 6-8-login-accounting
 :END:
 
 * 6.9 System Identification
 :PROPERTIES:
-:CUSTOM_ID: section-6-9
+:CUSTOM_ID: 6-9-system-identification
 :END:
 
 * 6.10 Time and Date Routines
 :PROPERTIES:
-:CUSTOM_ID: section-6-10
+:CUSTOM_ID: 6-10-time-and-date-routines
 :END:
 
 * 6.11 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-6-11
+:CUSTOM_ID: 6-11-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-6
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 6.1

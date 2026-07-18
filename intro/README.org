@@ -4,7 +4,7 @@
 #+STARTUP: showall
 
 * Table of Content                                                    :toc_2:
-- [[#some-beginners-questions][Some Beginner's Questions]]
+- [[#00-some-beginners-questions][0.0 Some Beginner's Questions]]
   - [[#to-be-const-qualified-or-not][To be =const= qualified or not]]
   - [[#restrict-vs-volatile][=restrict= vs =volatile=]]
 - [[#11-introduction][1.1 Introduction]]
@@ -17,7 +17,7 @@
 - [[#18-user-identification][1.8 User Identification]]
 - [[#19-signals][1.9 Signals]]
 - [[#110-time-values][1.10 Time Values]]
-- [[#111-system-calls-and-librar-y-functions][1.11 System Calls and Librar y Functions]]
+- [[#111-system-calls-and-library-functions][1.11 System Calls and Library Functions]]
 - [[#112-summary][1.12 Summary]]
 - [[#exercises][Exercises]]
   - [[#exercise-11][Exercise 1.1]]
@@ -26,7 +26,10 @@
   - [[#exercise-14][Exercise 1.4]]
   - [[#exercise-15][Exercise 1.5]]
 
-* Some Beginner's Questions
+* 0.0 Some Beginner's Questions
+:PROPERTIES:
+:CUSTOM_ID: 0-0-some-beginner's-questions
+:END:
 
 ** To be =const= qualified or not
 
@@ -136,67 +139,67 @@ In short:
 
 * 1.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-1-1
+:CUSTOM_ID: 1-1-introduction
 :END:
 
 * 1.2 UNIX Architecture
 :PROPERTIES:
-:CUSTOM_ID: section-1-2
+:CUSTOM_ID: 1-2-unix-architecture
 :END:
 
 * 1.3 Logging In
 :PROPERTIES:
-:CUSTOM_ID: section-1-3
+:CUSTOM_ID: 1-3-logging-in
 :END:
 
 * 1.4 Files and Directories
 :PROPERTIES:
-:CUSTOM_ID: section-1-4
+:CUSTOM_ID: 1-4-files-and-directories
 :END:
 
 * 1.5 Input and Output
 :PROPERTIES:
-:CUSTOM_ID: section-1-5
+:CUSTOM_ID: 1-5-input-and-output
 :END:
 
 * 1.6 Programs and Processes
 :PROPERTIES:
-:CUSTOM_ID: section-1-6
+:CUSTOM_ID: 1-6-programs-and-processes
 :END:
 
 * 1.7 Error Handling
 :PROPERTIES:
-:CUSTOM_ID: section-1-7
+:CUSTOM_ID: 1-7-error-handling
 :END:
 
 * 1.8 User Identification
 :PROPERTIES:
-:CUSTOM_ID: section-1-8
+:CUSTOM_ID: 1-8-user-identification
 :END:
 
 * 1.9 Signals
 :PROPERTIES:
-:CUSTOM_ID: section-1-9
+:CUSTOM_ID: 1-9-signals
 :END:
 
 * 1.10 Time Values
 :PROPERTIES:
-:CUSTOM_ID: section-1-10
+:CUSTOM_ID: 1-10-time-values
 :END:
 
-* 1.11 System Calls and Librar y Functions
+* 1.11 System Calls and Library Functions
 :PROPERTIES:
-:CUSTOM_ID: section-1-11
+:CUSTOM_ID: 1-11-system-calls-and-library-functions
 :END:
 
 * 1.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-1-12
+:CUSTOM_ID: 1-12-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-1
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 1.1

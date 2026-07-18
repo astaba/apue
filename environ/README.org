@@ -30,47 +30,47 @@
 
 * 7.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-7-1
+:CUSTOM_ID: 7-1-introduction
 :END:
 
 * 7.2 main Function
 :PROPERTIES:
-:CUSTOM_ID: section-7-2
+:CUSTOM_ID: 7-2-main-function
 :END:
 
 * 7.3 Process Termination
 :PROPERTIES:
-:CUSTOM_ID: section-7-3
+:CUSTOM_ID: 7-3-process-termination
 :END:
 
 * 7.4 Command-Line Arguments
 :PROPERTIES:
-:CUSTOM_ID: section-7-4
+:CUSTOM_ID: 7-4-command-line-arguments
 :END:
 
 * 7.5 Environment List
 :PROPERTIES:
-:CUSTOM_ID: section-7-5
+:CUSTOM_ID: 7-5-environment-list
 :END:
 
 * 7.6 Memory Layout of a C Program
 :PROPERTIES:
-:CUSTOM_ID: section-7-6
+:CUSTOM_ID: 7-6-memory-layout-of-a-c-program
 :END:
 
 * 7.7 Shared Librar ies
 :PROPERTIES:
-:CUSTOM_ID: section-7-7
+:CUSTOM_ID: 7-7-shared-librar-ies
 :END:
 
 * 7.8 Memory Allocation
 :PROPERTIES:
-:CUSTOM_ID: section-7-8
+:CUSTOM_ID: 7-8-memory-allocation
 :END:
 
 * 7.9 Environment Variables
 :PROPERTIES:
-:CUSTOM_ID: section-7-9
+:CUSTOM_ID: 7-9-environment-variables
 :END:
 
 *** Figure 7.8: Support for various environment list functions
@@ -89,22 +89,22 @@
 
 * 7.10 setjmp and longjmp Functions
 :PROPERTIES:
-:CUSTOM_ID: section-7-10
+:CUSTOM_ID: 7-10-setjmp-and-longjmp-functions
 :END:
 
 * 7.11 =getrlimit= and =setrlimit= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-7-11
+:CUSTOM_ID: 7-11-=getrlimit=-and-=setrlimit=-functions
 :END:
 
 * 7.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-7-12
+:CUSTOM_ID: 7-12-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-7
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 7.1

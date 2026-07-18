@@ -37,32 +37,32 @@
 
 * 3.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-3-1
+:CUSTOM_ID: 3-1-introduction
 :END:
 
 * 3.2 File Descr iptors
 :PROPERTIES:
-:CUSTOM_ID: section-3-2
+:CUSTOM_ID: 3-2-file-descr-iptors
 :END:
 
 * 3.3 =open= and =openat= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-3-3
+:CUSTOM_ID: 3-3-=open=-and-=openat=-functions
 :END:
 
 * 3.4 creat Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-4
+:CUSTOM_ID: 3-4-creat-function
 :END:
 
 * 3.5 close Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-5
+:CUSTOM_ID: 3-5-close-function
 :END:
 
 * 3.6 =lseek= function
 :PROPERTIES:
-:CUSTOM_ID: section-3-6
+:CUSTOM_ID: 3-6-=lseek=-function
 :END:
 
 ** Explicitly set file's offset
@@ -145,34 +145,34 @@ blocks*.
 
 * 3.7 read Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-7
+:CUSTOM_ID: 3-7-read-function
 :END:
 
 * 3.8 write Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-8
+:CUSTOM_ID: 3-8-write-function
 :END:
 
 * 3.9 I/O Efficiency
 :PROPERTIES:
-:CUSTOM_ID: section-3-9
+:CUSTOM_ID: 3-9-i/o-efficiency
 :END:
 
 - [[file:copy_inout.c][Figure 3.5 copy_inout.c]]: Copy standard input to standard output.
 
 * 3.10 File Shar ing
 :PROPERTIES:
-:CUSTOM_ID: section-3-10
+:CUSTOM_ID: 3-10-file-shar-ing
 :END:
 
 * 3.11 Atomic Operations
 :PROPERTIES:
-:CUSTOM_ID: section-3-11
+:CUSTOM_ID: 3-11-atomic-operations
 :END:
 
 * 3.12 =dup= and =dup2= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-3-12
+:CUSTOM_ID: 3-12-=dup=-and-=dup2=-functions
 :END:
 
 ** =dup2= Semantics
@@ -251,12 +251,12 @@ understood the resource management logic behind them!
 
 * 3.13 sync, fsync, and fdatasync Functions
 :PROPERTIES:
-:CUSTOM_ID: section-3-13
+:CUSTOM_ID: 3-13-sync,-fsync,-and-fdatasync-functions
 :END:
 
 * 3.14 =fcntl= Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-14
+:CUSTOM_ID: 3-14-=fcntl=-function
 :END:
 
 ** Presentation
@@ -411,12 +411,12 @@ an abnormal system failure.
 
 * 3.15 ioctl Function
 :PROPERTIES:
-:CUSTOM_ID: section-3-15
+:CUSTOM_ID: 3-15-ioctl-function
 :END:
 
 * 3.16 =/dev/fd=
 :PROPERTIES:
-:CUSTOM_ID: section-3-16
+:CUSTOM_ID: 3-16-=/dev/fd=
 :END:
 
 Newer systems provide a directory named =/dev/fd= whose entries are
@@ -428,12 +428,12 @@ is open.
 
 * 3.17 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-3-17
+:CUSTOM_ID: 3-17-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-3
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 3.1
