@@ -14,7 +14,7 @@
   - [[#iso-c-buffering-requirements][ISO C buffering requirements]]
   - [[#change-the-buffering-with-setbuf-or-setvbuf][Change the buffering with =setbuf= or =setvbuf=]]
   - [[#force-stream-flushing-with-fflush][Force stream flushing with =fflush=]]
-- [[#0505-opening-a-stream][05.05 Opening a Stream]]
+- [[#55-opening-a-stream][5.5 Opening a Stream]]
   - [[#opening-a-stream-with-fopen-freopen-and-fdopen][Opening a Stream with =fopen=, =freopen=, and =fdopen=]]
   - [[#close-a-stream-with-fclose][Close a stream with =fclose=]]
 - [[#56-reading-and-writing-a-stream][5.6 Reading and Writing a Stream]]
@@ -53,7 +53,7 @@
 
 * 5.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 5-1-introduction
+:CUSTOM_ID: 51-introduction
 :END:
 
 In this chapter, we describe the *standard I/O library*. This library
@@ -84,7 +84,7 @@ This chapter is about:
 
 * 5.2 Streams and =FILE= Objects
 :PROPERTIES:
-:CUSTOM_ID: 5-2-streams-and-file-objects
+:CUSTOM_ID: 52-streams-and-file-objects
 :END:
 
 ** Stream Orientation: =fwide=
@@ -143,7 +143,7 @@ deal only with byte-oriented streams.
 
 ** The file stream representation: =struct File=
 
-When we open a stream, the standard I/O function =fopen= ([[#0505-opening-a-stream][Section 5.5]])
+When we open a stream, the standard I/O function =fopen= ([[#55-opening-a-stream][Section 5.5]])
 returns a pointer to a =FILE= object. This object is normally a
 structure that contains *all the information required by the standard
 I/O library to manage the stream*:
@@ -165,7 +165,7 @@ type =( FILE * )=, as a *file pointer*.
 
 * 5.3 Standard Input, Standard Output, and Standard Error
 :PROPERTIES:
-:CUSTOM_ID: 5-3-standard-input-standard-output-and-standard-error
+:CUSTOM_ID: 53-standard-input-standard-output-and-standard-error
 :END:
 
 Three streams are predefined and automatically available to a process:
@@ -181,7 +181,7 @@ defined in the =<stdio.h>= header.
 
 * 5.4 Buffering
 :PROPERTIES:
-:CUSTOM_ID: 5-4-buffering
+:CUSTOM_ID: 54-buffering
 :END:
 
 ** The Three types of buffering
@@ -349,7 +349,7 @@ standard I/O buffering:
 - *streams open to terminal devices* are line buffered,
 - and *all other streams* are fully buffered.
 
-We explore standard I/O buffering in more detail in [[*5.12 Implementation Details][Section 5.12]]
+We explore standard I/O buffering in more detail in [[#512-implementation-details][Section 5.12]]
 (Display Buffering Types Metadata) and [[file:buf.c][Figure 5.11]].
 
 ** Change the buffering with =setbuf= or =setvbuf=
@@ -403,7 +403,7 @@ chapter, the GNU C library uses this method.
 
 *** Figure 5.1: Summary of the =setbuf= and =setvbuf= functions
 :PROPERTIES:
-:CUSTOM_ID: figure-5-1
+:CUSTOM_ID: figure-51
 :END:
 
 Summary of the actions of these two functions and their various
@@ -456,9 +456,9 @@ The =fflush= function causes any unwritten data for the stream to be
 passed to the kernel.  As a special case, if =fp= is =NULL=, =fflush=
 causes all output streams to be flushed.
 
-* 05.05 Opening a Stream
+* 5.5 Opening a Stream
 :PROPERTIES:
-:CUSTOM_ID: 0505-opening-a-stream
+:CUSTOM_ID: 55-opening-a-stream
 :END:
 
 ** Opening a Stream with =fopen=, =freopen=, and =fdopen=
@@ -505,7 +505,7 @@ POSIX.1, *since ISO C doesn’t deal with file descriptors.*
 
 **** Figure 5.2
 :PROPERTIES:
-:CUSTOM_ID: figure-5-2
+:CUSTOM_ID: figure-52
 :END:
 
 Here is Figure 5.2, a list of the different values for the =type=
@@ -556,10 +556,10 @@ the =type=), two restrictions apply:
 
 **** Figure 5.3: Six ways to open a standard I/O stream
 :PROPERTIES:
-:CUSTOM_ID: figure-5-3
+:CUSTOM_ID: figure-53
 :END:
 
-We can summarize the six ways to open a stream from [[#figure-5-2][Figure 5.2]] in
+We can summarize the six ways to open a stream from [[#figure-52][Figure 5.2]] in
 Figure 5.3.
 
 | Restriction                         | r | w | a | r+ | w+ | a+ |
@@ -611,12 +611,12 @@ standard I/O streams are closed.
 
 * 5.6 Reading and Writing a Stream
 :PROPERTIES:
-:CUSTOM_ID: 5-6-reading-and-writing-a-stream
+:CUSTOM_ID: 56-reading-and-writing-a-stream
 :END:
 
 Once we open a stream, we can choose from among *three types of
 unformatted I/O* (We describe the *formatted I/O functions,* such as
-=printf= and =scanf=, in [[#5-11-formatted-i-o][Section 5.11]].):
+=printf= and =scanf=, in [[#511-formatted-i-o][Section 5.11]].):
 
 1. *Character-at-a-time I/O.* We can read or write one character at a
    time, with the standard I/O functions handling all the buffering,
@@ -626,14 +626,14 @@ unformatted I/O* (We describe the *formatted I/O functions,* such as
    we use =fgets= and =fputs=.  Each line is terminated with a newline
    character, and we have to specify the maximum line length that we
    can handle when we call =fgets=. We describe these two functions in
-   [[*5.7 Line-at-a-Time I/O][Section 5.7]].
+   [[#57-line-at-a-time-i-o][Section 5.7]].
 
 3. *Direct I/O.* This type of I/O is supported by the =fread= and
    =fwrite= functions.  For each I/O operation, we read or write some
    number of objects, where each object is of a specified size. These
    two functions are often used for binary files where we read or
    write a structure with each operation.  We describe these two
-   functions in [[*5.9 Binary I/O][Section 5.9]].
+   functions in [[#59-binary-i-o-with-fread-and-fwrite][Section 5.9]].
 
   #+begin_quote
   The term /direct I/O/, from the ISO C standard, is known by many
@@ -777,7 +777,7 @@ cannot be implemented as a macro.
 
 * 5.7 Line-at-a-Time I/O
 :PROPERTIES:
-:CUSTOM_ID: 5-7-line-at-a-time-i-o
+:CUSTOM_ID: 57-line-at-a-time-i-o
 :END:
 
 ** Line-at-a-time input with =fgets= and =gets=
@@ -859,7 +859,7 @@ character at the end of each line.
 
 * 5.8 Standard I/O Efficiency
 :PROPERTIES:
-:CUSTOM_ID: 5-8-standard-i-o-efficiency
+:CUSTOM_ID: 58-standard-i-o-efficiency
 :END:
 
 Using the functions from the previous section, we can get an idea of
@@ -948,7 +948,7 @@ standard I/O routines.
 
 **** Figure 5.6 Timing results using standard I/O routines
 :PROPERTIES:
-:CUSTOM_ID: figure-5-6
+:CUSTOM_ID: figure-56
 :END:
 
 | Function                      | User CPU (seconds) | System CPU (seconds) | Clock time | Bytes of program text |
@@ -966,11 +966,11 @@ standard I/O routines.
 
 * 5.9 Binary I/O with =fread= and =fwrite=
 :PROPERTIES:
-:CUSTOM_ID: 5-9-binary-i-o-with-fread-and-fwrite
+:CUSTOM_ID: 59-binary-i-o-with-fread-and-fwrite
 :END:
 
-The functions from [[*Character-at-a-time I/O][Section 5.6]] operated with one character at a time,
-and the functions from [[*5.7 Line-at-a-Time I/O][Section 5.7]] operated with one line at a
+The functions from [[#56-reading-and-writing-a-stream][Section 5.6]] operated with one character at a time,
+and the functions from [[#57-line-at-a-time-i-o][Section 5.7]] operated with one line at a
 time. If we’re doing binary I/O, we often would like to read or write
 an entire structure at a time. To do this using =getc= or =putc=, we
 have to loop through the entire structure, one byte at a time, reading
@@ -1063,7 +1063,7 @@ read a binary structure, the UNIX process accounting records.
 
 * 5.10 Positioning a Stream
 :PROPERTIES:
-:CUSTOM_ID: 5-10-positioning-a-stream
+:CUSTOM_ID: 510-positioning-a-stream
 :END:
 
 There are three ways to position a standard I/O stream:
@@ -1151,7 +1151,7 @@ a later call to =fsetpos= to reposition the stream to that location.
 
 * 5.11 Formatted I/O
 :PROPERTIES:
-:CUSTOM_ID: 5-11-formatted-i-o
+:CUSTOM_ID: 511-formatted-i-o
 :END:
 
 ** Formatted Output
@@ -1216,7 +1216,7 @@ four optional components, shown in square brackets below:
 
 **** Figure 5.7 Flags of Conversion Specification
 :PROPERTIES:
-:CUSTOM_ID: figure-5-7
+:CUSTOM_ID: figure-57
 :END:
 
 | Flag    | Description                                                                              |
@@ -1254,7 +1254,7 @@ converted.
 
 **** Figure 5.8 Length-Modifier of Conversion Specification
 :PROPERTIES:
-:CUSTOM_ID: figure-5-8
+:CUSTOM_ID: figure-58
 :END:
 
 The =lenmodifier= component specifies the size of the
@@ -1273,7 +1273,7 @@ argument. Possible values are summarized in Figure 5.8.
 
 **** Figure 5.9 Conversion-Type of Conversion Specification
 :PROPERTIES:
-:CUSTOM_ID: figure-5-9
+:CUSTOM_ID: figure-59
 :END:
 
 The =convtype= component is not optional. It controls how the argument
@@ -1491,7 +1491,7 @@ family of functions.
 
 * 5.12 Implementation Details
 :PROPERTIES:
-:CUSTOM_ID: 5-12-implementation-details
+:CUSTOM_ID: 512-implementation-details
 :END:
 
 To look at the implementation of the standard I/O library on your
@@ -1935,7 +1935,7 @@ open_memstream and open_wmemstream.
 
 The =open_memstream= function creates a stream that is byte oriented,
 and the =open_wmemstream= function creates a stream that is wide
-oriented (see multibyte characters in [[#section-5-2][Section 5.2]]). These two
+oriented (see multibyte characters in [[#52-streams-and-file-objects][Section 5.2]]). These two
 functions differ from =fmemopen= in several ways:
 
 - The stream created is only open for writing.
