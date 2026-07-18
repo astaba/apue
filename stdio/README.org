@@ -143,7 +143,7 @@ deal only with byte-oriented streams.
 
 ** The file stream representation: =struct File=
 
-When we open a stream, the standard I/O function =fopen= ([[*5.5 Opening a Stream][Section 5.5]])
+When we open a stream, the standard I/O function =fopen= ([[#0505-opening-a-stream][Section 5.5]])
 returns a pointer to a =FILE= object. This object is normally a
 structure that contains *all the information required by the standard
 I/O library to manage the stream*:
