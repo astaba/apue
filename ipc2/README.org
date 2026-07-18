@@ -23,44 +23,44 @@
 
 * 17.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-17-1
+:CUSTOM_ID: 171-introduction
 :END:
 
 * 17.2 UNIX Domain Sockets
 :PROPERTIES:
-:CUSTOM_ID: section-17-2
+:CUSTOM_ID: 172-unix-domain-sockets
 :END:
 
 [[file:pollmsg.c][Figure 17.3]] Poll for XSI messages using UNIX domain sockets.
 
 ** 17.2.1 Naming UNIX Domain Sockets
 :PROPERTIES:
-:CUSTOM_ID: section-17-2-1
+:CUSTOM_ID: 1721-naming-unix-domain-sockets
 :END:
 
 * 17.3 Unique Connections
 :PROPERTIES:
-:CUSTOM_ID: section-17-3
+:CUSTOM_ID: 173-unique-connections
 :END:
 
 * 17.4 Passing File Descriptors
 :PROPERTIES:
-:CUSTOM_ID: section-17-4
+:CUSTOM_ID: 174-passing-file-descriptors
 :END:
 
 * 17.5 An Open Server, Version 1
 :PROPERTIES:
-:CUSTOM_ID: section-17-5
+:CUSTOM_ID: 175-an-open-server-version-1
 :END:
 
 * 17.6 An Open Server, Version 2
 :PROPERTIES:
-:CUSTOM_ID: section-17-6
+:CUSTOM_ID: 176-an-open-server-version-2
 :END:
 
 * 17.7 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-17-7
+:CUSTOM_ID: 177-summary
 :END:
 
 * Exercises
@@ -70,7 +70,7 @@
 
 ** Exercise 17.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-1
+:CUSTOM_ID: exercise-171
 :END:
 
 We chose to use UNIX domain datagram sockets in Figure 17.3, because they retain
@@ -95,7 +95,7 @@ is done with it. The solution is shown in [[file:../exercises/pollmsg2.c][Figure
 
 ** Exercise 17.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-2
+:CUSTOM_ID: exercise-172
 :END:
 
 Write the following program using the file descriptor passing functions from this chapter
@@ -109,7 +109,7 @@ Have the child position the file to a different offset and notify the parent aga
 
 ** Exercise 17.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-3
+:CUSTOM_ID: exercise-173
 :END:
 
 In Figures 17.20 and 17.21, we differentiated between declaring and defining the global
@@ -117,7 +117,7 @@ variables. What is the difference?
 
 ** Exercise 17.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-4
+:CUSTOM_ID: exercise-174
 :END:
 
 Recode the buf_args function (Figure 17.23), removing the compile-time limit on the size
@@ -125,7 +125,7 @@ of the argv array. Use dynamic memory allocation.
 
 ** Exercise 17.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-5
+:CUSTOM_ID: exercise-175
 :END:
 
 Describe ways to optimize the function loop in Figure 17.29 and Figure 17.30. Implement
@@ -133,7 +133,7 @@ your optimizations.
 
 ** Exercise 17.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-6
+:CUSTOM_ID: exercise-176
 :END:
 
 In the serv_listen function (Figure 17.8), we unlink the name of the file representing
@@ -143,7 +143,7 @@ with this approach.
 
 ** Exercise 17.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-17-7
+:CUSTOM_ID: exercise-177
 :END:
 
 Describe two possible ways to pass more than one file descriptor with a single call to

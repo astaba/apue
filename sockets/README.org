@@ -27,32 +27,32 @@
 
 * 16.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-16-1
+:CUSTOM_ID: 161-introduction
 :END:
 
 * 16.2 Socket Descr iptors
 :PROPERTIES:
-:CUSTOM_ID: section-16-2
+:CUSTOM_ID: 162-socket-descr-iptors
 :END:
 
 * 16.3 Addressing
 :PROPERTIES:
-:CUSTOM_ID: section-16-3
+:CUSTOM_ID: 163-addressing
 :END:
 
 ** 16.3.1 Byte Ordering
 :PROPERTIES:
-:CUSTOM_ID: section-16-3-1
+:CUSTOM_ID: 1631-byte-ordering
 :END:
 
 ** 16.3.2 Address Formats
 :PROPERTIES:
-:CUSTOM_ID: section-16-3-2
+:CUSTOM_ID: 1632-address-formats
 :END:
 
 ** 16.3.3 Address Lookup
 :PROPERTIES:
-:CUSTOM_ID: section-16-3-3
+:CUSTOM_ID: 1633-address-lookup
 :END:
 
 [[file:findsvc.c][Figure 16.9]] (/findsvc.c/) illustrates the use of the =getaddrinfo=
@@ -60,37 +60,37 @@ function.
 
 ** 16.3.4 Associating Addresses with Sockets
 :PROPERTIES:
-:CUSTOM_ID: section-16-3-4
+:CUSTOM_ID: 1634-associating-addresses-with-sockets
 :END:
 
 * 16.4 Connection Establishment
 :PROPERTIES:
-:CUSTOM_ID: section-16-4
+:CUSTOM_ID: 164-connection-establishment
 :END:
 
 * 16.5 Data Tr ansfer
 :PROPERTIES:
-:CUSTOM_ID: section-16-5
+:CUSTOM_ID: 165-data-tr-ansfer
 :END:
 
 * 16.6 Socket Options
 :PROPERTIES:
-:CUSTOM_ID: section-16-6
+:CUSTOM_ID: 166-socket-options
 :END:
 
 * 16.7 Out-of-Band Data
 :PROPERTIES:
-:CUSTOM_ID: section-16-7
+:CUSTOM_ID: 167-out-of-band-data
 :END:
 
 * 16.8 Nonblocking and Asynchronous I/O
 :PROPERTIES:
-:CUSTOM_ID: section-16-8
+:CUSTOM_ID: 168-nonblocking-and-asynchronous-io
 :END:
 
 * 16.9 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-16-9
+:CUSTOM_ID: 169-summary
 :END:
 
 * Exercises
@@ -100,7 +100,7 @@ function.
 
 ** Exercise 16.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-1
+:CUSTOM_ID: exercise-161
 :END:
 
 Write a program to determine your system’s byte ordering.
@@ -114,7 +114,7 @@ Write a program to determine your system’s byte ordering.
 
 ** Exercise 16.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-2
+:CUSTOM_ID: exercise-162
 :END:
 
 Write a program to print out which stat structure members are supported for sockets on
@@ -122,7 +122,7 @@ at least two different platforms, and describe how the results differ.
 
 ** Exercise 16.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-3
+:CUSTOM_ID: exercise-163
 :END:
 
 The program in Figure 16.17 provides service on only a single endpoint. Modify the
@@ -131,7 +131,7 @@ same time.
 
 ** Exercise 16.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-4
+:CUSTOM_ID: exercise-164
 :END:
 
 Write a client program and a server program to return the number of processes currently
@@ -139,7 +139,7 @@ running on a specified host computer.
 
 ** Exercise 16.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-5
+:CUSTOM_ID: exercise-165
 :END:
 
 In the program in Figure 16.18, the server waits for the child to execute the uptime
@@ -148,7 +148,7 @@ the time to service one request doesn’t delay the processing of incoming conne
 
 ** Exercise 16.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-16-6
+:CUSTOM_ID: exercise-166
 :END:
 
 Write two library routines: one to enable asynchronous (signal-based) I/O on a socket and

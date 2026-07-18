@@ -37,32 +37,32 @@
 
 * 3.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 3-1-introduction
+:CUSTOM_ID: 31-introduction
 :END:
 
 * 3.2 File Descr iptors
 :PROPERTIES:
-:CUSTOM_ID: 3-2-file-descr-iptors
+:CUSTOM_ID: 32-file-descr-iptors
 :END:
 
 * 3.3 =open= and =openat= Functions
 :PROPERTIES:
-:CUSTOM_ID: 3-3-=open=-and-=openat=-functions
+:CUSTOM_ID: 33-open-and-openat-functions
 :END:
 
 * 3.4 creat Function
 :PROPERTIES:
-:CUSTOM_ID: 3-4-creat-function
+:CUSTOM_ID: 34-creat-function
 :END:
 
 * 3.5 close Function
 :PROPERTIES:
-:CUSTOM_ID: 3-5-close-function
+:CUSTOM_ID: 35-close-function
 :END:
 
 * 3.6 =lseek= function
 :PROPERTIES:
-:CUSTOM_ID: 3-6-=lseek=-function
+:CUSTOM_ID: 36-lseek-function
 :END:
 
 ** Explicitly set file's offset
@@ -145,37 +145,40 @@ blocks*.
 
 * 3.7 read Function
 :PROPERTIES:
-:CUSTOM_ID: 3-7-read-function
+:CUSTOM_ID: 37-read-function
 :END:
 
 * 3.8 write Function
 :PROPERTIES:
-:CUSTOM_ID: 3-8-write-function
+:CUSTOM_ID: 38-write-function
 :END:
 
 * 3.9 I/O Efficiency
 :PROPERTIES:
-:CUSTOM_ID: 3-9-i/o-efficiency
+:CUSTOM_ID: 39-io-efficiency
 :END:
 
 - [[file:copy_inout.c][Figure 3.5 copy_inout.c]]: Copy standard input to standard output.
 
 * 3.10 File Shar ing
 :PROPERTIES:
-:CUSTOM_ID: 3-10-file-shar-ing
+:CUSTOM_ID: 310-file-shar-ing
 :END:
 
 * 3.11 Atomic Operations
 :PROPERTIES:
-:CUSTOM_ID: 3-11-atomic-operations
+:CUSTOM_ID: 311-atomic-operations
 :END:
 
 * 3.12 =dup= and =dup2= Functions
 :PROPERTIES:
-:CUSTOM_ID: 3-12-=dup=-and-=dup2=-functions
+:CUSTOM_ID: 312-dup-and-dup2-functions
 :END:
 
 ** =dup2= Semantics
+:PROPERTIES:
+:CUSTOM_ID: dup2-semantics
+:END:
 
 That is an *exceptionally insightful and accurate* deconstruction of the
 =dup2= system call. You have completely grasped the internal semantics,
@@ -251,12 +254,12 @@ understood the resource management logic behind them!
 
 * 3.13 sync, fsync, and fdatasync Functions
 :PROPERTIES:
-:CUSTOM_ID: 3-13-sync,-fsync,-and-fdatasync-functions
+:CUSTOM_ID: 313-sync-fsync-and-fdatasync-functions
 :END:
 
 * 3.14 =fcntl= Function
 :PROPERTIES:
-:CUSTOM_ID: 3-14-=fcntl=-function
+:CUSTOM_ID: 314-fcntl-function
 :END:
 
 ** Presentation
@@ -411,12 +414,12 @@ an abnormal system failure.
 
 * 3.15 ioctl Function
 :PROPERTIES:
-:CUSTOM_ID: 3-15-ioctl-function
+:CUSTOM_ID: 315-ioctl-function
 :END:
 
 * 3.16 =/dev/fd=
 :PROPERTIES:
-:CUSTOM_ID: 3-16-=/dev/fd=
+:CUSTOM_ID: 316-devfd
 :END:
 
 Newer systems provide a directory named =/dev/fd= whose entries are
@@ -428,7 +431,7 @@ is open.
 
 * 3.17 Summary
 :PROPERTIES:
-:CUSTOM_ID: 3-17-summary
+:CUSTOM_ID: 317-summary
 :END:
 
 * Exercises
@@ -438,7 +441,7 @@ is open.
 
 ** Exercise 3.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-1
+:CUSTOM_ID: exercise-31
 :END:
 
 When reading or writing a disk file, are the functions described in
@@ -460,7 +463,7 @@ scenes.
 
 ** Exercise 3.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-2
+:CUSTOM_ID: exercise-32
 :END:
 
 Write your own =dup2= function that behaves the same way as the =dup2=
@@ -473,7 +476,7 @@ function.  Be sure to handle errors correctly.
 
 ** TODO Exercise 3.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-3
+:CUSTOM_ID: todo-exercise-33
 :END:
 
 Assume that a process executes the following three function calls:
@@ -493,7 +496,7 @@ descriptors are affected by an =fcntl= on =fd1= with a command of
 
 ** Exercise 3.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-4
+:CUSTOM_ID: exercise-34
 :END:
 
 The following sequence of code has been observed in various programs:
@@ -624,7 +627,7 @@ that the program still needs to use.
 
 ** Exercise 3.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-5
+:CUSTOM_ID: exercise-35
 :END:
 
 The Bourne shell, Bourne-again shell, and Korn shell notation
@@ -687,7 +690,7 @@ As a result:
 
 ** Exercise 3.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-3-6
+:CUSTOM_ID: exercise-36
 :END:
 
 If you open a file for read–write with the append flag, can you still

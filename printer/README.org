@@ -23,32 +23,32 @@
 
 * 21.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-21-1
+:CUSTOM_ID: 211-introduction
 :END:
 
 * 21.2 The Internet Printing Protocol
 :PROPERTIES:
-:CUSTOM_ID: section-21-2
+:CUSTOM_ID: 212-the-internet-printing-protocol
 :END:
 
 * 21.3 The Hypertext Transfer Protocol
 :PROPERTIES:
-:CUSTOM_ID: section-21-3
+:CUSTOM_ID: 213-the-hypertext-transfer-protocol
 :END:
 
 * 21.4 Printer Spooling
 :PROPERTIES:
-:CUSTOM_ID: section-21-4
+:CUSTOM_ID: 214-printer-spooling
 :END:
 
 * 21.5 Source Code
 :PROPERTIES:
-:CUSTOM_ID: section-21-5
+:CUSTOM_ID: 215-source-code
 :END:
 
 * 21.6 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-21-6
+:CUSTOM_ID: 216-summary
 :END:
 
 * Exercises
@@ -58,7 +58,7 @@
 
 ** Exercise 21.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-1
+:CUSTOM_ID: exercise-211
 :END:
 
 Translate the IPP error code values listed in ipp.h into error messages. Then modify the
@@ -67,7 +67,7 @@ the IPP header indicates a printer error.
 
 ** Exercise 21.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-2
+:CUSTOM_ID: exercise-212
 :END:
 
 Add support to the print command and the printd daemon to allow users to request
@@ -75,7 +75,7 @@ double-sided printing. Do the same for landscape and portrait page orientation.
 
 ** Exercise 21.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-3
+:CUSTOM_ID: exercise-213
 :END:
 
 Modify the print spooler daemon so that when it starts, it contacts the printer to find out
@@ -84,14 +84,14 @@ that isn’t supported.
 
 ** Exercise 21.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-4
+:CUSTOM_ID: exercise-214
 :END:
 
 Write a command to report on the status of pending print jobs.
 
 ** Exercise 21.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-5
+:CUSTOM_ID: exercise-215
 :END:
 
 Write a command to cancel a pending print job. Use the job ID as the argument to the
@@ -100,7 +100,7 @@ another user’s print jobs?
 
 ** Exercise 21.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-6
+:CUSTOM_ID: exercise-216
 :END:
 
 Add support for multiple printers to the printer spooler. Include a way to move print jobs
@@ -108,7 +108,7 @@ from one printer to another.
 
 ** Exercise 21.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-7
+:CUSTOM_ID: exercise-217
 :END:
 
 In the printer daemon, explain why we don’t need to prod the printer thread when the
@@ -116,7 +116,7 @@ signal handling thread catches SIGHUP and sets reread to 1.
 
 ** Exercise 21.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-8
+:CUSTOM_ID: exercise-218
 :END:
 
 In the printer_status function, we search for the length of the IPP message by looking
@@ -127,7 +127,7 @@ as well.
 
 ** Exercise 21.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-21-9
+:CUSTOM_ID: exercise-219
 :END:
 
 In the update_jobno function, when the next job number wraps around from the

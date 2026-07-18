@@ -8,7 +8,7 @@
 - [[#192-over-view][19.2 Over view]]
 - [[#193-opening-pseudo-ter-minal-devices][19.3 Opening Pseudo-Ter minal Devices]]
 - [[#194-pty_fork-function][19.4 pty_fork Function]]
-- [[#195-pty-program][19.5 pty Program]]
+- [[#195-pty-program][19.5 =pty= Program]]
 - [[#196-using-the-pty-program][19.6 Using the pty Program]]
 - [[#197-advanced-features][19.7 Advanced Features]]
 - [[#198-summary][19.8 Summary]]
@@ -25,58 +25,58 @@
 
 * 19.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-19-1
+:CUSTOM_ID: 191-introduction
 :END:
 
 * 19.2 Over view
 :PROPERTIES:
-:CUSTOM_ID: section-19-2
+:CUSTOM_ID: 192-over-view
 :END:
 
 * 19.3 Opening Pseudo-Ter minal Devices
 :PROPERTIES:
-:CUSTOM_ID: section-19-3
+:CUSTOM_ID: 193-opening-pseudo-ter-minal-devices
 :END:
 
 [[file:../lib/ptyopen.c][Figure 19.9]] (/ptyopen.c/) Pseudo-terminal open functions.
 
 * 19.4 pty_fork Function
 :PROPERTIES:
-:CUSTOM_ID: section-19-4
+:CUSTOM_ID: 194-pty_fork-function
 :END:
 
 [[file:../lib/ptyfork.c][Figure 19.10]] (/ptyfork.c/) The =pty_fork= function.
 
-* 19.5 pty Program
+* 19.5 =pty= Program
 :PROPERTIES:
-:CUSTOM_ID: section-19-5
+:CUSTOM_ID: 195-pty-program
 :END:
 
 [[file:main.c][Figure 19.11]] (/main.c/) The main function for the =pty= program.
 
 * 19.6 Using the pty Program
 :PROPERTIES:
-:CUSTOM_ID: section-19-6
+:CUSTOM_ID: 196-using-the-pty-program
 :END:
 
 * 19.7 Advanced Features
 :PROPERTIES:
-:CUSTOM_ID: section-19-7
+:CUSTOM_ID: 197-advanced-features
 :END:
 
 * 19.8 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-19-8
+:CUSTOM_ID: 198-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-19
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 19.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-1
+:CUSTOM_ID: exercise-191
 :END:
 
 When we remotely log in to a BSD system using either telnet or rlogin, the ownership
@@ -85,7 +85,7 @@ this happen?
 
 ** Exercise 19.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-2
+:CUSTOM_ID: exercise-192
 :END:
 
 Use the pty program to determine the values used by your system to initialize a slave
@@ -93,14 +93,14 @@ PTY’s termios structure and winsize structure.
 
 ** Exercise 19.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-3
+:CUSTOM_ID: exercise-193
 :END:
 
 Recode the loop function (Figure 19.12) as a single process using either select or poll.
 
 ** Exercise 19.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-4
+:CUSTOM_ID: exercise-194
 :END:
 
 In the child process after pty_fork returns, standard input, standard output, and
@@ -109,7 +109,7 @@ and the other two to be write-only?
 
 ** Exercise 19.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-5
+:CUSTOM_ID: exercise-195
 :END:
 
 In Figure 19.13, identify which process groups are in the foreground and which are in the
@@ -117,7 +117,7 @@ background, and identify the session leaders.
 
 ** Exercise 19.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-6
+:CUSTOM_ID: exercise-196
 :END:
 
 In Figure 19.13, in what order do the processes terminate when we type the end-of-file
@@ -125,7 +125,7 @@ character? Verify this with process accounting, if possible.
 
 ** Exercise 19.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-7
+:CUSTOM_ID: exercise-197
 :END:
 
 The script(1) program normally adds to the beginning of the output file a line with the
@@ -134,7 +134,7 @@ these features to the simple shell script that we showed.
 
 ** Exercise 19.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-8
+:CUSTOM_ID: exercise-198
 :END:
 
 Explain why the contents of the file data are output to the terminal in the following
@@ -152,7 +152,7 @@ fd 2: /dev/ttys005
 
 ** Exercise 19.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-19-9
+:CUSTOM_ID: exercise-199
 :END:
 
 Write a program that calls pty_fork and have the child exec another program that you

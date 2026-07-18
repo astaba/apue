@@ -53,7 +53,7 @@
 
 * 8.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 8-1-introduction
+:CUSTOM_ID: 81-introduction
 :END:
 
 We now turn to the process control provided by the UNIX System. This
@@ -68,7 +68,7 @@ perspective.
 
 * 8.2 Process Identifiers
 :PROPERTIES:
-:CUSTOM_ID: 8-2-process-identifiers
+:CUSTOM_ID: 82-process-identifiers
 :END:
 
 Every process has a unique process ID, a non-negative integer. Because
@@ -145,7 +145,7 @@ function. The real and effective user and group IDs were discussed in
 
 * 8.3 The =fork= Function
 :PROPERTIES:
-:CUSTOM_ID: 8-3-the-=fork=-function
+:CUSTOM_ID: 83-the-fork-function
 :END:
 
 ** Definition and Address Space
@@ -400,7 +400,7 @@ especially systems without hardware support for memory management.
 
 * 8.4 =vfork= Function
 :PROPERTIES:
-:CUSTOM_ID: 8-4-=vfork=-function
+:CUSTOM_ID: 84-vfork-function
 :END:
 
 The function =vfork= has the same calling sequence and same return
@@ -492,7 +492,7 @@ on the implementation issues of =fork= and =vfork=. [[#exercise-8-1][Exercise 8.
 
 * 8.5 =exit= Functions
 :PROPERTIES:
-:CUSTOM_ID: 8-5-=exit=-functions
+:CUSTOM_ID: 85-exit-functions
 :END:
 
 ** Process Termination: normal and abnormal
@@ -640,7 +640,7 @@ parent has terminated and has been subsequently inherited by =init=.
 
 * 8.6 =wait= and =waitpid= Functions
 :PROPERTIES:
-:CUSTOM_ID: 8-6-=wait=-and-=waitpid=-functions
+:CUSTOM_ID: 86-wait-and-waitpid-functions
 :END:
 
 When a process terminates, either normally or abnormally, the kernel
@@ -892,7 +892,7 @@ init process ID is not 1.
 
 * 8.7 =waitid= Function
 :PROPERTIES:
-:CUSTOM_ID: 8-7-=waitid=-function
+:CUSTOM_ID: 87-waitid-function
 :END:
 
 The *Single UNIX Specification* includes an additional function to
@@ -962,7 +962,7 @@ the =siginfo= structure.
 
 * 8.8 =wait3= and =wait4= Functions
 :PROPERTIES:
-:CUSTOM_ID: 8-8-=wait3=-and-=wait4=-functions
+:CUSTOM_ID: 88-wait3-and-wait4-functions
 :END:
 
 Most UNIX system implementations provide two additional functions:
@@ -1016,7 +1016,7 @@ category; =wait3= *was removed from the specification in Version 3*.
 
 * 8.9 Race Conditions
 :PROPERTIES:
-:CUSTOM_ID: 8-9-race-conditions
+:CUSTOM_ID: 89-race-conditions
 :END:
 
 *For our purposes, a race condition occurs when multiple processes are
@@ -1156,7 +1156,7 @@ goes first if we change the lines following the fork to be
 
 * 8.10 =excec= Functions
 :PROPERTIES:
-:CUSTOM_ID: 8-10-=excec=-functions
+:CUSTOM_ID: 810-excec-functions
 :END:
 
 ** Definitions and Differences of the =exec= Functions
@@ -1564,7 +1564,7 @@ for this child process to finish.
 
 * 8.11 Changing User IDs and Group IDs
 :PROPERTIES:
-:CUSTOM_ID: 8-11-changing-user-ids-and-group-ids
+:CUSTOM_ID: 811-changing-user-ids-and-group-ids
 :END:
 
 In the UNIX System, privileges, such as being able to change the
@@ -1835,7 +1835,7 @@ trouble).
 
 * 8.12 Interpreter Files
 :PROPERTIES:
-:CUSTOM_ID: 8-12-interpreter-files
+:CUSTOM_ID: 812-interpreter-files
 :END:
 
 All contemporary UNIX systems support *interpreter files*. These files
@@ -2094,7 +2094,7 @@ for the following reasons.
 
 * 8.13 =system= Function
 :PROPERTIES:
-:CUSTOM_ID: 8-13-=system=-function
+:CUSTOM_ID: 813-system-function
 :END:
 
 It is convenient to execute a command string from within a
@@ -2235,27 +2235,27 @@ just calls system for its command-line argument.
 
 * 8.14 Process Accounting
 :PROPERTIES:
-:CUSTOM_ID: 8-14-process-accounting
+:CUSTOM_ID: 814-process-accounting
 :END:
 
 * 8.15 User Identification
 :PROPERTIES:
-:CUSTOM_ID: 8-15-user-identification
+:CUSTOM_ID: 815-user-identification
 :END:
 
 * 8.16 Process Scheduling
 :PROPERTIES:
-:CUSTOM_ID: 8-16-process-scheduling
+:CUSTOM_ID: 816-process-scheduling
 :END:
 
 * 8.17 Process Times
 :PROPERTIES:
-:CUSTOM_ID: 8-17-process-times
+:CUSTOM_ID: 817-process-times
 :END:
 
 * 8.18 Summary
 :PROPERTIES:
-:CUSTOM_ID: 8-18-summary
+:CUSTOM_ID: 818-summary
 :END:
 
 * Exercises
@@ -2265,7 +2265,7 @@ just calls system for its command-line argument.
 
 ** Exercise 8.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-1
+:CUSTOM_ID: exercise-81
 :END:
 
 In Figure 8.3, we said that replacing the call to _exit with a call to
@@ -2275,7 +2275,7 @@ this way. If it does not, how can you simulate this behavior?
 
 ** Exercise 8.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-2
+:CUSTOM_ID: exercise-82
 :END:
 
 Recall the typical arrangement of memory in Figure 7.6. Because the
@@ -2331,7 +2331,7 @@ stack growth   │           ┣━━━━━━━━━━━━━━━━
 
 ** Exercise 8.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-3
+:CUSTOM_ID: exercise-83
 :END:
 
 Rewrite the program in Figure 8.6 to use waitid instead of
@@ -2340,7 +2340,7 @@ from the siginfo structure.
 
 ** Exercise 8.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-4
+:CUSTOM_ID: exercise-84
 :END:
 
 When we execute the program in Figure 8.13 one time, as in
@@ -2359,7 +2359,7 @@ happen if we let the child write its output first?
 
 ** Exercise 8.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-5
+:CUSTOM_ID: exercise-85
 :END:
 
 In the program shown in Figure 8.20, we call execl, specifying the
@@ -2370,7 +2370,7 @@ the program is run?
 
 ** Exercise 8.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-6
+:CUSTOM_ID: exercise-86
 :END:
 
 Write a program that creates a zombie, and then call system to execute
@@ -2393,7 +2393,7 @@ PID PPID S TT COMMAND
 
 ** Exercise 8.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-8-7
+:CUSTOM_ID: exercise-87
 :END:
 
 We mentioned in Section 8.10 that POSIX.1 requires open directory

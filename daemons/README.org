@@ -20,42 +20,42 @@
 
 * 13.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-13-1
+:CUSTOM_ID: 131-introduction
 :END:
 
 * 13.2 Daemon Characteristics
 :PROPERTIES:
-:CUSTOM_ID: section-13-2
+:CUSTOM_ID: 132-daemon-characteristics
 :END:
 
 * 13.3 Coding Rules
 :PROPERTIES:
-:CUSTOM_ID: section-13-3
+:CUSTOM_ID: 133-coding-rules
 :END:
 
 * 13.4 Error Logging
 :PROPERTIES:
-:CUSTOM_ID: section-13-4
+:CUSTOM_ID: 134-error-logging
 :END:
 
 * 13.5 Single-Instance Daemons
 :PROPERTIES:
-:CUSTOM_ID: section-13-5
+:CUSTOM_ID: 135-single-instance-daemons
 :END:
 
 * 13.6 Daemon Conventions
 :PROPERTIES:
-:CUSTOM_ID: section-13-6
+:CUSTOM_ID: 136-daemon-conventions
 :END:
 
 * 13.7 Client–Server Model
 :PROPERTIES:
-:CUSTOM_ID: section-13-7
+:CUSTOM_ID: 137-client–server-model
 :END:
 
 * 13.8 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-13-8
+:CUSTOM_ID: 138-summary
 :END:
 
 * Exercises
@@ -65,7 +65,7 @@
 
 ** Exercise 13.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-13-1
+:CUSTOM_ID: exercise-131
 :END:
 
 As we might guess from Figure 13.2, when the syslog facility is initialized, either by
@@ -75,7 +75,7 @@ domain datagram socket, /dev/log, has to be opened. What happens if the user pro
 
 ** Exercise 13.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-13-2
+:CUSTOM_ID: exercise-132
 :END:
 
 Recall the sample ps output from Section 13.2. The only user-level daemon that isn’t a
@@ -84,7 +84,7 @@ leader.
 
 ** Exercise 13.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-13-3
+:CUSTOM_ID: exercise-133
 :END:
 
 List all the daemons active on your system, and identify the function of each one.
@@ -109,7 +109,7 @@ init when the system is bootstrapped).
 
 ** Exercise 13.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-13-4
+:CUSTOM_ID: exercise-134
 :END:
 
 Write a program that calls the daemonize function in Figure 13.1. After calling this

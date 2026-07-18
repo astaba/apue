@@ -44,7 +44,7 @@
 
 * 11.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-11-1
+:CUSTOM_ID: 111-introduction
 :END:
 
 We discussed processes in earlier chapters.  We learned about the
@@ -65,7 +65,7 @@ threads from viewing inconsistencies in their shared resources.
 
 * 11.2 Thread Concepts
 :PROPERTIES:
-:CUSTOM_ID: section-11-2
+:CUSTOM_ID: 112-thread-concepts
 :END:
 
 ** Threads Benefits and Execution Context
@@ -145,7 +145,7 @@ value =200809L=.
 
 * 11.3 Thread Identification
 :PROPERTIES:
-:CUSTOM_ID: section-11-3
+:CUSTOM_ID: 113-thread-identification
 :END:
 
 ** Using =pthread_equal= to compare the =pthread_t= opaque data type
@@ -209,7 +209,7 @@ with its own thread ID.
 
 * 11.4 Thread Creation with =pthread_create=
 :PROPERTIES:
-:CUSTOM_ID: section-11-4
+:CUSTOM_ID: 114-thread-creation-with-pthread_create
 :END:
 
 ** Creating peer threads and initial state
@@ -365,7 +365,7 @@ threads* semantics.
 
 * 11.5 Thread Termination
 :PROPERTIES:
-:CUSTOM_ID: section-11-5
+:CUSTOM_ID: 115-thread-termination
 :END:
 
 ** Exit threads with =pthread_exit= and reap them with =pthread_join=
@@ -707,7 +707,7 @@ pass to* =pthread_create=.
 
 * 11.6 Thread Synchronization
 :PROPERTIES:
-:CUSTOM_ID: section-11-6
+:CUSTOM_ID: 116-thread-synchronization
 :END:
 
 When multiple threads of control share the same memory, we need to
@@ -1848,7 +1848,7 @@ results, the same set of 8 million numbers was sorted in 1.91 seconds,
 
 * 11.7 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-11-7
+:CUSTOM_ID: 117-summary
 :END:
 
 In this chapter, we introduced the concept of threads and discussed
@@ -1967,7 +1967,7 @@ prevention, and robust tool support out of the box.
 
 ** Exercise 11.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-11-1
+:CUSTOM_ID: exercise-111
 :END:
 
 Modify the example code shown in [[file:badexit2.c][Figure 11.4]] (/badexit2.c/) to pass
@@ -1980,7 +1980,7 @@ of using an automatic variable is shown in [[file:../exercises/goodexit.c][Figur
 
 ** Exercise 11.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-11-2
+:CUSTOM_ID: exercise-112
 :END:
 
 In the example code shown in [[file:rwlock.c][Figure 11.14]] (/rwlock.c/), what
@@ -1990,7 +1990,7 @@ would this affect the =job_remove= function?
 
 ** Exercise 11.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-11-3
+:CUSTOM_ID: exercise-113
 :END:
 
 Apply the techniques shown in [[file:condvar.c][Figure 11.15]] (/condvar.c/) to the worker
@@ -2002,7 +2002,7 @@ arise?
 
 ** Exercise 11.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-11-4
+:CUSTOM_ID: exercise-114
 :END:
 
 Which sequence of steps is correct?
@@ -2021,7 +2021,7 @@ or
 
 ** Exercise 11.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-11-5
+:CUSTOM_ID: exercise-115
 :END:
 
 What synchronization primitives would you need to implement a barrier?

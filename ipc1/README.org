@@ -11,7 +11,7 @@
 - [[#155-fifos][15.5 FIFOs]]
 - [[#156-xsi-ipc][15.6 XSI IPC]]
   - [[#1561-identifiers-and-keys][15.6.1 Identifiers and Keys]]
-  - [[#1562-per-mission-str-ucture][15.6.2 Per mission Str ucture]]
+  - [[#1562-permission-structure][15.6.2 Permission Structure]]
   - [[#1563-configuration-limits][15.6.3 Configuration Limits]]
   - [[#1564-advantages-and-disadvantages][15.6.4 Advantages and Disadvantages]]
 - [[#157-message-queues][15.7 Message Queues]]
@@ -42,82 +42,82 @@
 
 * 15.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-15-1
+:CUSTOM_ID: 151-introduction
 :END:
 
 * 15.2 Pipes
 :PROPERTIES:
-:CUSTOM_ID: section-15-2
+:CUSTOM_ID: 152-pipes
 :END:
 
 * 15.3 =popen= and =pclose= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-15-3
+:CUSTOM_ID: 153-popen-and-pclose-functions
 :END:
 
 * 15.4 Coprocesses
 :PROPERTIES:
-:CUSTOM_ID: section-15-4
+:CUSTOM_ID: 154-coprocesses
 :END:
 
 * 15.5 FIFOs
 :PROPERTIES:
-:CUSTOM_ID: section-15-5
+:CUSTOM_ID: 155-fifos
 :END:
 
 * 15.6 XSI IPC
 :PROPERTIES:
-:CUSTOM_ID: section-15-6
+:CUSTOM_ID: 156-xsi-ipc
 :END:
 
 ** 15.6.1 Identifiers and Keys
 :PROPERTIES:
-:CUSTOM_ID: section-15-6-1
+:CUSTOM_ID: 1561-identifiers-and-keys
 :END:
 
-** 15.6.2 Per mission Str ucture
+** 15.6.2 Permission Structure
 :PROPERTIES:
-:CUSTOM_ID: section-15-6-2
+:CUSTOM_ID: 1562-permission-structure
 :END:
 
 ** 15.6.3 Configuration Limits
 :PROPERTIES:
-:CUSTOM_ID: section-15-6-3
+:CUSTOM_ID: 1563-configuration-limits
 :END:
 
 ** 15.6.4 Advantages and Disadvantages
 :PROPERTIES:
-:CUSTOM_ID: section-15-6-4
+:CUSTOM_ID: 1564-advantages-and-disadvantages
 :END:
 
 * 15.7 Message Queues
 :PROPERTIES:
-:CUSTOM_ID: section-15-7
+:CUSTOM_ID: 157-message-queues
 :END:
 
 * 15.8 Semaphores
 :PROPERTIES:
-:CUSTOM_ID: section-15-8
+:CUSTOM_ID: 158-semaphores
 :END:
 
 * 15.9 Shared Memory
 :PROPERTIES:
-:CUSTOM_ID: section-15-9
+:CUSTOM_ID: 159-shared-memory
 :END:
 
 * 15.10 POSIX Semaphores
 :PROPERTIES:
-:CUSTOM_ID: section-15-10
+:CUSTOM_ID: 1510-posix-semaphores
 :END:
 
 * 15.11 Client–Server Properties
 :PROPERTIES:
-:CUSTOM_ID: section-15-11
+:CUSTOM_ID: 1511-client–server-properties
 :END:
 
 * 15.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-15-12
+:CUSTOM_ID: 1512-summary
 :END:
 
 * Exercises
@@ -127,7 +127,7 @@
 
 ** Exercise 15.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-1
+:CUSTOM_ID: exercise-151
 :END:
 
 In the program shown in Figure 15.6, remove the close right before the waitpid at the
@@ -135,7 +135,7 @@ end of the parent code. Explain what happens.
 
 ** Exercise 15.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-2
+:CUSTOM_ID: exercise-152
 :END:
 
 In the program in Figure 15.6, remove the waitpid at the end of the parent code. Explain
@@ -143,7 +143,7 @@ what happens.
 
 ** Exercise 15.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-3
+:CUSTOM_ID: exercise-153
 :END:
 
 What happens if the argument to popen is a nonexistent command? Write a small
@@ -151,7 +151,7 @@ program to test this.
 
 ** Exercise 15.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-4
+:CUSTOM_ID: exercise-154
 :END:
 
 In the program shown in Figure 15.18, remove the signal handler, execute the program,
@@ -160,7 +160,7 @@ parent was terminated by SIGPIPE?
 
 ** Exercise 15.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-5
+:CUSTOM_ID: exercise-155
 :END:
 
 In the program in Figure 15.18, use the standard I/O library for reading and writing the
@@ -168,7 +168,7 @@ pipes instead of read and write.
 
 ** Exercise 15.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-6
+:CUSTOM_ID: exercise-156
 :END:
 
 The Rationale for POSIX.1 gives as one of the reasons for adding the waitpid function
@@ -183,7 +183,7 @@ What happens in this code if waitpid isn’t available and wait is used instead?
 
 ** Exercise 15.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-7
+:CUSTOM_ID: exercise-157
 :END:
 
 Explain how select and poll handle an input descriptor that is a pipe, when the pipe is
@@ -194,7 +194,7 @@ closed.
 
 ** Exercise 15.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-8
+:CUSTOM_ID: exercise-158
 :END:
 
 What happens if the cmdstring executed by popen with a type of "r" writes to its standard
@@ -202,7 +202,7 @@ error?
 
 ** Exercise 15.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-9
+:CUSTOM_ID: exercise-159
 :END:
 
 Since popen invokes a shell to execute its cmdstring argument, what happens when
@@ -210,7 +210,7 @@ cmdstring terminates? (Hint: Draw all the processes involved.)
 
 ** Exercise 15.10
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-10
+:CUSTOM_ID: exercise-1510
 :END:
 
 POSIX.1 specifically states that opening a FIFO for read–write is undefined. Although
@@ -234,7 +234,7 @@ read descriptor. [[file:../exercises/fifo1.c][Figure C.20]] shows the code for t
 
 ** Exercise 15.11
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-11
+:CUSTOM_ID: exercise-1511
 :END:
 
 Unless a file contains sensitive or confidential data, allowing other users to read the file
@@ -245,7 +245,7 @@ the malicious process need to know to read the message queue?
 
 ** Exercise 15.12
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-12
+:CUSTOM_ID: exercise-1512
 :END:
 
 Write a program that does the following. Execute a loop five times: create a message
@@ -256,7 +256,7 @@ Explain what is happening with the queue identifiers.
 
 ** Exercise 15.13
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-13
+:CUSTOM_ID: exercise-1513
 :END:
 
 Describe how to build a linked list of data objects in a shared memory segment. What
@@ -264,7 +264,7 @@ would you store as the list pointers?
 
 ** Exercise 15.14
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-14
+:CUSTOM_ID: exercise-1514
 :END:
 
 Draw a timeline of the program in Figure 15.33 showing the value of the variable i in both
@@ -273,7 +273,7 @@ value returned by the update function. Assume that the child runs first after th
 
 ** Exercise 15.15
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-15
+:CUSTOM_ID: exercise-1515
 :END:
 
 Redo the program in Figure 15.33 using the XSI shared memory functions from
@@ -281,7 +281,7 @@ Section 15.9 instead of the shared memory-mapped region.
 
 ** Exercise 15.16
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-16
+:CUSTOM_ID: exercise-1516
 :END:
 
 Redo the program in Figure 15.33 using the XSI semaphore functions from Section 15.8 to
@@ -289,7 +289,7 @@ alternate between the parent and the child.
 
 ** Exercise 15.17
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-17
+:CUSTOM_ID: exercise-1517
 :END:
 
 Redo the program in Figure 15.33 using advisory record locking to alternate between the
@@ -297,7 +297,7 @@ parent and the child.
 
 ** Exercise 15.18
 :PROPERTIES:
-:CUSTOM_ID: exercise-15-18
+:CUSTOM_ID: exercise-1518
 :END:
 
 Redo the program in Figure 15.33 using the POSIX semaphore functions from Section 15.10

@@ -37,92 +37,92 @@
 
 * 2.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 2-1-introduction
+:CUSTOM_ID: 21-introduction
 :END:
 
 * 2.2 UNIX Standardization
 :PROPERTIES:
-:CUSTOM_ID: 2-2-unix-standardization
+:CUSTOM_ID: 22-unix-standardization
 :END:
 
 ** 2.2.1 ISOC
 :PROPERTIES:
-:CUSTOM_ID: 2-2-1-isoc
+:CUSTOM_ID: 221-isoc
 :END:
 
 ** 2.2.2 IEEE POSIX
 :PROPERTIES:
-:CUSTOM_ID: 2-2-2-ieee-posix
+:CUSTOM_ID: 222-ieee-posix
 :END:
 
 ** 2.2.3 The Single UNIX Specification
 :PROPERTIES:
-:CUSTOM_ID: 2-2-3-the-single-unix-specification
+:CUSTOM_ID: 223-the-single-unix-specification
 :END:
 
 ** 2.2.4 FIPS
 :PROPERTIES:
-:CUSTOM_ID: 2-2-4-fips
+:CUSTOM_ID: 224-fips
 :END:
 
 * 2.3 UNIX System Implementations
 :PROPERTIES:
-:CUSTOM_ID: 2-3-unix-system-implementations
+:CUSTOM_ID: 23-unix-system-implementations
 :END:
 
 ** 2.3.1 UNIX System V Release 4
 :PROPERTIES:
-:CUSTOM_ID: 2-3-1-unix-system-v-release-4
+:CUSTOM_ID: 231-unix-system-v-release-4
 :END:
 
 ** 2.3.2 4.4BSD
 :PROPERTIES:
-:CUSTOM_ID: 2-3-2-4-4bsd
+:CUSTOM_ID: 232-44bsd
 :END:
 
 ** 2.3.3 FreeBSD
 :PROPERTIES:
-:CUSTOM_ID: 2-3-3-freebsd
+:CUSTOM_ID: 233-freebsd
 :END:
 
 ** 2.3.4 Linux
 :PROPERTIES:
-:CUSTOM_ID: 2-3-4-linux
+:CUSTOM_ID: 234-linux
 :END:
 
 ** 2.3.5 Mac OS X
 :PROPERTIES:
-:CUSTOM_ID: 2-3-5-mac-os-x
+:CUSTOM_ID: 235-mac-os-x
 :END:
 
 ** 2.3.6 Solaris
 :PROPERTIES:
-:CUSTOM_ID: 2-3-6-solaris
+:CUSTOM_ID: 236-solaris
 :END:
 
 ** 2.3.7 Other UNIX Systems
 :PROPERTIES:
-:CUSTOM_ID: 2-3-7-other-unix-systems
+:CUSTOM_ID: 237-other-unix-systems
 :END:
 
 * 2.4 Relationship of Standards and Implementations
 :PROPERTIES:
-:CUSTOM_ID: 2-4-relationship-of-standards-and-implementations
+:CUSTOM_ID: 24-relationship-of-standards-and-implementations
 :END:
 
 * 2.5 Limits
 :PROPERTIES:
-:CUSTOM_ID: 2-5-limits
+:CUSTOM_ID: 25-limits
 :END:
 
 ** 2.5.1 ISO C Limits
 :PROPERTIES:
-:CUSTOM_ID: 2-5-1-iso-c-limits
+:CUSTOM_ID: 251-iso-c-limits
 :END:
 
 ** 2.5.2 POSIX Limits
 :PROPERTIES:
-:CUSTOM_ID: 2-5-2-posix-limits
+:CUSTOM_ID: 252-posix-limits
 :END:
 
 *** Figure 2.8 POSIX.1 minimum values from =<limits.h>=
@@ -161,42 +161,42 @@
 
 ** 2.5.3 XSI Limits
 :PROPERTIES:
-:CUSTOM_ID: 2-5-3-xsi-limits
+:CUSTOM_ID: 253-xsi-limits
 :END:
 
 ** 2.5.4 sysconf, pathconf, and fpathconf Functions
 :PROPERTIES:
-:CUSTOM_ID: 2-5-4-sysconf,-pathconf,-and-fpathconf-functions
+:CUSTOM_ID: 254-sysconf-pathconf-and-fpathconf-functions
 :END:
 
 ** 2.5.5 Indeterminate Runtime Limits
 :PROPERTIES:
-:CUSTOM_ID: 2-5-5-indeterminate-runtime-limits
+:CUSTOM_ID: 255-indeterminate-runtime-limits
 :END:
 
 * 2.6 Options
 :PROPERTIES:
-:CUSTOM_ID: 2-6-options
+:CUSTOM_ID: 26-options
 :END:
 
 * 2.7 Feature Test Macros
 :PROPERTIES:
-:CUSTOM_ID: 2-7-feature-test-macros
+:CUSTOM_ID: 27-feature-test-macros
 :END:
 
 * 2.8 Primitive System Data Types
 :PROPERTIES:
-:CUSTOM_ID: 2-8-primitive-system-data-types
+:CUSTOM_ID: 28-primitive-system-data-types
 :END:
 
 * 2.9 Differences Between Standards
 :PROPERTIES:
-:CUSTOM_ID: 2-9-differences-between-standards
+:CUSTOM_ID: 29-differences-between-standards
 :END:
 
 * 2.10 Summary
 :PROPERTIES:
-:CUSTOM_ID: 2-10-summary
+:CUSTOM_ID: 210-summary
 :END:
 
 * Exercises
@@ -206,7 +206,7 @@
 
 ** Exercise 2.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-2-1
+:CUSTOM_ID: exercise-21
 :END:
 
 We mentioned in Section 2.8 that some of the primitive system data types are defined in
@@ -216,7 +216,7 @@ not allow multiple typedefs for the same name, how must the headers be written?
 
 ** Exercise 2.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-2-2
+:CUSTOM_ID: exercise-22
 :END:
 
 Examine your system’s headers and list the actual data types used to implement the
@@ -224,7 +224,7 @@ primitive system data types.
 
 ** Exercise 2.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-2-3
+:CUSTOM_ID: exercise-23
 :END:
 
 Update the program in Figure 2.17 to avoid the needless processing that occurs when

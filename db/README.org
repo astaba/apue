@@ -28,54 +28,54 @@
 
 * 20.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-20-1
+:CUSTOM_ID: 201-introduction
 :END:
 
 * 20.2 History
 :PROPERTIES:
-:CUSTOM_ID: section-20-2
+:CUSTOM_ID: 202-history
 :END:
 
 * 20.3 The Library
 :PROPERTIES:
-:CUSTOM_ID: section-20-3
+:CUSTOM_ID: 203-the-library
 :END:
 
 * 20.4 Implementation Over view
 :PROPERTIES:
-:CUSTOM_ID: section-20-4
+:CUSTOM_ID: 204-implementation-over-view
 :END:
 
 [[file:t4.c][Figure 20.3]] (/t4.c/) Create a database and write three records to it.
 
 * 20.5 Centralized or Decentralized?
 :PROPERTIES:
-:CUSTOM_ID: section-20-5
+:CUSTOM_ID: 205-centralized-or-decentralized?
 :END:
 
 * 20.6 Concurrency
 :PROPERTIES:
-:CUSTOM_ID: section-20-6
+:CUSTOM_ID: 206-concurrency
 :END:
 
 * 20.7 Building the Library
 :PROPERTIES:
-:CUSTOM_ID: section-20-7
+:CUSTOM_ID: 207-building-the-library
 :END:
 
 * 20.8 Source Code
 :PROPERTIES:
-:CUSTOM_ID: section-20-8
+:CUSTOM_ID: 208-source-code
 :END:
 
 * 20.9 Perfor mance
 :PROPERTIES:
-:CUSTOM_ID: section-20-9
+:CUSTOM_ID: 209-perfor-mance
 :END:
 
 * 20.10 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-20-10
+:CUSTOM_ID: 2010-summary
 :END:
 
 * Exercises
@@ -85,7 +85,7 @@
 
 ** Exercise 20.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-1
+:CUSTOM_ID: exercise-201
 :END:
 
 The locking in _db_dodelete is somewhat conservative. For example, we could allow
@@ -95,7 +95,7 @@ _db_readptr. What happens if we do this?
 
 ** Exercise 20.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-2
+:CUSTOM_ID: exercise-202
 :END:
 
 If db_nextrec did not read lock the free list and a record that it was reading was also in
@@ -104,7 +104,7 @@ an all-blank (hence incorrect) data record. (Hint: Look at _db_dodelete.)
 
 ** Exercise 20.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-3
+:CUSTOM_ID: exercise-203
 :END:
 
 At the end of Section 20.8, we described the locking performed by _db_writeidx and
@@ -113,14 +113,14 @@ except those making calls to db_store. Is this true if mandatory locking is bein
 
 ** Exercise 20.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-4
+:CUSTOM_ID: exercise-204
 :END:
 
 How would you integrate the fsync function into this database library?
 
 ** Exercise 20.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-5
+:CUSTOM_ID: exercise-205
 :END:
 
 In db_store, we write the data record before the index record. What happens if you do it
@@ -128,7 +128,7 @@ in the opposite order?
 
 ** Exercise 20.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-6
+:CUSTOM_ID: exercise-206
 :END:
 
 Create a new database and write some number of records to the database. Write a
@@ -138,7 +138,7 @@ each hash chain. Is the hashing function in _db_hash adequate?
 
 ** Exercise 20.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-7
+:CUSTOM_ID: exercise-207
 :END:
 
 Modify the database functions so that the number of hash chains in the index file can be
@@ -146,7 +146,7 @@ specified when the database is created.
 
 ** Exercise 20.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-8
+:CUSTOM_ID: exercise-208
 :END:
 
 Compare the performance of the database functions when the database is (a) on the same
@@ -155,7 +155,7 @@ locking provided by the database library still work?
 
 ** Exercise 20.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-9
+:CUSTOM_ID: exercise-209
 :END:
 
 The database reuses free list records only if the sizes of the key buffer and data buffer
@@ -165,7 +165,7 @@ to support this feature?
 
 ** Exercise 20.10
 :PROPERTIES:
-:CUSTOM_ID: exercise-20-10
+:CUSTOM_ID: exercise-2010
 :END:
 
 After implementing a solution to Exercise 20.9, write a tool to convert one database format

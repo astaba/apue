@@ -22,62 +22,62 @@
 
 * 9.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 9-1-introduction
+:CUSTOM_ID: 91-introduction
 :END:
 
 * 9.2 Terminal Logins
 :PROPERTIES:
-:CUSTOM_ID: 9-2-terminal-logins
+:CUSTOM_ID: 92-terminal-logins
 :END:
 
 * 9.3 Network Logins
 :PROPERTIES:
-:CUSTOM_ID: 9-3-network-logins
+:CUSTOM_ID: 93-network-logins
 :END:
 
 * 9.4 Process Groups
 :PROPERTIES:
-:CUSTOM_ID: 9-4-process-groups
+:CUSTOM_ID: 94-process-groups
 :END:
 
 * 9.5 Sessions
 :PROPERTIES:
-:CUSTOM_ID: 9-5-sessions
+:CUSTOM_ID: 95-sessions
 :END:
 
 * 9.6 Controlling Terminal
 :PROPERTIES:
-:CUSTOM_ID: 9-6-controlling-terminal
+:CUSTOM_ID: 96-controlling-terminal
 :END:
 
 * 9.7 =tcgetpgrp=, =tcsetpgrp=, and =tcgetsid= Functions
 :PROPERTIES:
-:CUSTOM_ID: 9-7-=tcgetpgrp=,-=tcsetpgrp=,-and-=tcgetsid=-functions
+:CUSTOM_ID: 97-tcgetpgrp-tcsetpgrp-and-tcgetsid-functions
 :END:
 
 * 9.8 Job Control
 :PROPERTIES:
-:CUSTOM_ID: 9-8-job-control
+:CUSTOM_ID: 98-job-control
 :END:
 
 * 9.9 Shell Execution of Programs
 :PROPERTIES:
-:CUSTOM_ID: 9-9-shell-execution-of-programs
+:CUSTOM_ID: 99-shell-execution-of-programs
 :END:
 
 * 9.10 Orphaned Process Groups
 :PROPERTIES:
-:CUSTOM_ID: 9-10-orphaned-process-groups
+:CUSTOM_ID: 910-orphaned-process-groups
 :END:
 
 * 9.11 FreeBSD Implementation
 :PROPERTIES:
-:CUSTOM_ID: 9-11-freebsd-implementation
+:CUSTOM_ID: 911-freebsd-implementation
 :END:
 
 * 9.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: 9-12-summary
+:CUSTOM_ID: 912-summary
 :END:
 
 * Exercises
@@ -87,7 +87,7 @@
 
 ** Exercise 9.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-9-1
+:CUSTOM_ID: exercise-91
 :END:
 
 Refer back to our discussion of the utmp and wtmp files in Section 6.8. Why are the logout
@@ -95,7 +95,7 @@ records written by the init process? Is this handled the same way for a network 
 
 ** Exercise 9.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-9-2
+:CUSTOM_ID: exercise-92
 :END:
 
 Write a small program that calls fork and has the child create a new session. Verify that

@@ -33,22 +33,22 @@
 
 * 14.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-14-1
+:CUSTOM_ID: 141-introduction
 :END:
 
 * 14.2 Nonblocking I/O
 :PROPERTIES:
-:CUSTOM_ID: section-14-2
+:CUSTOM_ID: 142-nonblocking-io
 :END:
 
 * 14.3 Record Locking
 :PROPERTIES:
-:CUSTOM_ID: section-14-3
+:CUSTOM_ID: 143-record-locking
 :END:
 
 * 14.4 I/O Multiplexing
 :PROPERTIES:
-:CUSTOM_ID: section-14-4
+:CUSTOM_ID: 144-io-multiplexing
 :END:
 
 ** 14.4.1 select and pselect Functions
@@ -63,7 +63,7 @@
 
 * 14.5 Asynchronous I/O
 :PROPERTIES:
-:CUSTOM_ID: section-14-5
+:CUSTOM_ID: 145-asynchronous-io
 :END:
 
 ** 14.5.1 System V Asynchronous I/O
@@ -83,22 +83,22 @@
 
 * 14.6 readv and writev Functions
 :PROPERTIES:
-:CUSTOM_ID: section-14-6
+:CUSTOM_ID: 146-readv-and-writev-functions
 :END:
 
 * 14.7 readn and writen Functions
 :PROPERTIES:
-:CUSTOM_ID: section-14-7
+:CUSTOM_ID: 147-readn-and-writen-functions
 :END:
 
 * 14.8 Memory-Mapped I/O
 :PROPERTIES:
-:CUSTOM_ID: section-14-8
+:CUSTOM_ID: 148-memory-mapped-io
 :END:
 
 * 14.9 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-14-9
+:CUSTOM_ID: 149-summary
 :END:
 
 * Exercises
@@ -108,7 +108,7 @@
 
 ** Exercise 14.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-1
+:CUSTOM_ID: exercise-141
 :END:
 
 Write a test program that illustrates your system’s behavior when a process is blocked
@@ -144,7 +144,7 @@ unable to obtain a read lock because there is a process waiting for a write lock
 
 ** Exercise 14.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-2
+:CUSTOM_ID: exercise-142
 :END:
 
 Take a look at your system’s headers and examine the implementation of select and the
@@ -152,7 +152,7 @@ four FD_ macros.
 
 ** Exercise 14.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-3
+:CUSTOM_ID: exercise-143
 :END:
 
 The system headers usually have a built-in limit on the maximum number of descriptors
@@ -161,7 +161,7 @@ handle up to 2,048 descriptors. How can we do this?
 
 ** Exercise 14.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-4
+:CUSTOM_ID: exercise-144
 :END:
 
 Compare the functions provided for signal sets (Section 10.11) and the fd_set descriptor
@@ -169,7 +169,7 @@ sets. Also compare the implementation of the two on your system.
 
 ** Exercise 14.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-5
+:CUSTOM_ID: exercise-145
 :END:
 
 Implement the function sleep_us, which is similar to sleep, but waits for a specified
@@ -191,7 +191,7 @@ process.
 
 ** Exercise 14.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-6
+:CUSTOM_ID: exercise-146
 :END:
 
 Can you implement the functions TELL_WAIT, TELL_PARENT, TELL_CHILD,
@@ -200,7 +200,7 @@ of signals? If so, code and test your implementation.
 
 ** Exercise 14.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-7
+:CUSTOM_ID: exercise-147
 :END:
 
 Determine the capacity of a pipe using nonblocking writes. Compare this value with the
@@ -228,7 +228,7 @@ independent of any atomicity constraints.
 
 ** Exercise 14.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-8
+:CUSTOM_ID: exercise-148
 :END:
 
 Rewrite the program in Figure 14.21 to make it a filter: read from the standard input and
@@ -238,7 +238,7 @@ whether the standard output is attached to a terminal, a pipe, or a regular file
 
 ** Exercise 14.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-9
+:CUSTOM_ID: exercise-149
 :END:
 
 Recall Figure 14.23. Determine the break-even point on your system where using writev
@@ -246,7 +246,7 @@ is faster than copying the data yourself and using a single write.
 
 ** Exercise 14.10
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-10
+:CUSTOM_ID: exercise-1410
 :END:
 
 Run the program in Figure 14.27 to copy a file and determine whether the last-access time
@@ -254,7 +254,7 @@ for the input file is updated.
 
 ** Exercise 14.11
 :PROPERTIES:
-:CUSTOM_ID: exercise-14-11
+:CUSTOM_ID: exercise-1411
 :END:
 
 In the program from Figure 14.27, close the input file after calling mmap to verify that

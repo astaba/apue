@@ -31,22 +31,22 @@
 
 * 12.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-12-1
+:CUSTOM_ID: 121-introduction
 :END:
 
 * 12.2 Thread Limits
 :PROPERTIES:
-:CUSTOM_ID: section-12-2
+:CUSTOM_ID: 122-thread-limits
 :END:
 
 * 12.3 Thread Attr ibutes
 :PROPERTIES:
-:CUSTOM_ID: section-12-3
+:CUSTOM_ID: 123-thread-attr-ibutes
 :END:
 
 * 12.4 Synchronization Attr ibutes
 :PROPERTIES:
-:CUSTOM_ID: section-12-4
+:CUSTOM_ID: 124-synchronization-attr-ibutes
 :END:
 
 ** 12.4.1 Mutex Attr ibutes
@@ -71,37 +71,37 @@
 
 * 12.5 Reentrancy
 :PROPERTIES:
-:CUSTOM_ID: section-12-5
+:CUSTOM_ID: 125-reentrancy
 :END:
 
 * 12.6 Thread-Specific Data
 :PROPERTIES:
-:CUSTOM_ID: section-12-6
+:CUSTOM_ID: 126-thread-specific-data
 :END:
 
 * 12.7 Cancel Options
 :PROPERTIES:
-:CUSTOM_ID: section-12-7
+:CUSTOM_ID: 127-cancel-options
 :END:
 
 * 12.8 Threads and Signals
 :PROPERTIES:
-:CUSTOM_ID: section-12-8
+:CUSTOM_ID: 128-threads-and-signals
 :END:
 
 * 12.9 Threads and fork
 :PROPERTIES:
-:CUSTOM_ID: section-12-9
+:CUSTOM_ID: 129-threads-and-fork
 :END:
 
 * 12.10 Threads and I/O
 :PROPERTIES:
-:CUSTOM_ID: section-12-10
+:CUSTOM_ID: 1210-threads-and-io
 :END:
 
 * 12.11 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-12-11
+:CUSTOM_ID: 1211-summary
 :END:
 
 * Exercises
@@ -111,7 +111,7 @@
 
 ** Exercise 12.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-1
+:CUSTOM_ID: exercise-121
 :END:
 
 Run the program in Figure 12.17 on a Linux system, but redirect the output into a file.
@@ -120,6 +120,7 @@ Explain the results.
 ** Exercise 12.2
 :PROPERTIES:
 :VISIBILITY: exercise-12-2
+:CUSTOM_ID: exercise-122
 :END:
 
 Implement putenv_r, a reentrant version of putenv. Make sure that your
@@ -127,7 +128,7 @@ implementation is async-signal safe as well as thread-safe.
 
 ** Exercise 12.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-3
+:CUSTOM_ID: exercise-123
 :END:
 
 Can you make the getenv function shown in Figure 12.13 async-signal safe by blocking
@@ -136,7 +137,7 @@ returning? Explain.
 
 ** Exercise 12.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-4
+:CUSTOM_ID: exercise-124
 :END:
 
 Write a program to exercise the version of getenv from Figure 12.13. Compile and run the
@@ -144,7 +145,7 @@ program on FreeBSD. What happens? Explain.
 
 ** Exercise 12.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-5
+:CUSTOM_ID: exercise-125
 :END:
 
 Given that you can create multiple threads to perform different tasks within a program,
@@ -152,7 +153,7 @@ explain why you might still need to use fork.
 
 ** Exercise 12.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-6
+:CUSTOM_ID: exercise-126
 :END:
 
 Reimplement the program in Figure 10.29 to make it thread-safe without using
@@ -170,7 +171,7 @@ other thread-safe functions.
 
 ** Exercise 12.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-7
+:CUSTOM_ID: exercise-127
 :END:
 
 After calling fork, could we safely reinitialize a condition variable in the child process by
@@ -179,7 +180,7 @@ initializing it with pthread_cond_init?
 
 ** Exercise 12.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-12-8
+:CUSTOM_ID: exercise-128
 :END:
 
 The timeout function in Figure 12.8 can be simplified substantially. Explain how.

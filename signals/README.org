@@ -45,92 +45,92 @@
 
 * 10.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: section-10-1
+:CUSTOM_ID: 101-introduction
 :END:
 
 * 10.2 Signal Concepts
 :PROPERTIES:
-:CUSTOM_ID: section-10-2
+:CUSTOM_ID: 102-signal-concepts
 :END:
 
 * 10.3 =signal= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-3
+:CUSTOM_ID: 103-signal-function
 :END:
 
 * 10.4 Unreliable Signals
 :PROPERTIES:
-:CUSTOM_ID: section-10-4
+:CUSTOM_ID: 104-unreliable-signals
 :END:
 
 * 10.5 Interrupted System Calls
 :PROPERTIES:
-:CUSTOM_ID: section-10-5
+:CUSTOM_ID: 105-interrupted-system-calls
 :END:
 
 * 10.6 Reentrant Functions
 :PROPERTIES:
-:CUSTOM_ID: section-10-6
+:CUSTOM_ID: 106-reentrant-functions
 :END:
 
 * 10.7 =SIGCLD= Semantics
 :PROPERTIES:
-:CUSTOM_ID: section-10-7
+:CUSTOM_ID: 107-sigcld-semantics
 :END:
 
 * 10.8 Reliable-Signal Terminology and Semantics
 :PROPERTIES:
-:CUSTOM_ID: section-10-8
+:CUSTOM_ID: 108-reliable-signal-terminology-and-semantics
 :END:
 
 * 10.9 =kill= and =raise= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-10-9
+:CUSTOM_ID: 109-kill-and-raise-functions
 :END:
 
 * 10.10 =alarm= and =pause= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-10-10
+:CUSTOM_ID: 1010-alarm-and-pause-functions
 :END:
 
 * 10.11 Signal Sets
 :PROPERTIES:
-:CUSTOM_ID: section-10-11
+:CUSTOM_ID: 1011-signal-sets
 :END:
 
 * 10.12 =sigprocmask= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-12
+:CUSTOM_ID: 1012-sigprocmask-function
 :END:
 
 * 10.13 =sigpending= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-13
+:CUSTOM_ID: 1013-sigpending-function
 :END:
 
 * 10.14 =sigaction= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-14
+:CUSTOM_ID: 1014-sigaction-function
 :END:
 
 * 10.15 =sigsetjmp= and =siglongjmp= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-10-15
+:CUSTOM_ID: 1015-sigsetjmp-and-siglongjmp-functions
 :END:
 
 * 10.16 =sigsuspend= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-16
+:CUSTOM_ID: 1016-sigsuspend-function
 :END:
 
 * 10.17 =abort= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-17
+:CUSTOM_ID: 1017-abort-function
 :END:
 
 * 10.18 =system= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-18
+:CUSTOM_ID: 1018-system-function
 :END:
 
 In [[file:../proc/README.org::#section-8-13][Section 8.13]], we showed an implementation of the =system=
@@ -303,58 +303,58 @@ as we described in [[file:../proc/README.org::#section-8-10][Section 8.10]].
 
 * 10.19 =sleep=, =nanosleep=, and =clock_nanosleep= Functions
 :PROPERTIES:
-:CUSTOM_ID: section-10-19
+:CUSTOM_ID: 1019-sleep-nanosleep-and-clock_nanosleep-functions
 :END:
 
 * 10.20 =sigqueue= Function
 :PROPERTIES:
-:CUSTOM_ID: section-10-20
+:CUSTOM_ID: 1020-sigqueue-function
 :END:
 
 * 10.21 Job-Control Signals
 :PROPERTIES:
-:CUSTOM_ID: section-10-21
+:CUSTOM_ID: 1021-job-control-signals
 :END:
 
 * 10.22 Signal Names and Numbers
 :PROPERTIES:
-:CUSTOM_ID: section-10-22
+:CUSTOM_ID: 1022-signal-names-and-numbers
 :END:
 
 * 10.23 Summary
 :PROPERTIES:
-:CUSTOM_ID: section-10-23
+:CUSTOM_ID: 1023-summary
 :END:
 
 * Exercises
 :PROPERTIES:
-:CUSTOM_ID: exercises-10
+:CUSTOM_ID: exercises
 :END:
 
 ** Exercise 10.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-1
+:CUSTOM_ID: exercise-101
 :END:
 
 In Figure 10.2, remove the for (;;) statement. What happens and why?
 
 ** Exercise 10.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-2
+:CUSTOM_ID: exercise-102
 :END:
 
 Implement the sig2str function described in Section 10.22.
 
 ** Exercise 10.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-3
+:CUSTOM_ID: exercise-103
 :END:
 
 Draw pictures of the stack frames when we run the program from Figure 10.9.
 
 ** Exercise 10.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-4
+:CUSTOM_ID: exercise-104
 :END:
 
 In Figure 10.11, we showed a technique that’s often used to set a timeout on an I/O
@@ -370,7 +370,7 @@ What else is wrong with this sequence of code?
 
 ** Exercise 10.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-5
+:CUSTOM_ID: exercise-105
 :END:
 
 Using only a single timer (either alarm or the higher-precision setitimer), provide a set
@@ -378,7 +378,7 @@ of functions that allows a process to set any number of timers.
 
 ** Exercise 10.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-6
+:CUSTOM_ID: exercise-106
 :END:
 
 Write the following program to test the parent–child synchronization functions in
@@ -389,7 +389,7 @@ increment.
 
 ** Exercise 10.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-7
+:CUSTOM_ID: exercise-107
 :END:
 
 In the function shown in Figure 10.25, if the caller catches SIGABRT and returns from the
@@ -398,7 +398,7 @@ call kill the second time, instead of simply calling _exit?
 
 ** Exercise 10.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-8
+:CUSTOM_ID: exercise-108
 :END:
 
 Why do you think the siginfo structure (Section 10.14) includes the real user ID, instead
@@ -406,7 +406,7 @@ of the effective user ID, in the si_uid field?
 
 ** Exercise 10.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-9
+:CUSTOM_ID: exercise-109
 :END:
 
 Rewrite the function in Figure 10.14 to handle all the signals from Figure 10.1. The
@@ -416,7 +416,7 @@ signal mask (not once for every possible signal).
 
 ** Exercise 10.10
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-10
+:CUSTOM_ID: exercise-1010
 :END:
 
 Write a program that calls sleep(60) in an infinite loop. Every five times through the
@@ -426,7 +426,7 @@ daemon, which runs every minute on the minute, handle this situation?
 
 ** Exercise 10.11
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-11
+:CUSTOM_ID: exercise-1011
 :END:
 
 Modify Figure 3.5 as follows: (a) change BUFFSIZE to 100; (b) catch the SIGXFSZ signal
@@ -440,7 +440,7 @@ you have access to. What happens and why?
 
 ** Exercise 10.12
 :PROPERTIES:
-:CUSTOM_ID: exercise-10-12
+:CUSTOM_ID: exercise-1012
 :END:
 
 Write a program that calls fwrite with a large buffer (about one gigabyte). Before calling

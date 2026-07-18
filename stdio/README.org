@@ -64,7 +64,7 @@ interfaces are defined as extensions to the *ISO C standard* by the
 
 The *standard I/O library* handles such details as buffer allocation
 and performing I/O in optimal-sized chunks, obviating our need to
-worry about using the correct block size (as in [[file:../fileio/README.org::#section-3-9][Section 3.9]]). This
+worry about using the correct block size (as in [[file:../fileio/README.org::#39-io-efficiency][Section 3.9]]). This
 makes the library easy to use, but at the same time introduces another
 set of problems if we’re not cognizant of what’s going on.
 
@@ -248,14 +248,14 @@ Line buffering comes with two caveats:
    standard I/O library from either:
    a. an unbuffered stream or
    b. a line-buffered stream (that requires data to be requested from
-      the kernel). See [[file:~/coding/c_prog/apue.3e/intro/yshell2.c][Figure 1.10]] for practical experiment.
+      the kernel). See [[file:../intro/yshell2.c][Figure 1.10]] for practical experiment.
 
 The reason for the qualifier on (b) is that the requested data may
 already be in the buffer, which doesn’t require data to be read from
 the kernel (in other words, in this specific case, there would be no
 prior need to flush any output streams). Obviously, any input from an
 unbuffered stream, item (a), requires data to be obtained from the
-kernel (see also [[file:../../tlpi/filebuff/README.org::#flushing-a-stdio-buffer][TLPI Section 13.2]]).
+kernel (see also [[file:~/coding/c_prog/tlpi/filebuff/README.org::#flushing-a-stdio-buffer][TLPI Section 13.2]]).
 
 **** Grammatical review of “qualifier”
 
@@ -524,8 +524,8 @@ parameter with description and the corresponding flags passed to the
 - ="a+"= or ="a+b"= or ="ab+"= : open or create for reading and
   writing at end of file (=O_RDWR | O_CREAT | O_APPEND=);
 
-ISO C specifies 15 values for the type argument, shown in [[#figure-5-3][Figure
-5.3]]. Using the character =b= as part of the type allows the standard
+ISO C specifies 15 values for the type argument, shown in [[#figure-53][Figure 5.3]].
+Using the character =b= as part of the type allows the standard
 I/O system to *differentiate between a text file and a binary
 file*. Since the UNIX kernel doesn’t differentiate between these types
 of files, *specifying the character* =b= *as part of the type has no
@@ -616,7 +616,7 @@ standard I/O streams are closed.
 
 Once we open a stream, we can choose from among *three types of
 unformatted I/O* (We describe the *formatted I/O functions,* such as
-=printf= and =scanf=, in [[#511-formatted-i-o][Section 5.11]].):
+=printf= and =scanf=, in [[#511-formatted-io][Section 5.11]].):
 
 1. *Character-at-a-time I/O.* We can read or write one character at a
    time, with the standard I/O functions handling all the buffering,
@@ -626,14 +626,14 @@ unformatted I/O* (We describe the *formatted I/O functions,* such as
    we use =fgets= and =fputs=.  Each line is terminated with a newline
    character, and we have to specify the maximum line length that we
    can handle when we call =fgets=. We describe these two functions in
-   [[#57-line-at-a-time-i-o][Section 5.7]].
+   [[#57-line-at-a-time-io][Section 5.7]].
 
 3. *Direct I/O.* This type of I/O is supported by the =fread= and
    =fwrite= functions.  For each I/O operation, we read or write some
    number of objects, where each object is of a specified size. These
    two functions are often used for binary files where we read or
    write a structure with each operation.  We describe these two
-   functions in [[#59-binary-i-o-with-fread-and-fwrite][Section 5.9]].
+   functions in [[#59-binary-io-with-fread-and-fwrite][Section 5.9]].
 
   #+begin_quote
   The term /direct I/O/, from the ISO C standard, is known by many
@@ -878,10 +878,10 @@ Finally, we have a version that reads and writes lines, shown in
 Note that we do not close the standard I/O streams explicitly in
 either [[file:getcputc.c][Figure 5.4]] or [[file:fgetsfputs.c][Figure 5.5]]. Instead, we know that the =exit=
 function will flush any unwritten data and then close all open
-streams. (We’ll discuss this in [[file:../proc/README.org::#section-8-5][Section 8.5]].) It is interesting to
+streams. (We’ll discuss this in [[file:~/coding/c_prog/apue.3e/proc/README.org::#85-exit-functions][Section 8.5]].) It is interesting to
 compare the timing of these three programs with the timing data from
 Figure 3.6. *We show this data when operating on the same file (98.5
-MB with 3 million lines) in* [[#figure-5-6][Figure 5.6]].
+MB with 3 million lines) in* [[#figure-56][Figure 5.6]].
 
 For each of the three standard I/O versions, the user CPU time is
 larger than the best read version from Figure 3.6, because:
@@ -970,7 +970,7 @@ standard I/O routines.
 :END:
 
 The functions from [[#56-reading-and-writing-a-stream][Section 5.6]] operated with one character at a time,
-and the functions from [[#57-line-at-a-time-i-o][Section 5.7]] operated with one line at a
+and the functions from [[#57-line-at-a-time-io][Section 5.7]] operated with one line at a
 time. If we’re doing binary I/O, we often would like to read or write
 an entire structure at a time. To do this using =getc= or =putc=, we
 have to loop through the entire structure, one byte at a time, reading
@@ -1058,7 +1058,7 @@ different systems is to use an agreed-upon canonical format. Refer to
 Rudoff [2004]/ for a description of some techniques various network
 protocols use to exchange binary data.
 
-We’ll return to the =fread= function in [[file:../proc/README.org::#section-8-14][Section 8.14]] when we use it to
+We’ll return to the =fread= function in [[file:~/coding/c_prog/apue.3e/proc/README.org::#814-process-accounting][Section 8.14]] when we use it to
 read a binary structure, the UNIX process accounting records.
 
 * 5.10 Positioning a Stream
@@ -1347,7 +1347,7 @@ provided.
      if buffer was large enough, negative value if encoding error */
 #+end_src
 
-We use the =vsnprintf= function in the [[file:../lib/error.c][error routines]] (=err_doit=) in
+We use the =vsnprintf= function in the [[file:~/coding/c_prog/apue.3e/lib/error.c][error routines]] (=err_doit=) in
 Appendix B.
 
 Refer to /Section 7.3 of Kernighan and Ritchie [1988]/ for additional
@@ -1412,7 +1412,7 @@ characters.
 The =lenmodifier= component specifies the size of the argument to be
 initialized with the result of the conversion. The same length
 modifiers supported by the =printf= family of functions are supported
-by the =scanf= family of functions (see [[#figure-5-8][Figure 5.8]] for a list of the
+by the =scanf= family of functions (see [[#figure-58][Figure 5.8]] for a list of the
 length modifiers).
 
 **** Figure 5.10 Conversion-Type of Conversion Specification
@@ -1506,7 +1506,7 @@ implementation of the GNU standard I/O library is also publicly
 available.
 
 - To have a good summarizing mental model see also [[file:../../tlpi/images/figure_13_1.jpeg][Figure 13-1]] from
-  [[file:~/coding/c_prog/tlpi/filebuff/README.org::#section-13-4][Section 13.4]] of "The Linux Programming Interface" (/TLPI/) by
+  [[file:~/coding/c_prog/tlpi/filebuff/README.org::#134-summary-of-io-buffering][Section 13.4]] of "The Linux Programming Interface" (/TLPI/) by
   Michael Kerrisk;
 
 ** Retrieve file stream underlying =fd= with =fileno=
@@ -1727,7 +1727,7 @@ The conceptual pattern used by =tmpfile= follows this algorithm:
 - Generate a unique name;
 - =open= / =create= a file;
 - Immediately =unlink= it;
-Recall from [[file:../filedir/README.org::#section-4-15][Section 4.15]] that unlinking a file does not delete its
+Recall from [[file:~/coding/c_prog/apue.3e/filedir/README.org::#415-link-linkat-unlink-unlinkat-and-remove-functions][Section 4.15]] that unlinking a file does not delete its
 contents until the file is closed.  This way, when the file is closed,
 either explicitly or on program termination, the contents of the file
 are deleted.
@@ -2026,12 +2026,12 @@ confusion.
 
 ** Exercise 5.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-1
+:CUSTOM_ID: exercise-51
 :END:
 
 Implement =setbuf= using =setvbuf=.
 
-[[file:../..//tlpi/filebuff/README.org::#section-13-2][TLPI Section 13.2]];
+[[file:~/coding/c_prog/tlpi/filebuff/README.org::#flushing-a-stdio-buffer][TLPI Section 13.2]];
 
 *** Answer
 - [[file:exr0501.c][exr0501.c]];
@@ -2065,7 +2065,7 @@ because it doesn't own the memory array you passed in!
 
 ** Exercise 5.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-2
+:CUSTOM_ID: exercise-52
 :END:
 
 Type in the program that copies a file using line-at-a-time I/O
@@ -2103,7 +2103,7 @@ calls to =fgets= and =fputs=.
 
 ** Exercise 5.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-3
+:CUSTOM_ID: exercise-53
 :END:
 
 What does a return value of 0 from =printf= mean?
@@ -2125,7 +2125,7 @@ This typically happens under two conditions:
 
 ** Exercise 5.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-4
+:CUSTOM_ID: exercise-54
 :END:
 
 The code in [[file:exr0504.c][exr0504.c]] works correctly on some machines, but not on
@@ -2161,7 +2161,7 @@ See [[#unsigned-char-within-int][Unsigned Char Within Int]];
 
 ** Exercise 5.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-5
+:CUSTOM_ID: exercise-55
 :END:
 
 How would you use the =fsync= function (Section 3.13) with a standard
@@ -2187,7 +2187,7 @@ would fail to protect any data still trapped in the application's
 
 ** Exercise 5.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-6
+:CUSTOM_ID: exercise-56
 :END:
 
 In the programs in [[file:~/coding/c_prog/apue.3e/intro/shell1.c][Figures 1.7]] and [[file:~/coding/c_prog/apue.3e/intro/shell2.c][1.10]] (/shell1.c and shell2.c/), the
@@ -2212,7 +2212,7 @@ interactive user is never presented with a blank, blocking screen
 before they are prompted for input.
 
 - See [[*Line buffered][Line buffered]] (Caveat 2.b);
-- [[file:../../tlpi/filebuff/README.org::#flushing-a-stdio-buffer][TLPI Section 13.2]];
+- [[file:~/coding/c_prog/tlpi/filebuff/README.org::#flushing-a-stdio-buffer][TLPI Section 13.2]];
 
 **** Toy shell experiment
 :PROPERTIES:
@@ -2244,7 +2244,7 @@ would use a raw, async-signal-safe system call like
 
 ** TODO Exercise 5.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-5-7
+:CUSTOM_ID: todo-exercise-57
 :END:
 
 BSD-based systems provide a function called =funopen= that allows us

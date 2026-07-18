@@ -30,47 +30,47 @@
 
 * 7.1 Introduction
 :PROPERTIES:
-:CUSTOM_ID: 7-1-introduction
+:CUSTOM_ID: 71-introduction
 :END:
 
 * 7.2 main Function
 :PROPERTIES:
-:CUSTOM_ID: 7-2-main-function
+:CUSTOM_ID: 72-main-function
 :END:
 
 * 7.3 Process Termination
 :PROPERTIES:
-:CUSTOM_ID: 7-3-process-termination
+:CUSTOM_ID: 73-process-termination
 :END:
 
 * 7.4 Command-Line Arguments
 :PROPERTIES:
-:CUSTOM_ID: 7-4-command-line-arguments
+:CUSTOM_ID: 74-command-line-arguments
 :END:
 
 * 7.5 Environment List
 :PROPERTIES:
-:CUSTOM_ID: 7-5-environment-list
+:CUSTOM_ID: 75-environment-list
 :END:
 
 * 7.6 Memory Layout of a C Program
 :PROPERTIES:
-:CUSTOM_ID: 7-6-memory-layout-of-a-c-program
+:CUSTOM_ID: 76-memory-layout-of-a-c-program
 :END:
 
 * 7.7 Shared Librar ies
 :PROPERTIES:
-:CUSTOM_ID: 7-7-shared-librar-ies
+:CUSTOM_ID: 77-shared-librar-ies
 :END:
 
 * 7.8 Memory Allocation
 :PROPERTIES:
-:CUSTOM_ID: 7-8-memory-allocation
+:CUSTOM_ID: 78-memory-allocation
 :END:
 
 * 7.9 Environment Variables
 :PROPERTIES:
-:CUSTOM_ID: 7-9-environment-variables
+:CUSTOM_ID: 79-environment-variables
 :END:
 
 *** Figure 7.8: Support for various environment list functions
@@ -89,17 +89,17 @@
 
 * 7.10 setjmp and longjmp Functions
 :PROPERTIES:
-:CUSTOM_ID: 7-10-setjmp-and-longjmp-functions
+:CUSTOM_ID: 710-setjmp-and-longjmp-functions
 :END:
 
 * 7.11 =getrlimit= and =setrlimit= Functions
 :PROPERTIES:
-:CUSTOM_ID: 7-11-=getrlimit=-and-=setrlimit=-functions
+:CUSTOM_ID: 711-getrlimit-and-setrlimit-functions
 :END:
 
 * 7.12 Summary
 :PROPERTIES:
-:CUSTOM_ID: 7-12-summary
+:CUSTOM_ID: 712-summary
 :END:
 
 * Exercises
@@ -109,7 +109,7 @@
 
 ** Exercise 7.1
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-1
+:CUSTOM_ID: exercise-71
 :END:
 
 On an Intel x86 system under Linux, if we execute the program that prints ‘‘hello, world’’
@@ -118,14 +118,14 @@ examine with the shell—is 13. Why?
 
 ** Exercise 7.2
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-2
+:CUSTOM_ID: exercise-72
 :END:
 
 When is the output from the printfs in Figure 7.3 actually output?
 
 ** Exercise 7.3
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-3
+:CUSTOM_ID: exercise-73
 :END:
 
 Is there any way for a function that is called by main to examine the command-line
@@ -134,7 +134,7 @@ arguments without (a) passing argc and argv as arguments from main to the functi
 
 ** Exercise 7.4
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-4
+:CUSTOM_ID: exercise-74
 :END:
 
 Some UNIX system implementations purposely arrange that, when a program is executed,
@@ -142,7 +142,7 @@ location 0 in the data segment is not accessible. Why?
 
 ** Exercise 7.5
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-5
+:CUSTOM_ID: exercise-75
 :END:
 
 Use the typedef facility of C to define a new data type Exitfunc for an exit handler.
@@ -150,7 +150,7 @@ Redo the prototype for atexit using this data type.
 
 ** Exercise 7.6
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-6
+:CUSTOM_ID: exercise-76
 :END:
 
 If we allocate an array of longs using calloc, is the array initialized to 0? If we allocate an
@@ -158,7 +158,7 @@ array of pointers using calloc, is the array initialized to null pointers?
 
 ** Exercise 7.7
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-7
+:CUSTOM_ID: exercise-77
 :END:
 
 In the output from the size command at the end of Section 7.6, why aren’t any sizes given
@@ -166,7 +166,7 @@ for the heap and the stack?
 
 ** Exercise 7.8
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-8
+:CUSTOM_ID: exercise-78
 :END:
 
 In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective
@@ -174,7 +174,7 @@ text and data sizes. Why?
 
 ** Exercise 7.9
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-9
+:CUSTOM_ID: exercise-79
 :END:
 
 In Section 7.7, why does the size of the executable file differ so dramatically when we use
@@ -182,7 +182,7 @@ shared libraries for such a trivial program?
 
 ** Exercise 7.10
 :PROPERTIES:
-:CUSTOM_ID: exercise-7-10
+:CUSTOM_ID: exercise-710
 :END:
 
 At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic
