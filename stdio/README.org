@@ -777,7 +777,7 @@ cannot be implemented as a macro.
 
 * 5.7 Line-at-a-Time I/O
 :PROPERTIES:
-:CUSTOM_ID: 57-line-at-a-time-i-o
+:CUSTOM_ID: 57-line-at-a-time-io
 :END:
 
 ** Line-at-a-time input with =fgets= and =gets=
@@ -859,7 +859,7 @@ character at the end of each line.
 
 * 5.8 Standard I/O Efficiency
 :PROPERTIES:
-:CUSTOM_ID: 58-standard-i-o-efficiency
+:CUSTOM_ID: 58-standard-io-efficiency
 :END:
 
 Using the functions from the previous section, we can get an idea of
@@ -966,7 +966,7 @@ standard I/O routines.
 
 * 5.9 Binary I/O with =fread= and =fwrite=
 :PROPERTIES:
-:CUSTOM_ID: 59-binary-i-o-with-fread-and-fwrite
+:CUSTOM_ID: 59-binary-io-with-fread-and-fwrite
 :END:
 
 The functions from [[#56-reading-and-writing-a-stream][Section 5.6]] operated with one character at a time,
@@ -1151,7 +1151,7 @@ a later call to =fsetpos= to reposition the stream to that location.
 
 * 5.11 Formatted I/O
 :PROPERTIES:
-:CUSTOM_ID: 511-formatted-i-o
+:CUSTOM_ID: 511-formatted-io
 :END:
 
 ** Formatted Output
@@ -1648,7 +1648,7 @@ e. We also see that:
 
 * 5.13 Temporary Files
 :PROPERTIES:
-:CUSTOM_ID: 5-13-temporary-files
+:CUSTOM_ID: 513-temporary-files
 :END:
 
 - [[info:libc#Temporary Files][libc#Temporary Files]];
@@ -1803,7 +1803,7 @@ are declared:
 
 * 5.14 Memory Streams
 :PROPERTIES:
-:CUSTOM_ID: 5-14-memory-streams
+:CUSTOM_ID: 514-memory-streams
 :END:
 
 - [[info:libc#String Streams][libc#String Streams]];
@@ -1964,7 +1964,7 @@ instead of a file stored on disk.
 
 * 5.15 Alternatives to Standard I/O
 :PROPERTIES:
-:CUSTOM_ID: 5-15-alternatives-to-standard-i-o
+:CUSTOM_ID: 515-alternatives-to-standard-io
 :END:
 
 The *standard I/O library* is not perfect. /Korn and Vo [1991]/ list
@@ -2009,7 +2009,7 @@ http://www.uclibc.org for more information) and the *Newlib C library*
 
 * 5.16 Summary
 :PROPERTIES:
-:CUSTOM_ID: 5-16-summary
+:CUSTOM_ID: 516-summary
 :END:
 
 The standard I/O library is used by most UNIX applications. In this
