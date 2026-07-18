@@ -14,7 +14,7 @@
   - [[#iso-c-buffering-requirements][ISO C buffering requirements]]
   - [[#change-the-buffering-with-setbuf-or-setvbuf][Change the buffering with =setbuf= or =setvbuf=]]
   - [[#force-stream-flushing-with-fflush][Force stream flushing with =fflush=]]
-- [[#55-opening-a-stream][5.5 Opening a Stream]]
+- [[#0505-opening-a-stream][05.05 Opening a Stream]]
   - [[#opening-a-stream-with-fopen-freopen-and-fdopen][Opening a Stream with =fopen=, =freopen=, and =fdopen=]]
   - [[#close-a-stream-with-fclose][Close a stream with =fclose=]]
 - [[#56-reading-and-writing-a-stream][5.6 Reading and Writing a Stream]]
@@ -456,9 +456,9 @@ The =fflush= function causes any unwritten data for the stream to be
 passed to the kernel.  As a special case, if =fp= is =NULL=, =fflush=
 causes all output streams to be flushed.
 
-* 5.5 Opening a Stream
+* 05.05 Opening a Stream
 :PROPERTIES:
-:CUSTOM_ID: 5-5-opening-a-stream
+:CUSTOM_ID: 0505-opening-a-stream
 :END:
 
 ** Opening a Stream with =fopen=, =freopen=, and =fdopen=
