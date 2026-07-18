@@ -1,6 +1,15 @@
-#include "../include/apue.h"
+/* =========================================================================
+ * Created on: <Thu Jul 16 01:02:06 +01 2026>
+ * Time-stamp: <Thu Jul 16 22:04:45 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/lib/error.c -
+ *
+ * Figure B.3 Error functions that output to standard error
+ * ========================================================================= */
+#include "apue.h"
 #include <errno.h>  /* for definition of errno */
-#include <stdarg.h> /* ISO C variable aruments */
+#include <stdarg.h> /* ISO C variable arguments */
 
 static void err_doit(int, int, const char *, va_list);
 
@@ -71,7 +80,7 @@ void err_dump(const char *fmt, ...) {
 }
 
 /*
- * Nonfatal cuctom error.
+ * Nonfatal custom error.
  * Print a message and return.
  */
 void err_msg(const char *fmt, ...) {

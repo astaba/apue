@@ -15,7 +15,7 @@
  * FDs do not store filenames; they store references to open file objects.
  * Several FDs can point to the same open file object.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <dirent.h>
 #include <unistd.h>
 

@@ -1,5 +1,13 @@
-/* #include "apue.h" */
-#include "../include/apue.h"
+/* =========================================================================
+ * Created on: <Fri Jul 17 14:25:15 +01 2026>
+ * Time-stamp: <Fri Jul 17 14:51:19 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/lib/pathalloc.c -
+ *
+ * Figure 2.16 Dynamically allocate space for a pathname
+ * ========================================================================= */
+#include "apue.h"
 #include <errno.h>
 #include <limits.h>
 

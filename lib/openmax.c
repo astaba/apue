@@ -1,3 +1,12 @@
+/* =========================================================================
+ * Created on: <Fri Jul 17 14:29:28 +01 2026> 
+ * Time-stamp: <Fri Jul 17 14:51:19 +01 2026 by owner> 
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/lib/openmax.c -
+ *
+ * Figure 2.17 Determine the number of file descriptors
+ * ========================================================================= */
 #include "apue.h"
 #include <errno.h>
 #include <limits.h>

@@ -22,7 +22,7 @@ PROGS =	\
 	exr0503 \
 	exr0505
 
-TEMPFILES += std.out std.err std.log
+TEMPFILES += std.out std.err std.log critical_data.log
 
 all:	$(PROGS) $(MEMSTR)
 

@@ -1,3 +1,12 @@
+/* =========================================================================
+ * Created on: <Fri Jul 17 14:23:25 +01 2026>
+ * Time-stamp: <Fri Jul 17 14:51:23 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/standards/conf.c.modified -
+ *
+ * Figure 2.14 Print all possible sysconf and pathconf values
+ * ========================================================================= */
 #include "apue.h"
 #include <errno.h>
 #include <limits.h>

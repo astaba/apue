@@ -1,6 +1,13 @@
-/*
- * Our own header, to be included before all standard system headers.
- */
+/* =========================================================================
+ * Created on: <Thu Jul 16 01:04:21 +01 2026>
+ * Time-stamp: <Thu Jul 16 01:05:07 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/include/apue.h -
+ *
+ * Figure B.1: Our own header, to be included before all standard
+ * system headers.
+ * ========================================================================= */
 #ifndef _APUE_H
 #define _APUE_H
 

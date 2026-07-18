@@ -10,7 +10,7 @@
  * happens if you copy lines that exceed this length? Explain what is
  * happening.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 #define MAXLINE_4 4
 

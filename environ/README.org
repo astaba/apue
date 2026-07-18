@@ -1,0 +1,191 @@
+#+TITLE: Process Environment
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 7 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#71-introduction][7.1 Introduction]]
+- [[#72-main-function][7.2 main Function]]
+- [[#73-process-termination][7.3 Process Termination]]
+- [[#74-command-line-arguments][7.4 Command-Line Arguments]]
+- [[#75-environment-list][7.5 Environment List]]
+- [[#76-memory-layout-of-a-c-program][7.6 Memory Layout of a C Program]]
+- [[#77-shared-librar-ies][7.7 Shared Librar ies]]
+- [[#78-memory-allocation][7.8 Memory Allocation]]
+- [[#79-environment-variables][7.9 Environment Variables]]
+- [[#710-setjmp-and-longjmp-functions][7.10 setjmp and longjmp Functions]]
+- [[#711-getrlimit-and-setrlimit-functions][7.11 =getrlimit= and =setrlimit= Functions]]
+- [[#712-summary][7.12 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-71][Exercise 7.1]]
+  - [[#exercise-72][Exercise 7.2]]
+  - [[#exercise-73][Exercise 7.3]]
+  - [[#exercise-74][Exercise 7.4]]
+  - [[#exercise-75][Exercise 7.5]]
+  - [[#exercise-76][Exercise 7.6]]
+  - [[#exercise-77][Exercise 7.7]]
+  - [[#exercise-78][Exercise 7.8]]
+  - [[#exercise-79][Exercise 7.9]]
+  - [[#exercise-710][Exercise 7.10]]
+
+* 7.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-7-1
+:END:
+
+* 7.2 main Function
+:PROPERTIES:
+:CUSTOM_ID: section-7-2
+:END:
+
+* 7.3 Process Termination
+:PROPERTIES:
+:CUSTOM_ID: section-7-3
+:END:
+
+* 7.4 Command-Line Arguments
+:PROPERTIES:
+:CUSTOM_ID: section-7-4
+:END:
+
+* 7.5 Environment List
+:PROPERTIES:
+:CUSTOM_ID: section-7-5
+:END:
+
+* 7.6 Memory Layout of a C Program
+:PROPERTIES:
+:CUSTOM_ID: section-7-6
+:END:
+
+* 7.7 Shared Librar ies
+:PROPERTIES:
+:CUSTOM_ID: section-7-7
+:END:
+
+* 7.8 Memory Allocation
+:PROPERTIES:
+:CUSTOM_ID: section-7-8
+:END:
+
+* 7.9 Environment Variables
+:PROPERTIES:
+:CUSTOM_ID: section-7-9
+:END:
+
+*** Figure 7.8: Support for various environment list functions
+:PROPERTIES:
+:CUSTOM_ID: figure-7-8
+:END:
+
+| Function | ISO C | POSIX.1 | FreeBSD | Linux | Mac OS X | Solaris |
+|          |       |         | 8.0     | 3.2.0 | 10.6.8   | 10      |
+|----------+-------+---------+---------+-------+----------+---------|
+| getenv   | •     | •       | •       | •     | •        | •       |
+| putenv   |       | XSI     | •       | •     | •        | •       |
+| setenv   |       | •       | •       | •     | •        |         |
+| unsetenv |       | •       | •       | •     | •        |         |
+| clearenv |       |         |         | •     |          |         |
+
+* 7.10 setjmp and longjmp Functions
+:PROPERTIES:
+:CUSTOM_ID: section-7-10
+:END:
+
+* 7.11 =getrlimit= and =setrlimit= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-7-11
+:END:
+
+* 7.12 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-7-12
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-7
+:END:
+
+** Exercise 7.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-1
+:END:
+
+On an Intel x86 system under Linux, if we execute the program that prints ‘‘hello, world’’
+and do not call exit or return, the termination status of the program — which we can
+examine with the shell—is 13. Why?
+
+** Exercise 7.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-2
+:END:
+
+When is the output from the printfs in Figure 7.3 actually output?
+
+** Exercise 7.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-3
+:END:
+
+Is there any way for a function that is called by main to examine the command-line
+arguments without (a) passing argc and argv as arguments from main to the function or
+(b) having main copy argc and argv into global variables?
+
+** Exercise 7.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-4
+:END:
+
+Some UNIX system implementations purposely arrange that, when a program is executed,
+location 0 in the data segment is not accessible. Why?
+
+** Exercise 7.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-5
+:END:
+
+Use the typedef facility of C to define a new data type Exitfunc for an exit handler.
+Redo the prototype for atexit using this data type.
+
+** Exercise 7.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-6
+:END:
+
+If we allocate an array of longs using calloc, is the array initialized to 0? If we allocate an
+array of pointers using calloc, is the array initialized to null pointers?
+
+** Exercise 7.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-7
+:END:
+
+In the output from the size command at the end of Section 7.6, why aren’t any sizes given
+for the heap and the stack?
+
+** Exercise 7.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-8
+:END:
+
+In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective
+text and data sizes. Why?
+
+** Exercise 7.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-9
+:END:
+
+In Section 7.7, why does the size of the executable file differ so dramatically when we use
+shared libraries for such a trivial program?
+
+** Exercise 7.10
+:PROPERTIES:
+:CUSTOM_ID: exercise-7-10
+:END:
+
+At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic
+variable. Is the following code correct?
+
+- [[file:exr0710.c][exr0710.c]];

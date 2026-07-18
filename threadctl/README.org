@@ -1,0 +1,185 @@
+#+TITLE: Thread Control
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 12 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#121-introduction][12.1 Introduction]]
+- [[#122-thread-limits][12.2 Thread Limits]]
+- [[#123-thread-attr-ibutes][12.3 Thread Attr ibutes]]
+- [[#124-synchronization-attr-ibutes][12.4 Synchronization Attr ibutes]]
+  - [[#1241-mutex-attr-ibutes][12.4.1 Mutex Attr ibutes]]
+  - [[#1242-readerwriter-lock-attr-ibutes][12.4.2 Reader–Writer Lock Attr ibutes]]
+  - [[#1243-condition-variable-attributes][12.4.3 Condition Variable Attributes]]
+  - [[#1244-barrier-attributes][12.4.4 Barrier Attributes]]
+- [[#125-reentrancy][12.5 Reentrancy]]
+- [[#126-thread-specific-data][12.6 Thread-Specific Data]]
+- [[#127-cancel-options][12.7 Cancel Options]]
+- [[#128-threads-and-signals][12.8 Threads and Signals]]
+- [[#129-threads-and-fork][12.9 Threads and fork]]
+- [[#1210-threads-and-io][12.10 Threads and I/O]]
+- [[#1211-summary][12.11 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-121][Exercise 12.1]]
+  - [[#exercise-122][Exercise 12.2]]
+  - [[#exercise-123][Exercise 12.3]]
+  - [[#exercise-124][Exercise 12.4]]
+  - [[#exercise-125][Exercise 12.5]]
+  - [[#exercise-126][Exercise 12.6]]
+  - [[#exercise-127][Exercise 12.7]]
+  - [[#exercise-128][Exercise 12.8]]
+
+* 12.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-12-1
+:END:
+
+* 12.2 Thread Limits
+:PROPERTIES:
+:CUSTOM_ID: section-12-2
+:END:
+
+* 12.3 Thread Attr ibutes
+:PROPERTIES:
+:CUSTOM_ID: section-12-3
+:END:
+
+* 12.4 Synchronization Attr ibutes
+:PROPERTIES:
+:CUSTOM_ID: section-12-4
+:END:
+
+** 12.4.1 Mutex Attr ibutes
+:PROPERTIES:
+:CUSTOM_ID: section-12-4-1
+:END:
+
+** 12.4.2 Reader–Writer Lock Attr ibutes
+:PROPERTIES:
+:CUSTOM_ID: section-12-4-2
+:END:
+
+** 12.4.3 Condition Variable Attributes
+:PROPERTIES:
+:CUSTOM_ID: section-12-4-3
+:END:
+
+** 12.4.4 Barrier Attributes
+:PROPERTIES:
+:CUSTOM_ID: section-12-4-4
+:END:
+
+* 12.5 Reentrancy
+:PROPERTIES:
+:CUSTOM_ID: section-12-5
+:END:
+
+* 12.6 Thread-Specific Data
+:PROPERTIES:
+:CUSTOM_ID: section-12-6
+:END:
+
+* 12.7 Cancel Options
+:PROPERTIES:
+:CUSTOM_ID: section-12-7
+:END:
+
+* 12.8 Threads and Signals
+:PROPERTIES:
+:CUSTOM_ID: section-12-8
+:END:
+
+* 12.9 Threads and fork
+:PROPERTIES:
+:CUSTOM_ID: section-12-9
+:END:
+
+* 12.10 Threads and I/O
+:PROPERTIES:
+:CUSTOM_ID: section-12-10
+:END:
+
+* 12.11 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-12-11
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-12
+:END:
+
+** Exercise 12.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-1
+:END:
+
+Run the program in Figure 12.17 on a Linux system, but redirect the output into a file.
+Explain the results.
+
+** Exercise 12.2
+:PROPERTIES:
+:VISIBILITY: exercise-12-2
+:END:
+
+Implement putenv_r, a reentrant version of putenv. Make sure that your
+implementation is async-signal safe as well as thread-safe.
+
+** Exercise 12.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-3
+:END:
+
+Can you make the getenv function shown in Figure 12.13 async-signal safe by blocking
+signals at the beginning of the function and restoring the previous signal mask before
+returning? Explain.
+
+** Exercise 12.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-4
+:END:
+
+Write a program to exercise the version of getenv from Figure 12.13. Compile and run the
+program on FreeBSD. What happens? Explain.
+
+** Exercise 12.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-5
+:END:
+
+Given that you can create multiple threads to perform different tasks within a program,
+explain why you might still need to use fork.
+
+** Exercise 12.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-6
+:END:
+
+Reimplement the program in Figure 10.29 to make it thread-safe without using
+nanosleep or clock_nanosleep.
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-12-6
+:END:
+
+[[file:../exercises/sleep.c][Figure C.13]] shows a thread-safe sleep implementation that uses select
+to delay for the specified amount of time. It is thread-safe because
+it doesn’t use any unprotected global or static data and calls only
+other thread-safe functions.
+
+** Exercise 12.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-7
+:END:
+
+After calling fork, could we safely reinitialize a condition variable in the child process by
+first destroying the condition variable with pthread_cond_destroy and then
+initializing it with pthread_cond_init?
+
+** Exercise 12.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-12-8
+:END:
+
+The timeout function in Figure 12.8 can be simplified substantially. Explain how.

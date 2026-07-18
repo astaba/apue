@@ -8,7 +8,7 @@
  * Figure 3.11 Print file status flags for specified descriptor.
  * See also [[file:../filedir/filetype.c::30]]
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {

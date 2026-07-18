@@ -7,7 +7,7 @@
  *
  * Figure 4.24 Example of getcwd function
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   char *ptr;

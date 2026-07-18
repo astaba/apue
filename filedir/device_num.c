@@ -10,7 +10,7 @@
  * character special file or a block special file, the st_rdev value
  * for the special file is printed.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #ifdef SOLARIS
 #include <sys/mkdev.h>
 #else

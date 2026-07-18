@@ -8,7 +8,7 @@
  * way as the dup2 function described in Section 3.12, without calling
  * the fcntl function.  Be sure to handle errors correctly.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <errno.h>
 #define MAX_TEMP_FDS 1024
 

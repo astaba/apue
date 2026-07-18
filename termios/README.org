@@ -1,0 +1,128 @@
+#+TITLE: Terminal I/O
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 18 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#181-introduction][18.1 Introduction]]
+- [[#182-over-view][18.2 Over view]]
+- [[#183-special-input-characters][18.3 Special Input Characters]]
+- [[#184-getting-and-setting-terminal-attributes][18.4 Getting and Setting Terminal Attributes]]
+- [[#185-terminal-option-flags][18.5 Terminal Option Flags]]
+- [[#186-stty-command][18.6 =stty= Command]]
+- [[#187-baud-rate-functions][18.7 Baud Rate Functions]]
+- [[#188-line-control-functions][18.8 Line Control Functions]]
+- [[#189-terminal-identification][18.9 Terminal Identification]]
+- [[#1810-canonical-mode][18.10 Canonical Mode]]
+- [[#1811-noncanonical-mode][18.11 Noncanonical Mode]]
+- [[#1812-terminal-window-size][18.12 Terminal Window Size]]
+- [[#1813-termcap-terminfo-and-curses][18.13 =termcap=, =terminfo=, and =curses=]]
+- [[#1814-summary][18.14 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-181][Exercise 18.1]]
+  - [[#exercise-182][Exercise 18.2]]
+  - [[#exercise-183][Exercise 18.3]]
+
+* 18.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-18-1
+:END:
+
+* 18.2 Over view
+:PROPERTIES:
+:CUSTOM_ID: section-18-2
+:END:
+
+* 18.3 Special Input Characters
+:PROPERTIES:
+:CUSTOM_ID: section-18-3
+:END:
+
+* 18.4 Getting and Setting Terminal Attributes
+:PROPERTIES:
+:CUSTOM_ID: section-18-4
+:END:
+
+* 18.5 Terminal Option Flags
+:PROPERTIES:
+:CUSTOM_ID: section-18-5
+:END:
+
+* 18.6 =stty= Command
+:PROPERTIES:
+:CUSTOM_ID: section-18-6
+:END:
+
+* 18.7 Baud Rate Functions
+:PROPERTIES:
+:CUSTOM_ID: section-18-7
+:END:
+
+* 18.8 Line Control Functions
+:PROPERTIES:
+:CUSTOM_ID: section-18-8
+:END:
+
+* 18.9 Terminal Identification
+:PROPERTIES:
+:CUSTOM_ID: section-18-9
+:END:
+
+* 18.10 Canonical Mode
+:PROPERTIES:
+:CUSTOM_ID: section-18-10
+:END:
+
+* 18.11 Noncanonical Mode
+:PROPERTIES:
+:CUSTOM_ID: section-18-11
+:END:
+
+* 18.12 Terminal Window Size
+:PROPERTIES:
+:CUSTOM_ID: section-18-12
+:END:
+
+* 18.13 =termcap=, =terminfo=, and =curses=
+:PROPERTIES:
+:CUSTOM_ID: section-18-13
+:END:
+
+* 18.14 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-18-14
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-18
+:END:
+
+** Exercise 18.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-18-1
+:END:
+
+Write a program that calls tty_raw and terminates (without resetting the terminal mode).
+If your system provides the reset(1) command (all four systems described in this text do),
+use it to restore the terminal mode.
+
+** Exercise 18.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-18-2
+:END:
+
+The PARODD flag in the c_cflag field allows us to specify even or odd parity. The BSD
+tip program, however, also allows the parity bit to be 0 or 1. How does it do this?
+
+** Exercise 18.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-18-3
+:END:
+
+If your system’s stty(1) command outputs the MIN and TIME values, do the following
+exercise. Log in to the system twice and start the vi editor from one login. Use the stty
+command from your other login to determine which values vi sets MIN and TIME to
+(since vi sets the terminal to noncanonical mode). (If you are running a windowing
+system on your terminal, you can do this same test by logging in once and using two
+separate windows instead.)

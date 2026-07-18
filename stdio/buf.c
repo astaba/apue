@@ -12,7 +12,7 @@
  * Modern Version: Re-add missing internal definitions that modern
  * glibc hides from stdio.h
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 /* Explicitly bring in the layout definitions if they are concealed */
 struct _IO_FILE_modern {

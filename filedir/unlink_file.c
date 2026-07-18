@@ -7,7 +7,7 @@
  *
  * Figure 4.16 Open a file and then unlink it.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 int main(void) {

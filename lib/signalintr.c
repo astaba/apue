@@ -1,17 +1,24 @@
+/* =========================================================================
+ * Created on: <Fri Jul 17 14:40:36 +01 2026>
+ * Time-stamp: <Fri Jul 17 14:51:19 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/lib/signalintr.c -
+ *
+ * Figure 10.19 The signal_intr function
+ * ========================================================================= */
 #include "apue.h"
 
-Sigfunc *
-signal_intr(int signo, Sigfunc *func)
-{
-	struct sigaction	act, oact;
+Sigfunc *signal_intr(int signo, Sigfunc *func) {
+  struct sigaction act, oact;
 
-	act.sa_handler = func;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = 0;
-#ifdef	SA_INTERRUPT
-	act.sa_flags |= SA_INTERRUPT;
+  act.sa_handler = func;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+#ifdef SA_INTERRUPT
+  act.sa_flags |= SA_INTERRUPT;
 #endif
-	if (sigaction(signo, &act, &oact) < 0)
-		return(SIG_ERR);
-	return(oact.sa_handler);
+  if (sigaction(signo, &act, &oact) < 0)
+    return (SIG_ERR);
+  return (oact.sa_handler);
 }

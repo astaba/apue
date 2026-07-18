@@ -10,7 +10,7 @@
  * program that seeds the buffer with a known pattern to see how
  * writes to the stream behave.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 #define BSZ 48
 

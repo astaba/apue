@@ -10,7 +10,7 @@
  * using this simple program that reads commands from standard input
  * and executes the commands.  See [[file:shell2.c][Figure 1.10]]
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <sys/wait.h>
 
 int main(void) {

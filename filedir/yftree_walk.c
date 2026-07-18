@@ -27,7 +27,7 @@
  * global variables updated by the callback function to display the
  * final report.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>

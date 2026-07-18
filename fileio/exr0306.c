@@ -15,7 +15,7 @@
  * offset to the last updated file size from v-node before writting at
  * the end, always at the and.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 int main(int argc, char *argv[argc + 1]) {

@@ -7,7 +7,7 @@
  *
  * Figure 4.8 Example of access function
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {

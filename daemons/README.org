@@ -1,0 +1,117 @@
+#+TITLE: Deamon Processes
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 13 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#131-introduction][13.1 Introduction]]
+- [[#132-daemon-characteristics][13.2 Daemon Characteristics]]
+- [[#133-coding-rules][13.3 Coding Rules]]
+- [[#134-error-logging][13.4 Error Logging]]
+- [[#135-single-instance-daemons][13.5 Single-Instance Daemons]]
+- [[#136-daemon-conventions][13.6 Daemon Conventions]]
+- [[#137-clientserver-model][13.7 Client–Server Model]]
+- [[#138-summary][13.8 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-131][Exercise 13.1]]
+  - [[#exercise-132][Exercise 13.2]]
+  - [[#exercise-133][Exercise 13.3]]
+  - [[#exercise-134][Exercise 13.4]]
+
+* 13.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-13-1
+:END:
+
+* 13.2 Daemon Characteristics
+:PROPERTIES:
+:CUSTOM_ID: section-13-2
+:END:
+
+* 13.3 Coding Rules
+:PROPERTIES:
+:CUSTOM_ID: section-13-3
+:END:
+
+* 13.4 Error Logging
+:PROPERTIES:
+:CUSTOM_ID: section-13-4
+:END:
+
+* 13.5 Single-Instance Daemons
+:PROPERTIES:
+:CUSTOM_ID: section-13-5
+:END:
+
+* 13.6 Daemon Conventions
+:PROPERTIES:
+:CUSTOM_ID: section-13-6
+:END:
+
+* 13.7 Client–Server Model
+:PROPERTIES:
+:CUSTOM_ID: section-13-7
+:END:
+
+* 13.8 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-13-8
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-13
+:END:
+
+** Exercise 13.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-13-1
+:END:
+
+As we might guess from Figure 13.2, when the syslog facility is initialized, either by
+calling openlog directly or on the first call to syslog, the special device file for the UNIX
+domain datagram socket, /dev/log, has to be opened. What happens if the user process
+(the daemon) calls chroot before calling openlog?
+
+** Exercise 13.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-13-2
+:END:
+
+Recall the sample ps output from Section 13.2. The only user-level daemon that isn’t a
+session leader is the rsyslogd process. Explain why the syslogd daemon isn’t a session
+leader.
+
+** Exercise 13.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-13-3
+:END:
+
+List all the daemons active on your system, and identify the function of each one.
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-13-3
+:END:
+
+[[file:../exercises/getlogin.c][Figure C.14]] shows a solution.
+
+The results depend on the platform. Recall that daemonize closes all open file
+descriptors and then reopens the first three to /dev/null. This means that the
+process won’t have a controlling terminal, so getlogin won’t be able to look in
+the utmp file for the process’s login entry. Thus, on Linux 3.2.0 and Solaris 10,
+we find that a daemon has no login name.
+
+Under FreeBSD 8.0 and Mac OS X 10.6.8, however, the login name is maintained
+in the process table and copied across a fork. This means that the process can
+always get the login name, unless the parent didn’t have one to start out (such as
+init when the system is bootstrapped).
+
+** Exercise 13.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-13-4
+:END:
+
+Write a program that calls the daemonize function in Figure 13.1. After calling this
+function, call getlogin (Section 8.15) to see whether the process has a login name now
+that it has become a daemon. Print the results to a file.

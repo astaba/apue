@@ -1,6 +1,6 @@
 /* =========================================================================
  * Created on: <Wed Jun 24 19:24:06 +01 2026>
- * Time-stamp: <Wed Jun 24 20:07:00 +01 2026 by owner>
+ * Time-stamp: <Mon Jul 13 01:10:55 +01 2026 by owner>
  * Author    : owner
  * Desc      : ~/coding/c_prog/apue.3e/stdio/ybuf.c -
  *
@@ -11,7 +11,7 @@
  * Modern Version: Re-add missing internal definitions that modern
  * glibc hides from stdio.h
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 /* Explicitly bring in the layout definitions if they are concealed */
 struct _IO_FILE_modern {

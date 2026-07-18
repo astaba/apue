@@ -1,0 +1,104 @@
+#+TITLE: Miscellaneous Source Code
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Appendix B from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#b1-our-header-file][B.1 Our Header File]]
+- [[#b2-standard-error-routines][B.2 Standard Error Routines]]
+  - [[#single-call-error-notification-to-stderr][Single-call ERROR Notification to =stderr=]]
+  - [[#error-notification-from-daemon-process][ERROR Notification from =daemon= process]]
+
+* B.1 Our Header File
+:PROPERTIES:
+:CUSTOM_ID: section-b-1
+:END:
+
+Most programs in the text include the proverbial header file =apue.h=,
+shown in [[file:~/coding/c_prog/apue.3e/include/apue.h][Figure B.1]]. It defines constants (such as =MAXLINE=) and
+prototypes for our own functions.  Most programs need to include the
+following headers: =<stdio.h>=, =<stdlib.h>= (for the =exit= function
+prototype), and =<unistd.h>= (for all the standard *UNIX* function
+prototypes). So our header automatically includes these system
+headers, along with =<string.h>=. This also reduces the size of all
+the program listings in the text.
+
+The reasons we include our header before all the normal system headers
+are to allow us to define anything that might be required by headers
+before they are included, to control the order in which header files
+are included, and to allow us to redefine anything that needs to be
+fixed up to hide the differences between systems.
+
+* B.2 Standard Error Routines
+:PROPERTIES:
+:CUSTOM_ID: section-b-2
+:END:
+
+Two sets of /error functions/ are used in most of the examples
+throughout the text to handle error conditions. One set begins with
+=err_= and *outputs an error message to standard error*. The other set
+begins with =log_= and *is intended for daemon processes* ([[file:~/coding/c_prog/apue.3e/daemons/README.org][Chapter 13]])
+*that probably have no controlling terminal*.
+
+** Single-call ERROR Notification to =stderr=
+
+The reason for defining our own error functions is to let us write our
+error handling with a single line of C code, as in
+
+#+begin_src c
+  if (/* error condition */)
+    err_dump(/* printf format with any number of arguments */);
+#+end_src
+
+instead of
+
+#+begin_src c
+  if (/* error condition */) {
+    char buf[200];
+    sprintf(buf, /* printf format with any number of arguments */);
+    perror(buf);
+    abort();
+  }
+#+end_src
+
+Our error functions use the *variable-length argument list* facility
+from *ISO C*. See /Section 7.3 of Kernighan and Ritchie/ [1988] for
+additional details. Be aware that this ISO C facility differs from the
+=varargs= facility provided by earlier systems (such as *SVR3* and
+*4.3BSD*). The names of the macros are the same, but the arguments to
+some of the macros have changed.
+
+[[file:error.c][Figure B.3]] (/error.c/) shows the error functions that output to
+standard error.
+
+** ERROR Notification from =daemon= process
+
+[[file:errorlog.c][Figure B.4]] (/errorlog.c/) shows the =log_XXX= error functions. These
+require the caller to define the variable =log_to_stderr= and set it
+/nonzero/ if the process is not running as a daemon. In this case, the
+error messages are sent to standard error. If the =log_to_stderr= flag
+is =0=, the =syslog= facility ([[file:~/coding/c_prog/apue.3e/daemons/README.org::#section-13-4][Section 13.4]]) is used.
+
+*** Figure B.2 Our standard error functions
+:PROPERTIES:
+:CUSTOM_ID: figure-b-2
+:END:
+
+Summarizes the differences between the various error functions.
+
+| Function | Adds string from strerror? | Parameter to strerror | Terminate? |
+|----------+----------------------------+-----------------------+------------|
+| err_dump | yes                        | errno                 | abort();   |
+| err_exit | yes                        | explicit parameter    | exit(1);   |
+| err_msg  | no                         |                       | return;    |
+| err_quit | no                         |                       | exit(1);   |
+| err_ret  | yes                        | errno                 | return;    |
+| err_sys  | yes                        | errno                 | exit(1);   |
+| err_cont | yes                        | explicit parameter    | return;    |
+|----------+----------------------------+-----------------------+------------|
+| log_msg  | no                         |                       | return;    |
+| log_quit | no                         |                       | exit(2);   |
+| log_ret  | yes                        | errno                 | return;    |
+| log_sys  | yes                        | errno                 | exit(2);   |
+| log_exit | yes                        | explicit parameter    | exit(2);   |
+

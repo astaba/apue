@@ -1,5 +1,15 @@
 #!/usr/bin/awk -f
-# Note: on Solaris, use nawk instead
+# =========================================================================
+# Created on: <Wed Jul 15 17:34:14 +01 2026>
+# Time-stamp: <Wed Jul 15 18:21:04 +01 2026 by owner>
+# Author    : W. Richard Stevens and Stephen A. Rago from
+#             "Advanced Programming in the UNIX® Environment" Third Edition
+# Desc      : ~/coding/c_prog/apue.3e/proc/awkexample -
+#
+# Figure 8.21: An awk program as an interpreter file
+#
+# NOTE: on Solaris, use nawk instead
+# ========================================================================= */
 BEGIN {
 	for (i = 0; i < ARGC; i++)
 		printf "ARGV[%d] = %s\n", i, ARGV[i]

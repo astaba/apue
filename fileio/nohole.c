@@ -9,7 +9,7 @@
  * demonstration.
  * ========================================================================= */
 /* #include "apue.h" */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 #define TARGET_SIZE 16394

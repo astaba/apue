@@ -1,0 +1,150 @@
+#+TITLE: Advanced IPC
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 17 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#171-introduction][17.1 Introduction]]
+- [[#172-unix-domain-sockets][17.2 UNIX Domain Sockets]]
+  - [[#1721-naming-unix-domain-sockets][17.2.1 Naming UNIX Domain Sockets]]
+- [[#173-unique-connections][17.3 Unique Connections]]
+- [[#174-passing-file-descriptors][17.4 Passing File Descriptors]]
+- [[#175-an-open-server-version-1][17.5 An Open Server, Version 1]]
+- [[#176-an-open-server-version-2][17.6 An Open Server, Version 2]]
+- [[#177-summary][17.7 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-171][Exercise 17.1]]
+  - [[#exercise-172][Exercise 17.2]]
+  - [[#exercise-173][Exercise 17.3]]
+  - [[#exercise-174][Exercise 17.4]]
+  - [[#exercise-175][Exercise 17.5]]
+  - [[#exercise-176][Exercise 17.6]]
+  - [[#exercise-177][Exercise 17.7]]
+
+* 17.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-17-1
+:END:
+
+* 17.2 UNIX Domain Sockets
+:PROPERTIES:
+:CUSTOM_ID: section-17-2
+:END:
+
+[[file:pollmsg.c][Figure 17.3]] Poll for XSI messages using UNIX domain sockets.
+
+** 17.2.1 Naming UNIX Domain Sockets
+:PROPERTIES:
+:CUSTOM_ID: section-17-2-1
+:END:
+
+* 17.3 Unique Connections
+:PROPERTIES:
+:CUSTOM_ID: section-17-3
+:END:
+
+* 17.4 Passing File Descriptors
+:PROPERTIES:
+:CUSTOM_ID: section-17-4
+:END:
+
+* 17.5 An Open Server, Version 1
+:PROPERTIES:
+:CUSTOM_ID: section-17-5
+:END:
+
+* 17.6 An Open Server, Version 2
+:PROPERTIES:
+:CUSTOM_ID: section-17-6
+:END:
+
+* 17.7 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-17-7
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-17
+:END:
+
+** Exercise 17.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-1
+:END:
+
+We chose to use UNIX domain datagram sockets in Figure 17.3, because they retain
+message boundaries. Describe the changes that would be necessary to use regular pipes
+instead. How can we avoid copying the messages two extra times?
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-17-1
+:END:
+
+Regular pipes provide a byte stream interface. To detect message
+boundaries, we’d have to add a header to each message to indicate the
+length. But this still involves two extra copy operations: one to
+write to the pipe and one to read from the pipe. A more efficient
+approach is to use the pipe only to signal the main thread that a new
+message is available. We can use a single byte for this purpose. With
+this approach, we need to move the mymesg structure to the threadinfo
+structure and use a mutex and a condition variable to prevent the
+helper thread from reusing the mymesg structure until the main thread
+is done with it. The solution is shown in [[file:../exercises/pollmsg2.c][Figure C.24]].
+
+** Exercise 17.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-2
+:END:
+
+Write the following program using the file descriptor passing functions from this chapter
+and the parent–child synchronization routines from Section 8.9. The program calls fork,
+and the child opens an existing file and passes the open descriptor to the parent. The child
+then positions the file using lseek and notifies the parent. The parent reads the file’s
+current offset and prints it for verification. If the file was passed from the child to the
+parent as we described, they should be sharing the same file table entry, so each time the
+child changes the file’s current offset, that change should also affect the parent’s descriptor.
+Have the child position the file to a different offset and notify the parent again.
+
+** Exercise 17.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-3
+:END:
+
+In Figures 17.20 and 17.21, we differentiated between declaring and defining the global
+variables. What is the difference?
+
+** Exercise 17.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-4
+:END:
+
+Recode the buf_args function (Figure 17.23), removing the compile-time limit on the size
+of the argv array. Use dynamic memory allocation.
+
+** Exercise 17.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-5
+:END:
+
+Describe ways to optimize the function loop in Figure 17.29 and Figure 17.30. Implement
+your optimizations.
+
+** Exercise 17.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-6
+:END:
+
+In the serv_listen function (Figure 17.8), we unlink the name of the file representing
+the UNIX domain socket if the file already exists. To avoid unintentionally removing a file
+that isn’t a socket, we could call stat first to verify the file type. Explain the two problems
+with this approach.
+
+** Exercise 17.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-17-7
+:END:
+
+Describe two possible ways to pass more than one file descriptor with a single call to
+sendmsg. Try them out to see if they are supported by your operating system.

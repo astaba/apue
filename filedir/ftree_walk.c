@@ -27,7 +27,7 @@
  * Many UNIX tools (e.g., `find`, `du`, `tar`) and APIs (`ftw()`, `nftw()`)
  * are built on this paradigm.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <dirent.h>
 #include <limits.h>
 #include <stdlib.h>

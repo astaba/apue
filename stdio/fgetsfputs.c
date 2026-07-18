@@ -8,7 +8,7 @@
  * Figure 5.5 Copy standard input to standard output using fgets and
  * fputs.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   char buf[MAXLINE];

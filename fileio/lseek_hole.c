@@ -15,7 +15,7 @@
  *    $ ./nohole         # Create the nohole file and optionally look inside
  *    $ ls -l file.hole  file.nohole  # Compare sizes
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 /* Declare 10-char strings */

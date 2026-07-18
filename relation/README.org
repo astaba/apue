@@ -1,0 +1,103 @@
+#+TITLE: Process Relationships
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 9 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#91-introduction][9.1 Introduction]]
+- [[#92-terminal-logins][9.2 Terminal Logins]]
+- [[#93-network-logins][9.3 Network Logins]]
+- [[#94-process-groups][9.4 Process Groups]]
+- [[#95-sessions][9.5 Sessions]]
+- [[#96-controlling-terminal][9.6 Controlling Terminal]]
+- [[#97-tcgetpgrp-tcsetpgrp-and-tcgetsid-functions][9.7 =tcgetpgrp=, =tcsetpgrp=, and =tcgetsid= Functions]]
+- [[#98-job-control][9.8 Job Control]]
+- [[#99-shell-execution-of-programs][9.9 Shell Execution of Programs]]
+- [[#910-orphaned-process-groups][9.10 Orphaned Process Groups]]
+- [[#911-freebsd-implementation][9.11 FreeBSD Implementation]]
+- [[#912-summary][9.12 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-91][Exercise 9.1]]
+  - [[#exercise-92][Exercise 9.2]]
+
+* 9.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-9-1
+:END:
+
+* 9.2 Terminal Logins
+:PROPERTIES:
+:CUSTOM_ID: section-9-2
+:END:
+
+* 9.3 Network Logins
+:PROPERTIES:
+:CUSTOM_ID: section-9-3
+:END:
+
+* 9.4 Process Groups
+:PROPERTIES:
+:CUSTOM_ID: section-9-4
+:END:
+
+* 9.5 Sessions
+:PROPERTIES:
+:CUSTOM_ID: section-9-5
+:END:
+
+* 9.6 Controlling Terminal
+:PROPERTIES:
+:CUSTOM_ID: section-9-6
+:END:
+
+* 9.7 =tcgetpgrp=, =tcsetpgrp=, and =tcgetsid= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-9-7
+:END:
+
+* 9.8 Job Control
+:PROPERTIES:
+:CUSTOM_ID: section-9-8
+:END:
+
+* 9.9 Shell Execution of Programs
+:PROPERTIES:
+:CUSTOM_ID: section-9-9
+:END:
+
+* 9.10 Orphaned Process Groups
+:PROPERTIES:
+:CUSTOM_ID: section-9-10
+:END:
+
+* 9.11 FreeBSD Implementation
+:PROPERTIES:
+:CUSTOM_ID: section-9-11
+:END:
+
+* 9.12 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-9-12
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-9
+:END:
+
+** Exercise 9.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-9-1
+:END:
+
+Refer back to our discussion of the utmp and wtmp files in Section 6.8. Why are the logout
+records written by the init process? Is this handled the same way for a network login?
+
+** Exercise 9.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-9-2
+:END:
+
+Write a small program that calls fork and has the child create a new session. Verify that
+the child becomes a process group leader and that the child no longer has a controlling
+terminal.

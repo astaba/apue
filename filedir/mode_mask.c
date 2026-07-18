@@ -8,7 +8,7 @@
  * Figure 4.9: Example of umask function Any bits that are on in the
  * file mode creation mask are turned off in the file's mode.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 #define RWRWRW (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)

@@ -1,0 +1,240 @@
+#+TITLE: UNIX Standardization and Implementations
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 2 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#21-introduction][2.1 Introduction]]
+- [[#22-unix-standardization][2.2 UNIX Standardization]]
+  - [[#221-isoc][2.2.1 ISOC]]
+  - [[#222-ieee-posix][2.2.2 IEEE POSIX]]
+  - [[#223-the-single-unix-specification][2.2.3 The Single UNIX Specification]]
+  - [[#224-fips][2.2.4 FIPS]]
+- [[#23-unix-system-implementations][2.3 UNIX System Implementations]]
+  - [[#231-unix-system-v-release-4][2.3.1 UNIX System V Release 4]]
+  - [[#232-44bsd][2.3.2 4.4BSD]]
+  - [[#233-freebsd][2.3.3 FreeBSD]]
+  - [[#234-linux][2.3.4 Linux]]
+  - [[#235-mac-os-x][2.3.5 Mac OS X]]
+  - [[#236-solaris][2.3.6 Solaris]]
+  - [[#237-other-unix-systems][2.3.7 Other UNIX Systems]]
+- [[#24-relationship-of-standards-and-implementations][2.4 Relationship of Standards and Implementations]]
+- [[#25-limits][2.5 Limits]]
+  - [[#251-iso-c-limits][2.5.1 ISO C Limits]]
+  - [[#252-posix-limits][2.5.2 POSIX Limits]]
+  - [[#253-xsi-limits][2.5.3 XSI Limits]]
+  - [[#254-sysconf-pathconf-and-fpathconf-functions][2.5.4 sysconf, pathconf, and fpathconf Functions]]
+  - [[#255-indeterminate-runtime-limits][2.5.5 Indeterminate Runtime Limits]]
+- [[#26-options][2.6 Options]]
+- [[#27-feature-test-macros][2.7 Feature Test Macros]]
+- [[#28-primitive-system-data-types][2.8 Primitive System Data Types]]
+- [[#29-differences-between-standards][2.9 Differences Between Standards]]
+- [[#210-summary][2.10 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-21][Exercise 2.1]]
+  - [[#exercise-22][Exercise 2.2]]
+  - [[#exercise-23][Exercise 2.3]]
+
+* 2.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-2-1
+:END:
+
+* 2.2 UNIX Standardization
+:PROPERTIES:
+:CUSTOM_ID: section-2-2-1
+:END:
+
+** 2.2.1 ISOC
+:PROPERTIES:
+:CUSTOM_ID: section-2-2-1
+:END:
+
+** 2.2.2 IEEE POSIX
+:PROPERTIES:
+:CUSTOM_ID: section-2-2-2
+:END:
+
+** 2.2.3 The Single UNIX Specification
+:PROPERTIES:
+:CUSTOM_ID: section-2-2-3
+:END:
+
+** 2.2.4 FIPS
+:PROPERTIES:
+:CUSTOM_ID: section-2-2-4
+:END:
+
+* 2.3 UNIX System Implementations
+:PROPERTIES:
+:CUSTOM_ID: section-2-3
+:END:
+
+** 2.3.1 UNIX System V Release 4
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-1
+:END:
+
+** 2.3.2 4.4BSD
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-2
+:END:
+
+** 2.3.3 FreeBSD
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-3
+:END:
+
+** 2.3.4 Linux
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-4
+:END:
+
+** 2.3.5 Mac OS X
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-5
+:END:
+
+** 2.3.6 Solaris
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-6
+:END:
+
+** 2.3.7 Other UNIX Systems
+:PROPERTIES:
+:CUSTOM_ID: section-2-3-7
+:END:
+
+* 2.4 Relationship of Standards and Implementations
+:PROPERTIES:
+:CUSTOM_ID: section-2-4
+:END:
+
+* 2.5 Limits
+:PROPERTIES:
+:CUSTOM_ID: section-2-5
+:END:
+
+** 2.5.1 ISO C Limits
+:PROPERTIES:
+:CUSTOM_ID: section-2-5-1
+:END:
+
+** 2.5.2 POSIX Limits
+:PROPERTIES:
+:CUSTOM_ID: section-2-5-2
+:END:
+
+*** Figure 2.8 POSIX.1 minimum values from =<limits.h>=
+:PROPERTIES:
+:CUSTOM_ID: figure-2-8
+:END:
+
+| Name                  | Description: minimum acceptable value for maximum ...                                                                                               |  Value |
+|                       | <40>                                                                                                                                                |        |
+|-----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------+--------|
+| _POSIX_ARG_MAX        | length of arguments to exec functions                                                                                                               |  4,096 |
+| _POSIX_CHILD_MAX      | number of child processes at a time per real user ID                                                                                                |     25 |
+| _POSIX_DELAYTIMER_MAX | number of timer expiration overruns                                                                                                                 |     32 |
+| _POSIX_HOST_NAME_MAX  | length of a host name as returned by gethostname                                                                                                    |    255 |
+| _POSIX_LINK_MAX       | number of links to a file                                                                                                                           |      8 |
+| _POSIX_LOGIN_NAME_MAX | length of a login name                                                                                                                              |      9 |
+| _POSIX_MAX_CANON      | number of bytes on a terminal’s canonical input queue                                                                                               |    255 |
+| _POSIX_MAX_INPUT      | space available on a terminal’s input queue                                                                                                         |    255 |
+| _POSIX_NAME_MAX       | number of bytes in a filename, not including the terminating null                                                                                   |     14 |
+| _POSIX_NGROUPS_MAX    | number of simultaneous supplementary group IDs per process                                                                                          |      8 |
+| _POSIX_OPEN_MAX       | maximum number of open files per process                                                                                                            |     20 |
+| _POSIX_PATH_MAX       | number of bytes in a pathname, including the terminating null                                                                                       |    256 |
+| _POSIX_PIPE_BUF       | number of bytes that can be written atomically to a pipe                                                                                            |    512 |
+| _POSIX_RE_DUP_MAX     | number of repeated occurrences of a basic regular expression using the interval notation \{m,n\}permitted by the regexec and regcomp functions when |    255 |
+| _POSIX_RTSIG_MAX      | number of real-time signal numbers reserved for applications                                                                                        |      8 |
+| _POSIX_SEM_NSEMS_MAX  | number of semaphores a process can have in use at one time                                                                                          |    256 |
+| _POSIX_SEM_VALUE_MAX  | value a semaphore can hold                                                                                                                          | 32,767 |
+| _POSIX_SIGQUEUE_MAX   | number of queued signals a process can send and have pending                                                                                        |     32 |
+| _POSIX_SSIZE_MAX      | value that can be stored in ssize_t object                                                                                                          | 32,767 |
+| _POSIX_STREAM_MAX     | number of standard I/O streams a process can have open at once                                                                                      |      8 |
+| _POSIX_SYMLINK_MAX    | number of bytes in a symbolic link                                                                                                                  |    255 |
+| _POSIX_SYMLOOP_MAX    | number of symbolic links that can be traversed during pathname resolution                                                                           |      8 |
+| _POSIX_TIMER_MAX      | number of timers per process                                                                                                                        |     32 |
+| _POSIX_TTY_NAME_MAX   | length of a terminal device name, including the terminating null                                                                                    |      9 |
+| _POSIX_TZNAME_MAX     | number of bytes for the name of a time zone                                                                                                         |      6 |
+
+** 2.5.3 XSI Limits
+:PROPERTIES:
+:CUSTOM_ID: section-2-5-3
+:END:
+
+** 2.5.4 sysconf, pathconf, and fpathconf Functions
+:PROPERTIES:
+:CUSTOM_ID: section-2-5-4
+:END:
+
+** 2.5.5 Indeterminate Runtime Limits
+:PROPERTIES:
+:CUSTOM_ID: section-2-5-5
+:END:
+
+* 2.6 Options
+:PROPERTIES:
+:CUSTOM_ID: section-2-6
+:END:
+
+* 2.7 Feature Test Macros
+:PROPERTIES:
+:CUSTOM_ID: section-2-7
+:END:
+
+* 2.8 Primitive System Data Types
+:PROPERTIES:
+:CUSTOM_ID: section-2-8
+:END:
+
+* 2.9 Differences Between Standards
+:PROPERTIES:
+:CUSTOM_ID: section-2-9
+:END:
+
+* 2.10 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-2-10
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-2
+:END:
+
+** Exercise 2.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-2-1
+:END:
+
+We mentioned in Section 2.8 that some of the primitive system data types are defined in
+more than one header. For example, in FreeBSD 8.0, size_t is defined in 29 different
+headers. Because all 29 headers could be included in a program and because ISO C does
+not allow multiple typedefs for the same name, how must the headers be written?
+
+** Exercise 2.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-2-2
+:END:
+
+Examine your system’s headers and list the actual data types used to implement the
+primitive system data types.
+
+** Exercise 2.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-2-3
+:END:
+
+Update the program in Figure 2.17 to avoid the needless processing that occurs when
+sysconf returns LONG_MAX as the limit for OPEN_MAX.
+
+*** Solution
+
+If =OPEN_MAX= is indeterminate or ridiculously large (i.e., equal to
+=LONG_MAX=), we can use getrlimit to get the per-process maximum for
+open file descriptors.  Since the per-process limit can be modified,
+we can’t cache the value obtained from the previous call (it might
+have changed). See [[file:~/coding/c_prog/apue.3e/exercises/openmax.c][Figure C.1]].
+

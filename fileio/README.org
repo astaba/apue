@@ -4,17 +4,29 @@
 #+STARTUP: showall
 
 * Table of Content                                                    :toc_2:
+- [[#31-introduction][3.1 Introduction]]
+- [[#32-file-descr-iptors][3.2 File Descr iptors]]
+- [[#33-open-and-openat-functions][3.3 =open= and =openat= Functions]]
+- [[#34-creat-function][3.4 creat Function]]
+- [[#35-close-function][3.5 close Function]]
 - [[#36-lseek-function][3.6 =lseek= function]]
   - [[#explicitly-set-files-offset][Explicitly set file's offset]]
   - [[#creating-files-with-holes][Creating files with holes]]
+- [[#37-read-function][3.7 read Function]]
+- [[#38-write-function][3.8 write Function]]
 - [[#39-io-efficiency][3.9 I/O Efficiency]]
+- [[#310-file-shar-ing][3.10 File Shar ing]]
+- [[#311-atomic-operations][3.11 Atomic Operations]]
 - [[#312-dup-and-dup2-functions][3.12 =dup= and =dup2= Functions]]
   - [[#dup2-semantics][=dup2= Semantics]]
+- [[#313-sync-fsync-and-fdatasync-functions][3.13 sync, fsync, and fdatasync Functions]]
 - [[#314-fcntl-function][3.14 =fcntl= Function]]
   - [[#presentation][Presentation]]
   - [[#file-descriptor-flags-and-file-status-flags][File descriptor flags and file status flags]]
   - [[#example][Example]]
+- [[#315-ioctl-function][3.15 ioctl Function]]
 - [[#316-devfd][3.16 =/dev/fd=]]
+- [[#317-summary][3.17 Summary]]
 - [[#exercises][Exercises]]
   - [[#exercise-31][Exercise 3.1]]
   - [[#exercise-32][Exercise 3.2]]
@@ -23,7 +35,35 @@
   - [[#exercise-35][Exercise 3.5]]
   - [[#exercise-36][Exercise 3.6]]
 
+* 3.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-3-1
+:END:
+
+* 3.2 File Descr iptors
+:PROPERTIES:
+:CUSTOM_ID: section-3-2
+:END:
+
+* 3.3 =open= and =openat= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-3-3
+:END:
+
+* 3.4 creat Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-4
+:END:
+
+* 3.5 close Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-5
+:END:
+
 * 3.6 =lseek= function
+:PROPERTIES:
+:CUSTOM_ID: section-3-6
+:END:
 
 ** Explicitly set file's offset
 
@@ -103,11 +143,37 @@ Although both files are the same size, the file without holes consumes
 *20 disk blocks*, whereas the file with holes consumes only *8
 blocks*.
 
+* 3.7 read Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-7
+:END:
+
+* 3.8 write Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-8
+:END:
+
 * 3.9 I/O Efficiency
+:PROPERTIES:
+:CUSTOM_ID: section-3-9
+:END:
 
 - [[file:copy_inout.c][Figure 3.5 copy_inout.c]]: Copy standard input to standard output.
 
+* 3.10 File Shar ing
+:PROPERTIES:
+:CUSTOM_ID: section-3-10
+:END:
+
+* 3.11 Atomic Operations
+:PROPERTIES:
+:CUSTOM_ID: section-3-11
+:END:
+
 * 3.12 =dup= and =dup2= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-3-12
+:END:
 
 ** =dup2= Semantics
 
@@ -183,7 +249,15 @@ mechanics:
 You have correctly moved past the high-level API terms and fully
 understood the resource management logic behind them!
 
+* 3.13 sync, fsync, and fdatasync Functions
+:PROPERTIES:
+:CUSTOM_ID: section-3-13
+:END:
+
 * 3.14 =fcntl= Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-14
+:END:
 
 ** Presentation
 
@@ -335,7 +409,15 @@ system is a likely candidate for using =O_SYNC=, so that it knows on
 return from a write that the data is actually on the disk, in case of
 an abnormal system failure.
 
+* 3.15 ioctl Function
+:PROPERTIES:
+:CUSTOM_ID: section-3-15
+:END:
+
 * 3.16 =/dev/fd=
+:PROPERTIES:
+:CUSTOM_ID: section-3-16
+:END:
 
 Newer systems provide a directory named =/dev/fd= whose entries are
 files named 0, 1, 2, and so on. Opening the file =/dev/fd/n= is
@@ -344,9 +426,20 @@ is open.
 
 - [[file:ytracefd.c][My Utility ytracefd.c]];
 
+* 3.17 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-3-17
+:END:
+
 * Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-3
+:END:
 
 ** Exercise 3.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-1
+:END:
 
 When reading or writing a disk file, are the functions described in
 this chapter really unbuffered? Explain.
@@ -366,9 +459,12 @@ operating system performs extensive buffering and caching behind the
 scenes.
 
 ** Exercise 3.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-2
+:END:
 
 Write your own =dup2= function that behaves the same way as the =dup2=
-function described in Section 3.12, without calling the =fcntl=
+function described in [[#section-3-12][Section 3.12]], without calling the =fcntl=
 function.  Be sure to handle errors correctly.
 
 *** Answer
@@ -376,6 +472,9 @@ function.  Be sure to handle errors correctly.
 - [[file:exr0302.c][exr0302.c]];
 
 ** TODO Exercise 3.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-3
+:END:
 
 Assume that a process executes the following three function calls:
 
@@ -393,6 +492,9 @@ descriptors are affected by an =fcntl= on =fd1= with a command of
 *** Answer
 
 ** Exercise 3.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-4
+:END:
 
 The following sequence of code has been observed in various programs:
 
@@ -521,6 +623,9 @@ only if it wasn't one of the critical standard descriptors (0, 1, or 2)
 that the program still needs to use.
 
 ** Exercise 3.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-5
+:END:
 
 The Bourne shell, Bourne-again shell, and Korn shell notation
 
@@ -581,6 +686,9 @@ As a result:
      to the terminal.
 
 ** Exercise 3.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-3-6
+:END:
 
 If you open a file for read–write with the append flag, can you still
 read from anywhere in the file using =lseek=? Can you use =lseek= to

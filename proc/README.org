@@ -1,0 +1,2403 @@
+#+TITLE: Process Control
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 8 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#81-introduction][8.1 Introduction]]
+- [[#82-process-identifiers][8.2 Process Identifiers]]
+- [[#83-the-fork-function][8.3 The =fork= Function]]
+  - [[#definition-and-address-space][Definition and Address Space]]
+  - [[#file-sharing][File Sharing]]
+- [[#84-vfork-function][8.4 =vfork= Function]]
+  - [[#example][Example]]
+- [[#85-exit-functions][8.5 =exit= Functions]]
+  - [[#process-termination-normal-and-abnormal][Process Termination: normal and abnormal]]
+  - [[#dealing-with-various-terminating-conditions][Dealing with various terminating conditions]]
+- [[#86-wait-and-waitpid-functions][8.6 =wait= and =waitpid= Functions]]
+  - [[#the-differences-between-wait-and-waitpid][The differences between =wait= and =waitpid=]]
+  - [[#granulary-control-over-child-reaping-with-waitpid][Granulary control over child reaping with =waitpid=]]
+- [[#87-waitid-function][8.7 =waitid= Function]]
+  - [[#function-arguments][Function arguments]]
+- [[#88-wait3-and-wait4-functions][8.8 =wait3= and =wait4= Functions]]
+- [[#89-race-conditions][8.9 Race Conditions]]
+  - [[#interprocess-communication-using-signals-the-tell_wait-model][Interprocess Communication Using Signals: The TELL_WAIT model]]
+- [[#810-excec-functions][8.10 =excec= Functions]]
+  - [[#definitions-and-differences-of-the-exec-functions][Definitions and Differences of the =exec= Functions]]
+  - [[#resource-limitations-and-program-state-across-exec][Resource Limitations and Program State across =exec=]]
+  - [[#system-call-execve-at-the-core-of-exec-api][System Call =execve= at the Core of =exec= API]]
+  - [[#example-1][Example]]
+- [[#811-changing-user-ids-and-group-ids][8.11 Changing User IDs and Group IDs]]
+  - [[#setreuid-and-setregid-functions][=setreuid= and =setregid= Functions]]
+  - [[#seteuid-and-setegid-functions][=seteuid= and =setegid= Functions]]
+  - [[#group-ids][Group IDs]]
+  - [[#example-2][Example]]
+- [[#812-interpreter-files][8.12 Interpreter Files]]
+  - [[#example-3][Example]]
+  - [[#example-4][Example]]
+- [[#813-system-function][8.13 =system= Function]]
+  - [[#set-user-id-programs][Set-User-ID Programs]]
+- [[#814-process-accounting][8.14 Process Accounting]]
+- [[#815-user-identification][8.15 User Identification]]
+- [[#816-process-scheduling][8.16 Process Scheduling]]
+- [[#817-process-times][8.17 Process Times]]
+- [[#818-summary][8.18 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-81][Exercise 8.1]]
+  - [[#exercise-82][Exercise 8.2]]
+  - [[#exercise-83][Exercise 8.3]]
+  - [[#exercise-84][Exercise 8.4]]
+  - [[#exercise-85][Exercise 8.5]]
+  - [[#exercise-86][Exercise 8.6]]
+  - [[#exercise-87][Exercise 8.7]]
+
+* 8.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-8-10
+:END:
+
+We now turn to the process control provided by the UNIX System. This
+includes the creation of new processes, program execution, and process
+termination. We also look at the various IDs that are the property of
+the process — real, effective, and saved; user and group IDs — and how
+they’re affected by the process control primitives. Interpreter files
+and the system function are also covered. We conclude the chapter by
+looking at the process accounting provided by most UNIX systems. This
+lets us look at the process control functions from a different
+perspective.
+
+* 8.2 Process Identifiers
+:PROPERTIES:
+:CUSTOM_ID: section-8-2
+:END:
+
+Every process has a unique process ID, a non-negative integer. Because
+the process ID is the only well-known identifier of a process that is
+always unique, it is often used as a piece of other identifiers, to
+guarantee uniqueness. For example, applications sometimes include the
+process ID as part of a filename in an attempt to generate unique
+filenames.
+
+Although unique, process IDs are reused. As processes terminate, their
+IDs become candidates for reuse. Most UNIX systems implement
+algorithms to delay reuse, however, so that newly created processes
+are assigned IDs different from those used by processes that
+terminated recently. This prevents a new process from being mistaken
+for the previous process to have used the same ID.
+
+There are some special processes, but the details differ from
+implementation to implementation.
+
+- *Process ID 0* is usually the *scheduler process* and is often known
+  as the *swapper*. No program on disk corresponds to this process,
+  which is part of the kernel and is known as a *system process*.
+
+- *Process ID 1* is usually the *init process* and is invoked by the
+  kernel at the end of the bootstrap procedure. The program file for
+  this process was =/etc/init= in older versions of the UNIX System
+  and is =/sbin/init= in newer versions. This process is responsible
+  for bringing up a UNIX system after the kernel has been
+  bootstrapped. *init* usually reads the system-dependent
+  initialization files — the ~/etc/rc*~ files or =/etc/inittab= and
+  the files in =/etc/init.d= — and brings the system to a certain
+  state, such as multiuser. The *init process* never dies. It is a
+  *normal user process*, not a system process within the kernel, like
+  the swapper, although it does run with superuser privileges. Later
+  in this chapter, we’ll see how init becomes the parent process of
+  any orphaned child process.
+
+#+begin_quote
+In *Mac OS X 10.4*, the =init= process was replaced with the =launchd=
+process, which performs the same set of tasks as init, but has
+expanded functionality. See /Section 5.10 in Singh/ [2006] for a
+discussion of how launchd operates.
+#+end_quote
+
+Each UNIX System implementation has its own set of kernel processes
+that provide operating system services. For example, on some virtual
+memory implementations of the UNIX System, process ID 2 is the
+/pagedaemon/. This process is responsible for supporting the paging of
+the virtual memory system.
+
+In addition to the process ID, there are other identifiers for every
+process. The following functions return these identifiers.
+
+#+begin_src c
+  #include <unistd.h>
+  pid_t getpid(void);
+  /* Returns: process ID of calling process */
+  pid_t getppid(void);
+  /* Returns: parent process ID of calling process */
+  uid_t getuid(void);
+  /* Returns: real user ID of calling process */
+  uid_t geteuid(void);
+  /* Returns: effective user ID of calling process */
+  gid_t getgid(void);
+  /* Returns: real group ID of calling process */
+  gid_t getegid(void);
+  /* Returns: effective group ID of calling process */
+#+end_src
+
+Note that none of these functions has an error return. We’ll return to
+the parent process ID in the next section when we discuss the =fork=
+function. The real and effective user and group IDs were discussed in
+[[file:../filedir/README.org::#section-4-4][Section 4.4]].
+
+* 8.3 The =fork= Function
+:PROPERTIES:
+:CUSTOM_ID: section-8-3
+:END:
+
+** Definition and Address Space
+
+An existing process can create a new one by calling the fork function.
+
+#+begin_src c
+  #include <unistd.h>
+  pid_t fork(void);
+  /* Returns: 0 in child, process ID of child in parent, −1 on error */
+#+end_src
+
+The new process created by =fork= is called the child process. This
+function is called once but returns twice. The only difference in the
+returns is that the return value in the child is 0, whereas the return
+value in the parent is the process ID of the new child. The reason the
+child’s process ID is returned to the parent is that a process can
+have more than one child, and there is no function that allows a
+process to obtain the process IDs of its children. The reason fork
+returns 0 to the child is that a process can have only a single
+parent, and the child can always call =getppid= to obtain the process
+ID of its parent. (Process ID 0 is reserved for use by the kernel, so
+it’s not possible for 0 to be the process ID of a child.)
+
+Both the child and the parent continue executing with the instruction
+that follows the call to =fork=. The child is a copy of the parent. For
+example, the child gets a copy of the parent’s data space, heap, and
+stack. Note that this is a copy for the child; the parent and the
+child do not share these portions of memory. The parent and the child
+do share the text segment, however ([[file:~/coding/c_prog/apue.3e/environ/README.org::#section-7-6][Section 7.6]]).
+
+Modern implementations don’t perform a complete copy of the parent’s
+data, stack, and heap, since a =fork= is often followed by an
+=exec=. Instead, a technique called *copy-on-write* (COW) is
+used. These regions are shared by the parent and the child and have
+their protection changed by the kernel to read-only. If either process
+tries to modify these regions, the kernel then makes a copy of that
+piece of memory only, typically a “page” in a virtual memory
+system. /Section 9.2 of Bach/ [1986] and /Sections 5.6 and 5.7 of
+McKusick et al./ [1996] provide more detail on this feature.
+
+#+begin_quote
+Variations of the =fork= function are provided by some platforms. All
+four platforms discussed in this book support the =vfork(2)= variant
+discussed in the next section.
+
+Linux 3.2.0 also provides new process creation through the =clone(2)=
+system call. This is a generalized form of =fork= that allows the
+caller to control what is shared between parent and child.
+
+FreeBSD 8.0 provides the =rfork(2)= system call, which is similar to
+the Linux clone system call. The =rfork= call is derived from the Plan
+9 operating system (Pike et al. [1995]).
+
+Solaris 10 provides two threads libraries: one for POSIX threads
+(pthreads) and one for Solaris threads. In previous releases, the
+behavior of fork differed between the two thread libraries.  For POSIX
+threads, fork created a process containing only the calling thread,
+but for Solaris threads, fork created a process containing copies of
+all threads from the process of the calling thread. In Solaris 10,
+this behavior has changed; fork creates a child containing a copy of
+the calling thread only, regardless of which thread library is
+used. Solaris also provides the =fork1= function, which can be used to
+create a process that duplicates only the calling thread, and the
+=forkall= function, which can be used to create a process that
+duplicates all the threads in the process. Threads are discussed in
+detail in *Chapters 11 and 12*.
+#+end_quote
+
+*** Example
+
+The program in [[file:fork1.c][Figure 8.1]] (/fork1.c/) demonstrates the fork function,
+showing how changes to variables in a child process do not affect the
+value of the variables in the parent process.
+
+If we execute this program, we get
+
+#+begin_example
+$ ./fork1
+a write to stdout
+before fork
+pid = 430, glob = 7, var = 89        # child’s variables were changed
+pid = 429, glob = 6, var = 88        # parent’s copy was not changed
+
+$ ./fork1 > temp.out
+
+$ cat temp.out
+a write to stdout
+before fork
+pid = 432, glob = 7, var = 89
+before fork
+pid = 431, glob = 6, var = 88
+#+end_example
+
+In general, we never know whether the child starts executing before
+the parent, or vice versa. The order depends on the scheduling
+algorithm used by the kernel. If it’s required that the child and
+parent synchronize their actions, some form of interprocess
+communication is required. In the program shown in Figure 8.1, we
+simply have the parent put itself to sleep for 2 seconds, to let the
+child execute. *There is no guarantee that the length of this delay is
+adequate*, and we talk about this and other types of synchronization
+in [[#section-8-9][Section 8.9]] (/Race Conditions/) when we discuss race conditions. In
+[[file:../signals/README.org::#section-10-16][Section 10.16]], we show how to use signals to synchronize a parent and
+a child after a fork.
+
+When we write to standard output, we subtract 1 from the size of buf
+to avoid writing the terminating null byte. Although =strlen= will
+calculate the length of a string not including the terminating null
+byte, =sizeof= calculates the size of the buffer, which does include
+the terminating null byte. Another difference is that using =strlen=
+requires a function call, whereas =sizeof= *calculates the buffer
+length at compile time*, *as the buffer is initialized with a known
+string and its size is fixed*.
+
+Note the interaction of =fork= with the I/O functions in the program
+in [[file:fork1.c][Figure 8.1]].  Recall from Chapter 3 that the =write= function is not
+buffered. Because =write= is called before the =fork=, its data is
+written once to standard output. The standard I/O library, however, is
+buffered. Recall from [[file:../stdio/README.org::#section-5-12][Section 5.12]] that standard output is line
+buffered if it’s connected to a terminal device; otherwise, it’s fully
+buffered. When we run the program interactively, we get only a single
+copy of the first =printf= line, because the standard output buffer is
+flushed by the newline. When we redirect standard output to a file,
+however, we get two copies of the =printf= line. In this second case,
+the =printf= before the =fork= is called once, but the line remains in
+the buffer when =fork= is called.  This buffer is then copied into the
+child when the parent’s data space is copied to the child. Both the
+parent and the child now have a standard I/O buffer with this line in
+it.  The second =printf=, right before the =exit=, just appends its
+data to the existing buffer.  When each process terminates, its copy
+of the buffer is finally flushed.
+
+** File Sharing
+
+When we redirect the standard output of the parent from the program in
+[[file:fork1.c][Figure 8.1]], the child’s standard output is also redirected. Indeed,
+one characteristic of =fork= is that all file descriptors that are
+open in the parent are duplicated in the child. We say “duplicated”
+because it’s as if the =dup= function had been called for each
+descriptor. The parent and the child share a file table entry for
+every open descriptor (recall Figure 3.9).
+
+Consider a process that has three different files opened for standard
+input, standard output, and standard error. On return from =fork=, we
+have the arrangement shown in [[file:../images/figure-8-2.jpeg][Figure 8.2]].
+
+It is important that the parent and the child share the same file
+=offset=. Consider a process that forks a child, then waits for the
+child to complete. Assume that both processes write to standard output
+as part of their normal processing. If the parent has its standard
+output redirected (by a shell, perhaps), it is essential that the
+parent’s file offset be updated by the child when the child writes to
+standard output. In this case, the child can write to standard output
+while the parent is waiting for it; on completion of the child, the
+parent can continue writing to standard output, knowing that its
+output will be appended to whatever the child wrote. If the parent and
+the child did not share the same file offset, this type of interaction
+would be more difficult to accomplish and would require explicit
+actions by the parent.
+
+If both parent and child write to the same descriptor, without any
+form of synchronization, such as having the parent wait for the child,
+their output will be intermixed (assuming it’s a descriptor that was
+open before the fork). This is not the normal mode of operation,
+although possible as we saw it in [[file:../images/figure-8-2.jpeg][Figure 8.2]].
+
+There are two normal cases for handling the descriptors after a fork.
+
+1. The parent waits for the child to complete. In this case, the
+   parent does not need to do anything with its descriptors. When the
+   child terminates, any of the shared descriptors that the child read
+   from or wrote to will have their file offsets updated accordingly.
+2. Both the parent and the child go their own ways. Here, after the
+   fork, the parent closes the descriptors that it doesn’t need, and
+   the child does the same thing. This way, neither interferes with
+   the other’s open descriptors. This scenario is often found with
+   network servers.
+
+Besides the open files, numerous other properties of the parent are
+inherited by the child:
+
+- Real user ID, real group ID, effective user ID, and effective group
+  ID
+- Supplementary group IDs
+- Process group ID
+- Session ID
+- Controlling terminal
+- The set-user-ID and set-group-ID flags
+- Current working directory
+- Root directory
+- File mode creation mask
+- Signal mask and dispositions
+- The close-on-exec flag for any open file descriptors
+- Environment
+- Attached shared memory segments
+- Memory mappings
+- Resource limits
+
+The differences between the parent and child are
+
+- The return values from =fork= are different.
+- The process IDs are different.
+- The two processes have different parent process IDs: the parent
+  process ID of the child is the parent; the parent process ID of the
+  parent doesn’t change.
+- The child’s =tms_utime=, =tms_stime=, =tms_cutime=, and =tms_cstime=
+  values are set to 0 (these times are discussed in [[#section-8-17][Section 8.17]]).
+- File locks set by the parent are not inherited by the child.
+- Pending alarms are cleared for the child.
+- The set of pending signals for the child is set to the empty set.
+
+Many of these features haven’t been discussed yet — we’ll cover them
+in later chapters.
+
+The two main reasons for =fork= to fail are:
+
+- if too many processes are already in the system, which usually means
+  that something else is wrong, or
+- if the total number of processes for this real user ID exceeds the
+  system’s limit. Recall from Figure 2.11 that =CHILD_MAX= specifies
+  the maximum number of simultaneous processes per real user ID.
+
+There are two uses for =fork=:
+
+1. When a process wants to duplicate itself so that the parent and the
+   child can each execute different sections of code at the same
+   time. This is common for network servers — the parent waits for a
+   service request from a client. When the request arrives, the parent
+   calls =fork= and lets the child handle the request. The parent goes
+   back to waiting for the next service request to arrive.
+2. When a process wants to execute a different program. This is common
+   for shells. In this case, the child does an =exec= (which we
+   describe in [[#section-8-10][Section 8.10]]) right after it returns from the =fork=.
+
+Some operating systems combine the operations from step 2 — a =fork=
+followed by an =exec= — into a single operation called a *spawn*. The
+UNIX System separates the two, as there are numerous cases where it is
+useful to =fork= without doing an =exec=. Also, separating the two
+operations allows the child to change the per-process attributes
+between the =fork= and the =exec=, such as I/O redirection, user ID,
+signal disposition, and so on. We’ll see numerous examples of this in
+Chapter 15.
+
+#+begin_quote
+The Single UNIX Specification does include spawn interfaces in the
+advanced real-time option group. These interfaces are not intended to
+be replacements for fork and exec, however.  They are intended to
+support systems that have difficulty implementing =fork= efficiently,
+especially systems without hardware support for memory management.
+#+end_quote
+
+* 8.4 =vfork= Function
+:PROPERTIES:
+:CUSTOM_ID: section-8-4
+:END:
+
+The function =vfork= has the same calling sequence and same return
+values as =fork=, but the semantics of the two functions differ.
+
+The =vfork= function originated with 2.9BSD. Some consider the
+function a blemish, but all the platforms covered in this book support
+it. In fact, the BSD developers removed it from the 4.4BSD release,
+but all the open source BSD distributions that derive from 4.4BSD
+added support for it back into their own releases. The =vfork=
+function was marked as *an obsolescent interface in Version 3 of the
+Single UNIX Specification* *and was removed entirely in Version 4*.
+We include it here for historical reasons only. *Portable applications
+should not use it*.
+
+The =vfork= function was intended to create a new process for the
+purpose of executing a new program (step 2 at the end of the previous
+section), similar to the method used by the bare-bones shell from
+Figure 1.7. The =vfork= function creates the new process, just like
+=fork=, without copying the address space of the parent into the
+child, as the child won’t reference that address space; the child
+simply calls =exec= (or =exit=) right after the =vfork=. Instead, the
+child runs in the address space of the parent until it calls either
+=exec= or =exit=. This optimization is more efficient on some
+implementations of the UNIX System, but leads to undefined results if
+the child modifies any data (except the variable used to hold the
+return value from =vfork=), makes function calls, or returns without
+calling =exec= or =exit=. (As we mentioned in the previous section,
+implementations use copy-on-write to improve the efficiency of a
+=fork= followed by an =exec=, but no copying is still faster than some
+copying.)
+
+Another difference between the two functions is that =vfork=
+guarantees that the child runs first, until the child calls =exec= or
+=exit=. When the child calls either of these functions, the parent
+resumes. (This can lead to deadlock if the child depends on further
+actions of the parent before calling either of these two functions.)
+
+** Example
+
+The program in [[file:vfork1.c][Figure 8.3]] (/vfork1.c/) is a modified version of the
+program from [[file:fork1.c][Figure 8.1]] (/fork1.c/). We’ve replaced the call to =fork=
+with =vfork= and removed the write to standard output.  Also, we don’t
+need to have the parent call =sleep=, as we’re guaranteed that it is
+put to sleep by the kernel until the child calls either =exec= or
+=exit=.
+
+Running this program gives us:
+
+#+begin_example
+$ ./vfork1
+before vfork
+pid = 29039, glob = 7, var = 89
+#+end_example
+
+Here, the incrementing of the variables done by the child changes the
+values in the parent. Because the child runs in the address space of
+the parent, this doesn’t surprise us. This behavior, however, differs
+from the behavior of =fork=.
+
+Note in Figure 8.3 that we call =_exit= instead of exit. As we
+described in [[file:~/coding/c_prog/apue.3e/environ/README.org::#section-7-3][Section 7.3]], =_exit= does not perform any flushing of
+standard I/O buffers. If we call =exit= instead, the results are
+indeterminate. Depending on the implementation of the standard I/O
+library, we might see no difference in the output, or we might find
+that the output from the first =printf= in the parent has disappeared.
+
+If the child calls =exit=, the implementation flushes the standard I/O
+streams. If this is the only action taken by the library, then we will
+see no difference from the output generated if the child called
+=_exit=. If the implementation also closes the standard I/O streams,
+however, the memory representing the =FILE= object for the standard
+output will be cleared out. Because the child is borrowing the
+parent’s address space, when the parent resumes and calls =printf=, no
+output will appear and =printf= will return =−1=.  Note that the
+parent’s =STDOUT_FILENO= is still valid, as the child gets a copy of
+the parent’s file descriptor array (refer back to Figure 8.2).
+
+#+begin_quote
+Most modern implementations of =exit= do not bother to close the
+streams. Because the process is about to exit, the kernel will close
+all the file descriptors open in the process.  Closing them in the
+library simply adds overhead without any benefit.
+#+end_quote
+
+/Section 5.6 of McKusick et al. [1996]/ contains additional information
+on the implementation issues of =fork= and =vfork=. [[#exercise-8-1][Exercise 8.1]] and
+[[#exercise-8-2][8.2]] continue the discussion of =vfork=.
+
+* 8.5 =exit= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-8-5
+:END:
+
+** Process Termination: normal and abnormal
+
+*** Normal Termination
+
+As we described in [[file:~/coding/c_prog/apue.3e/environ/README.org::#section-7-3][Section 7.3]], a process can terminate normally in
+five ways:
+
+1. Executing a =return= from the =main= function. Again, as we saw in
+   [[file:~/coding/c_prog/apue.3e/environ/README.org::#section-7-3][Section 7.3]], this is equivalent to calling =exit=.
+
+2. Calling the =exit= function. This function is defined by *ISO C*
+   and includes the calling of all exit handlers that have been
+   registered by calling =atexit= and closing all standard I/O
+   streams. Because ISO C does not deal with file descriptors,
+   multiple processes (parents and children), and job control, the
+   definition of this function is incomplete for a UNIX system.
+
+3. Calling the =_exit= or =_Exit= function. *ISO C* defines =_Exit= to
+   provide a way for a process to terminate without running =exit=
+   handlers or signal handlers. Whether standard I/O streams are
+   flushed depends on the implementation. On UNIX systems, =_Exit= and
+   =_exit= are synonymous and do not flush standard I/O streams. The
+   =_exit= function is called by =exit= and handles the UNIX
+   system-specific details; =_exit= is specified by POSIX.1.
+
+  #+begin_quote
+   In most UNIX system implementations, =exit(3)= is a function in the
+   standard C library, whereas =_exit(2)= is a system call.
+  #+end_quote
+
+4. Executing a =return= from the start routine of the last thread in the
+   process. The return value of the thread is not used as the return
+   value of the process, however. When the last thread returns from
+   its start routine, the process exits with a termination status
+   of 0.
+
+5. Calling the =pthread_exit= function from the last thread in the
+   process. As with the previous case, the exit status of the process
+   in this situation is always 0, regardless of the argument passed to
+   =pthread_exit=. We’ll say more about =pthread_exit= in [[file:../threads/README.org::#thread-termination][Section 11.5]].
+
+*** Abnormal Termination
+
+The three forms of abnormal termination are as follows:
+
+1. Calling =abort=. This is a special case of the next item, as it
+   generates the =SIGABRT= signal.
+
+2. When the process receives certain signals. (We describe signals in
+   more detail in Chapter 10.) The signal can be generated by the
+   process itself (e.g., by calling the =abort= function), by some other
+   process, or by the kernel. Examples of signals generated by the
+   kernel include the process referencing a memory location not within
+   its address space or trying to divide by 0.
+
+3. The last thread responds to a cancellation request. By default,
+   cancellation occurs in a deferred manner: one thread requests that
+   another be canceled, and sometime later the target thread
+   terminates. We discuss cancellation requests in detail in
+   [[file:../threads/README.org::#thread-termination][Section 11.5]] and [[file:../threadctl/README.org::#section-12-7][12.7]].
+
+Regardless of how a process terminates, the same code in the kernel is
+eventually executed. This kernel code closes all the open descriptors
+for the process, releases the memory that it was using, and so on.
+
+** Dealing with various terminating conditions
+
+*** Notification of terminating conditions
+
+For any of the preceding cases, we want the terminating process to be
+able to notify its parent how it terminated. For the three exit
+functions (=exit=, =_exit=, and =_Exit=), this is done by passing an
+exit status as the argument to the function. In the case of an
+abnormal termination, however, the kernel — not the process —
+generates a termination status to indicate the reason for the abnormal
+termination. In any case, the parent of the process can obtain the
+termination status from either the =wait= or the =waitpid= function
+(described in the next section).
+
+*** From exit status to termination status
+
+Note that we differentiate between the *exit status*, which is the
+argument to one of the three =exit= functions or the return value from
+=main=, and the *termination status*. The *exit status is converted
+into a termination status* by the kernel when =_exit= is finally
+called (recall Figure 7.2). [[*Figure 8.4][Figure 8.4]] describes the various ways the
+parent can examine the termination status of a child. If the child
+terminated normally, the parent can obtain the exit status of the
+child.
+
+*** Orphan processes inheritance
+
+When we described the =fork= function, it was obvious that the child has
+a parent process after the call to =fork=. Now we’re talking about
+returning a termination status to the parent. But what happens if the
+parent terminates before the child? The answer is that the =init=
+process becomes the parent process of any process whose parent
+terminates. In such a case, we say that the process has been inherited
+by =init=. What normally happens is that whenever a process terminates,
+the kernel goes through all active processes to see whether the
+terminating process is the parent of any process that still exists. If
+so, the parent process ID of the surviving process is changed to be 1
+(the process ID of =init=). This way, we’re guaranteed that every
+process has a parent.
+
+*** Kernel handling of unreaped processes
+:PROPERTIES:
+:CUSTOM_ID: kernel-handling-of-unreaped-processes
+:END:
+
+Another condition we have to worry about is when a child terminates
+before its parent. If the child completely disappeared, the parent
+wouldn’t be able to fetch its termination status when and if the
+parent was finally ready to check if the child had terminated. The
+kernel keeps a small amount of information for every terminating
+process, so that the information is available when the parent of the
+terminating process calls =wait= or =waitpid=. Minimally, this information
+consists of the process ID, the termination status of the process, and
+the amount of CPU time taken by the process.  The kernel can discard
+all the memory used by the process and close its open files. In UNIX
+System terminology, a process that has terminated, but whose parent
+has not yet waited for it, is called a *zombie*. The =ps(1)= command
+prints the state of a zombie process as =Z=. If we write a long-running
+program that forks many child processes, they become zombies unless we
+wait for them and fetch their termination status.
+
+#+begin_quote
+Some systems provide ways to prevent the creation of zombies, as we
+describe in [[file:../signals/README.org::#section-10-7][Section 10.7]].
+#+end_quote
+
+*** Process reaping by =init=
+
+The final condition to consider is this: What happens when a process
+that has been inherited by =init= terminates? Does it become a zombie?
+The answer is “no”, because =init= is written so that whenever one of
+its children terminates, =init= calls one of the =wait= functions to
+fetch the termination status. By doing this, =init= prevents the
+system from being clogged by zombies. When we say “one of init’s
+children,” we mean either a process that =init= generates directly
+(such as =getty=, which we describe in [[file:../relation/README.org::#section-9-2][Section 9.2]]) or a process whose
+parent has terminated and has been subsequently inherited by =init=.
+
+* 8.6 =wait= and =waitpid= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-8-6
+:END:
+
+When a process terminates, either normally or abnormally, the kernel
+notifies the parent by sending the =SIGCHLD= signal to the
+parent. Because the termination of a child is an asynchronous event —
+it can happen at any time while the parent is running — this signal is
+the asynchronous notification from the kernel to the parent. The
+parent can choose to ignore this signal, or it can provide a function
+that is called when the signal occurs: a signal handler. The default
+action for this signal is to be ignored. We describe these options in
+Chapter 10. For now, we need to be aware that a process that calls
+=wait= or =waitpid= can:
+
+- Block, if all of its children are still running
+- Return immediately with the termination status of a child, if a
+  child has terminated and is waiting for its termination status to be
+  fetched
+- Return immediately with an error, if it doesn’t have any child
+  processes
+
+If the process is calling =wait= because it received the =SIGCHLD=
+signal, we expect =wait= to return immediately. But if we call it at
+any random point in time, it can block.
+
+#+begin_src c
+  #include <sys/wait.h>
+  pid_t wait(int *statloc);
+  pid_t waitpid(pid_t pid, int *statloc, int options);
+  /* Both return: process ID if OK, 0 (see later), or −1 on error */
+#+end_src
+
+** The differences between =wait= and =waitpid=
+
+- The =wait= function can block the caller until a child process
+  terminates, whereas =waitpid= has an option that prevents it from
+  blocking.
+
+- The =waitpid= function doesn’t wait for the child that terminates
+  first; it has a number of options that control which process it
+  waits for.
+
+*** The blocking nature of =wait=
+
+If a child has already terminated and is a zombie, =wait= returns
+immediately with that child’s status. Otherwise, it blocks the caller
+until a child terminates. If the caller blocks and has multiple
+children, =wait= returns when one terminates. We can always tell which
+child terminated, because the process ID is returned by the function.
+
+*** Retreive child termination status with =statloc= argument
+
+For both functions, the argument =statloc= is a pointer to an
+integer. If this argument is not a null pointer, the termination
+status of the terminated process is stored in the location pointed to
+by the argument. If we don’t care about the termination status, we
+simply pass a null pointer as this argument.
+
+*** The =WIF= macros for interpreting child termination status
+
+Traditionally, the integer status that these two functions return has
+been defined by the implementation, with certain bits indicating the
+exit status (for a normal return), other bits indicating the signal
+number (for an abnormal return), one bit indicating whether a core
+file was generated, and so on. POSIX.1 specifies that the termination
+status is to be looked at using various macros that are defined in
+=<sys/wait.h>=. Four *mutually exclusive macros tell us how the
+process terminated*, and they all begin with =WIF=. Based on which of
+these four macros is true, other macros are used to obtain the exit
+status, signal number, and the like. The four mutually exclusive
+macros are shown in [[#figure-8-4][Figure 8.4]].
+
+*** Figure 8.4
+:PROPERTIES:
+:CUSTOM_ID: figure-8-4
+:END:
+
+Macros to examine the termination status returned by =wait= and
+=waitpid=.
+
+| Macro                  | Description                                                                                                                                                                                                                                                                                                                                                                                                        |
+|                        | <50>                                                                                                                                                                                                                                                                                                                                                                                                               |
+|------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ~WIFEXITED(status)~    | True if status was returned for a child that terminated normally. In this case, we can execute ~WEXITSTATUS(status)~  to fetch the low-order 8 bits of the argument that the child passed to ~exit~, ~_exit~, or ~_Exit~.                                                                                                                                                                                          |
+| ~WIFSIGNALED(status)~  | True if status was returned for a child that terminated abnormally, by receipt of a signal that it didn’t catch. In this case, we can execute ~WTERMSIG(status)~ to fetch the signal number that caused the termination. Additionally, some implementations (but not the Single UNIX Specification) define the macro ~WCOREDUMP(status)~ that returns true if a core file of the terminated process was generated. |
+| ~WIFSTOPPED(status)~   | True if status was returned for a child that is currently stopped. In this case, we can execute ~WSTOPSIG(status)~ to fetch the signal number that caused the child to stop.                                                                                                                                                                                                                                       |
+| ~WIFCONTINUED(status)~ | True if status was returned for a child that has been continued after a job control stop (=XSI= option; =waitpid= only).                                                                                                                                                                                                                                                                                           |
+
+We’ll discuss how a process can be stopped in [[file:../relation/README.org::#section-9-8][Section 9.8]] when we
+discuss job control.
+
+*** Example
+
+The function =pr_exit= in [[file:../lib/prexit.c][Figure 8.5]] uses the macros from [[*Figure 8.4][Figure 8.4]]
+to print a description of the termination status. We’ll call this
+function from numerous programs in the text. Note that this function
+handles the =WCOREDUMP= macro, if it is defined.
+
+#+begin_quote
+*FreeBSD 8.0*, *Linux 3.2.0*, *Mac OS X 10.6.8*, and *Solaris 10* all
+support the =WCOREDUMP= macro.  However, some platforms hide its
+definition if the =_POSIX_C_SOURCE= constant is defined (recall
+[[file:../standards/README.org::#section-2-7][Section 2.7]]).
+#+end_quote
+
+The program shown in [[file:wait1.c][Figure 8.6]] (/wait1.c/) calls the =pr_exit=
+function, demonstrating the various values for the termination
+status. If we run the program in Figure 8.6, we get:
+
+#+begin_example
+$ ./wait1
+normal termination, exit status = 7
+abnormal termination, signal number = 6 (core file generated)
+abnormal termination, signal number = 8 (core file generated)
+#+end_example
+
+For now, we print the signal number from =WTERMSIG=. We can look at
+the =<signal.h>= header to verify that =SIGABRT= has a value of 6 and
+that =SIGFPE= has a value of 8. We’ll see a portable way to map a
+signal number to a descriptive name in [[file:../signals/README.org::#section-10-22][Section 10.22]].
+
+** Granulary control over child reaping with =waitpid=
+
+As we mentioned, if we have more than one child, =wait= returns on
+termination of any of the children. But what if we want to wait for a
+specific process to terminate (assuming we know which process ID we
+want to wait for)? In older versions of the UNIX System, we would have
+to call wait and compare the returned process ID with the one we’re
+interested in. If the terminated process wasn’t the one we wanted, we
+would have to save the process ID and termination status and call
+=wait= again. We would need to continue doing this until the desired
+process terminated. The next time we wanted to wait for a specific
+process, we would go through the list of already terminated processes
+to see whether we had already waited for it, and if not, call =wait=
+again. What we need is a function that waits for a specific
+process. This functionality (and more) is provided by the *POSIX.1*
+=waitpid= function.
+
+*** Reap processes in various ways with =pid= argument
+
+The interpretation of the =pid= argument for =waitpid= depends on its
+value:
+
+- =pid == -1=: Waits for any child process. In this respect, =waitpid=
+  is equivalent to =wait=.
+- ~pid > 0~: Waits for the child whose process ID equals =pid=.
+- ~pid == 0~: Waits for any child whose process group ID equals that
+  of the calling process. (We discuss process groups in [[file:../relation/README.org::#section-9-4][Section 9.4]].)
+- ~pid < −1~: Waits for any child whose process group ID equals the
+  absolute value of =pid=.
+
+*** Return values and output parameter of =waitpid=
+
+The =waitpid= function returns the process ID of the child that
+terminated and stores the child’s termination status in the memory
+location pointed to by =statloc=. With =wait=, the only real error is
+if the calling process has no children. (Another error return is
+possible, in case the function call is interrupted by a signal. We’ll
+discuss this in [[file:../signals/README.org][Chapter 10]].)  With =waitpid=, however, it’s also
+possible to get an error if the specified process or process group
+does not exist or is not a child of the calling process.
+
+*** Control =waitpid= behavior with =options= parameter
+
+The =options= argument lets us further control the operation of
+=waitpid=. This argument either is 0 or is constructed from the
+bitwise OR of the constants in [[#figure-8-7][Figure 8.7]].
+
+#+begin_quote
+*FreeBSD 8.0* and *Solaris 10* support one additional, but
+nonstandard, option constant. =WNOWAIT= has the system keep the
+process whose termination status is returned by =waitpid= in a =wait=
+state, so that it may be waited for again.
+#+end_quote
+
+*** Figure 8.7
+:PROPERTIES:
+:CUSTOM_ID: figure-8-7
+:END:
+
+The options constants for =waitpid=:
+
+| Constant     | Description                                                                                                                                                                                                                                                                           |
+|              | <60>                                                                                                                                                                                                                                                                                   |
+|--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| =WCONTINUED= | If the implementation supports job control, the status of any child specified by =pid= that has been continued after being stopped, but whose status has not yet been reported, is returned (XSI option).                                                                             |
+| =WNOHANG=    | The =waitpid= function will not block if a child specified by =pid= is not immediately available. In this case, the return value is 0.                                                                                                                                                |
+| =WUNTRACED=  | If the implementation supports job control, the status of any child specified by =pid= that has stopped, and whose status has not been reported since it has stopped, is returned. The =WIFSTOPPED= macro determines whether the return value corresponds to a stopped child process. |
+
+*** Enhancement of =waitpid= over =wait=
+
+The =waitpid= function provides three features that aren’t provided by
+the =wait= function:
+1. The =waitpid= function lets us wait for one particular process,
+   whereas the =wait= function returns the status of any terminated
+   child. We’ll return to this feature when we discuss the =popen=
+   function.
+2. The =waitpid= function provides a nonblocking version of
+   =wait=. There are times when we want to fetch a child’s status, but
+   we don’t want to block.
+3. The =waitpid= function provides support for job control with the
+   =WUNTRACED= and =WCONTINUED= options.
+
+*** Example
+
+Recall our discussion in [[#kernel-handling-of-unreaped-processes][Section 8.5]] about zombie processes. If we
+want to write a process so that it forks a child but we don’t want to
+wait for the child to complete and we don’t want the child to become a
+zombie until we terminate, *the trick is to call fork twice*. The
+program in [[file:fork2.c][Figure 8.8]] (/fork2.c/) does this.
+
+We call =sleep= in the second child to ensure that the first child
+terminates before printing the parent process ID. After a fork, either
+the parent or the child can continue executing; we never know which
+will resume execution first. If we didn’t put the second child to
+sleep, and if it resumed execution after the fork before its parent,
+the parent process ID that it printed would be that of its parent, not
+process ID 1.
+
+Executing the program in  [[file:fork2.c][Figure 8.8]] (/fork2.c/) gives us:
+
+#+begin_example
+$ ./fork2
+$ second child, parent pid = 1
+#+end_example
+
+Note that the shell prints its prompt when the original process
+terminates, which is before the second child prints its parent process
+ID.
+
+*** TODO Init ID is not 1
+
+Running my updated version of [[file:yfork2.c][Figure 8.8]] (/yfork2.c/) gives us:
+
+#+begin_src sh
+$ ./fork2
+parent process pid = 1841253
+first child, parent pid = 1841253
+first child pid = 1841254
+
+$ second child, parent pid = 84651
+                                 # enter newline to redisplay the prompt
+
+$ ps aux | grep 84651
+root       84651  0.0  0.0   3144  1168 ?        S    Jul03   0:52 /init
+
+#+end_src
+
+init process ID is not 1.
+
+* 8.7 =waitid= Function
+:PROPERTIES:
+:CUSTOM_ID: section-8-7
+:END:
+
+The *Single UNIX Specification* includes an additional function to
+retrieve the exit status of a process. The =waitid= function is
+similar to =waitpid=, but provides extra flexibility.
+
+#+begin_src c
+  #include <sys/wait.h>
+  int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
+  /* Returns: 0 if OK, −1 on error */
+#+end_src
+
+Like =waitpid=, =waitid= allows a process to specify which children to
+wait for.  Instead of encoding this information in a single argument
+combined with the process ID or process group ID, two separate
+arguments are used. The =id= parameter is interpreted based on the
+value of =idtype=. The types supported are summarized in [[#figure-8-9][Figure 8.9]].
+
+** Function arguments
+
+*** Figure 8.9 The =idtype= constants for =waitid=
+:PROPERTIES:
+:CUSTOM_ID: figure-8-9
+:END:
+
+| Constant | Description                                                                                                               |
+|          | <60>                                                                                                                       |
+|----------+---------------------------------------------------------------------------------------------------------------------------|
+| =P_PID=  | Wait for a particular process: =id= contains the process ID of the child to wait for.                                     |
+| =P_PGID= | Wait for any child process in a particular process group: =id= contains the process group ID of the children to wait for. |
+| =P_ALL=  | Wait for any child process: =id= is ignored.                                                                              |
+
+*** Figure 8.10 The =options= constants for =waitid=
+:PROPERTIES:
+:CUSTOM_ID: figure-8-10
+:END:
+
+The =options= argument is a bitwise OR of the flags shown in folowing
+table. These flags indicate which state changes the caller is
+interested in.
+
+| Constant     | Description                                                                                                                           |
+|              | <60>                                                                                                                                   |
+|--------------+---------------------------------------------------------------------------------------------------------------------------------------|
+| =WCONTINUED= | Wait for a process that has previously stopped and has been continued, and whose status has not yet been reported.                    |
+| =WEXITED=    | Wait for processes that have exited.                                                                                                  |
+| =WNOHANG=    | Return immediately instead of blocking if there is no child exit status available.                                                    |
+| =WNOWAIT=    | Don’t destroy the child exit status. The child’s exit status can be retrieved by a subsequent call to =wait=, =waitid=, or =waitpid=. |
+| =WSTOPPED=   | Wait for a process that has stopped and whose status has not yet been reported.                                                       |
+
+At least one of =WCONTINUED=, =WEXITED=, or =WSTOPPED= must be
+specified in the options argument.
+
+*** The =infop= argument
+
+The =infop= argument is a pointer to a =siginfo= structure. This
+structure contains detailed information about the signal generated
+that caused the state change in the child process. The =siginfo=
+structure is discussed further in [[file:../signals/README.org::#section-10-14][Section 10.14]].
+
+#+begin_quote
+Of the four platforms covered in this book, only Linux 3.2.0, Mac OS X
+10.6.8, and Solaris 10 provide support for =waitid=. Note, however,
+that Mac OS X 10.6.8 *doesn’t set all the information we expect* in
+the =siginfo= structure.
+#+end_quote
+
+* 8.8 =wait3= and =wait4= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-8-8
+:END:
+
+Most UNIX system implementations provide two additional functions:
+=wait3= and =wait4=. Historically, these two variants descend from the
+*BSD branch* of the UNIX System. The only feature provided by these
+two functions that isn’t provided by the =wait=, =waitid=, and
+=waitpid= functions is *an additional argument that allows the kernel
+to return a summary* *of the resources used by the terminated process
+and all its child processes*.
+
+#+begin_src c
+  #include <sys/types.h>
+  #include <sys/wait.h>
+  #include <sys/time.h>
+  #include <sys/resource.h>
+  pid_t wait3(int *statloc, int options, struct rusage *rusage);
+  pid_t wait4(pid_t pid, int *statloc, int options, struct rusage *rusage);
+  /* Both return: process ID if OK, 0, or −1 on error */
+#+end_src
+
+The resource information includes such statistics as the amount of
+user CPU time, amount of system CPU time, number of page faults,
+number of signals received, and the like. Refer to the =getrusage(2)=
+manual page for additional details. (This resource information differs
+from the resource limits we described in [[file:../environ/README.org::#section-7-11][Section 7.11]].) [[#figure-8-11][Figure 8.11]]
+details the various arguments supported by the *wait functions*.
+
+*** Figure 8.11
+:PROPERTIES:
+:CUSTOM_ID: figure-8-11
+:END:
+
+Arguments supported by =wait= functions on various systems.
+
+| Function | pid | options | rusage | POSIX.1 | FreeBSD | Linux | Mac OS X | Solaris |
+|          |     |         |        |         | 8.0     | 3.2.0 | 10.6.8   | 10      |
+|          |     |         |        |         | <2>     |  <2>   | <2>      | <2>      |
+|----------+-----+---------+--------+---------+---------+-------+----------+---------|
+| wait     |     |         |        | •       | •       | •     | •        | •       |
+| waitid   | •   | •       |        | •       |         | •     | •        | •       |
+| waitpid  | •   | •       |        | •       | •       | •     | •        | •       |
+|----------+-----+---------+--------+---------+---------+-------+----------+---------|
+| wait3    |     | •       | •      |         | •       | •     | •        | •       |
+| wait4    | •   | •       | •      |         | •       | •     | •        | •       |
+
+#+begin_quote
+The =wait3= function was included in earlier versions of the *Single
+UNIX Specification*. In Version 2, =wait3= was moved to the legacy
+category; =wait3= *was removed from the specification in Version 3*.
+#+end_quote
+
+* 8.9 Race Conditions
+:PROPERTIES:
+:CUSTOM_ID: section-8-9
+:END:
+
+*For our purposes, a race condition occurs when multiple processes are
+trying to do something with shared data* *and the final outcome
+depends on the order in which the processes run*. The =fork= function
+is a lively breeding ground for race conditions, if any of the logic
+after the fork either explicitly or implicitly depends on whether the
+parent or child runs first after the fork. *In general, we cannot
+predict which process runs first*.  Even if we knew which process
+would run first, what happens after that process starts running
+depends on the system load and the kernel’s scheduling algorithm.
+
+We saw a potential race condition in the program in [[file:fork2.c][Figure 8.8]]
+(/fork2.c/) when the second child printed its parent process ID. If
+the second child runs before the first child, then its parent process
+will be the first child. But if the first child runs first and has
+enough time to exit, then the parent process of the second child is
+=init=. Even calling =sleep=, as we did, guarantees nothing. If the
+system was heavily loaded, the second child could resume after =sleep=
+returns, before the first child has a chance to run. *Problems of this
+form can be difficult to debug* *because they tend to work “most of
+the time.”*
+
+** Interprocess Communication Using Signals: The TELL_WAIT model
+
+A process that wants to wait for a child to terminate must call one of
+the =wait= functions. If a process wants to wait for its parent to
+terminate, as in the program from [[file:fork2.c][Figure 8.8]] (/fork2.c/), a loop of
+the following form could be used:
+
+#+begin_src c
+  while (getppid() != 1)
+    sleep(1);
+#+end_src
+
+The problem with this type of loop, *called polling*, is that it
+wastes CPU time, as the caller is awakened every second to test the
+condition.
+
+To avoid race conditions and to avoid polling, some form of signaling
+is required between multiple processes. Signals can be used for this
+purpose, and we describe one way to do this in [[file:../signals/README.org::#section-10-16][Section 10.16]]. Various
+forms of interprocess communication (IPC) can also be used. We’ll
+discuss some of these options in Chapters 15 and 17.
+
+For a parent and child relationship, we often have the following
+scenario. After the fork, both the parent and the child have something
+to do. For example, the parent could update a record in a log file
+with the child’s process ID, and the child might have to create a file
+for the parent. *In this example*, *we require that each process tell
+the other* *when it has finished its initial set of operations*, *and
+that each wait for the other to complete*, *before heading off on its
+own*. The following code illustrates this scenario:
+
+#+begin_src c
+  #include "apue.h"
+
+  TELL_WAIT(); /* set things up for TELL_xxx & WAIT_xxx */
+  if ((pid = fork()) < 0) {
+    err_sys("fork error");
+   } else if (pid == 0) { /* child */
+    /* child does whatever is necessary ... */
+    TELL_PARENT(getppid()); /* tell parent we’re done */
+    WAIT_PARENT(); /* and wait for parent */
+    /* and the child continues on its way ... */
+    exit(0);
+   }
+  /* parent does whatever is necessary ... */
+  TELL_CHILD(pid); /* tell child we’re done */
+  WAIT_CHILD(); /* and wait for child */
+  /* and the parent continues on its way ... */
+  exit(0);
+#+end_src
+
+We assume that the header =apue.h= defines whatever variables are
+required.  The five routines =TELL_WAIT=, =TELL_PARENT=, =TELL_CHILD=,
+=WAIT_PARENT=, and =WAIT_CHILD= can be either macros or functions.
+
+We’ll show various ways to implement these =TELL= and =WAIT= routines
+in later chapters: [[file:../signals/README.org::#section-10-16][Section 10.16]] shows an implementation using signals
+([[file:../lib/tellwait.c][Figure 10.24]] /tellwait.c/); [[file:../ipc1/tellwait.c][Figure 15.7]] /tellwait.c/ shows an
+implementation using pipes. Let’s look at an example that uses these
+five routines.
+
+*** Example
+
+The program in [[file:tellwait1.c][Figure 8.12]] (/tellwait1.c/) outputs two strings: one
+from the child and one from the parent. The program contains a race
+condition because the output depends on the order in which the
+processes are run by the kernel and the length of time for which each
+process runs.
+
+We set the standard output unbuffered, so every character output
+generates a write.  The goal in this example is to allow the kernel to
+switch between the two processes as often as possible to demonstrate
+the race condition. (If we didn’t do this, we might never see the type
+of output that follows. Not seeing the erroneous output doesn’t mean
+that the race condition doesn’t exist; it simply means that we can’t
+see it on this particular system.) The following actual output shows
+how the results can vary:
+
+#+begin_src sh
+$ ./tellwait1
+OUTPUT FROM oPuAtRpEuNtT
+from child
+
+$ ./tellwait1
+OUTPUT FROM PARENT
+output from child
+
+$ ./tellwait1
+OUTPUT FROM PAREoNuTt
+put from child
+#+end_src
+
+We need to change the program in [[file:tellwait1.c][Figure 8.12]] to use the =TELL= and
+=WAIT= functions. The program in [[file:tellwait2.c][Figure 8.13]] (/tellwait2.c/) does
+this. The lines preceded by a plus sign are new lines.
+
+When we run this program, the output is as we expect; there is no
+intermixing of output from the two processes.
+
+In the program shown in [[file:tellwait2.c][Figure 8.13]], the parent goes first. The child
+goes first if we change the lines following the fork to be
+
+#+begin_src c
+  } else if (pid == 0) {
+      charatatime("output from child\n");
+      TELL_PARENT(getppid());
+  } else {
+      WAIT_CHILD(); /* child goes first */
+      charatatime("output from parent\n");
+  }
+#+end_src
+
+[[#exercise-8-4][Exercise 8.4]] continues this example.
+
+* 8.10 =excec= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-8-10
+:END:
+
+** Definitions and Differences of the =exec= Functions
+
+*** The =exec= API
+
+We mentioned in [[#section-8-3][Section 8.3]] that one use of the =fork= function is to
+create a new process (the child) that then causes another program to
+be executed by calling one of the =exec= functions. When a process
+calls one of the =exec= functions, that process is completely replaced
+by the new program, and the new program starts executing at its main
+function. The process ID does not change across an /exec/, because a
+new process is not created; =exec= merely replaces the current process
+— its text, data, heap, and stack segments — with a brand-new program
+from disk.
+
+There are seven different exec functions, but we’ll often simply refer
+to “the *exec* function,” which means that we could use any of the
+seven functions. *These seven functions round out the UNIX System
+process control primitives*. With =fork=, we can create new processes;
+and with the =exec= functions, we can initiate new programs. The
+=exit= function and the =wait= functions *handle termination and
+waiting for termination*.  These are the only process control
+primitives we need. We’ll use these primitives in later sections to
+build additional functions, such as =popen= and =system=.
+
+#+begin_src c
+  #include <unistd.h>
+  int execl(const char *pathname, const char *arg0, ... /* (char *)0 */ );
+  int execv(const char *pathname, char *const argv[]);
+  int execle(const char *pathname, const char *arg0, ...
+             /* (char *)0, char *const envp[] */ );
+  int execve(const char *pathname, char *const argv[], char *const envp[]);
+  int execlp(const char *filename, const char *arg0, ... /* (char *)0 */ );
+  int execvp(const char *filename, char *const argv[]);
+  int fexecve(int fd, char *const argv[], char *const envp[]);
+  /* All seven return: −1 on error, no return on success */
+#+end_src
+
+*** The Three Main Differences In The =exec= API
+
+**** The Way To The Executbles: Letters =p= And =f=
+
+The first difference in these functions is that the first four take a
+=pathname= argument, the next two take a =filename= argument, and the
+last one takes a /file descriptor/ argument. When a =filename= argument
+is specified,
+
+- If =filename= contains a slash, it is taken as a =pathname=.
+- Otherwise, the executable file is searched for in the directories
+  specified by the =PATH= environment variable.
+
+The =PATH= variable contains a list of directories, called path
+prefixes, that are separated by colons. For example, the /name=value/
+environment string
+
+#+begin_src sh
+  PATH=/bin:/usr/bin:/usr/local/bin/:.
+#+end_src
+
+specifies four directories to search. The last path prefix specifies
+the current directory.  (*A zero-length prefix also means the current
+directory*. It can be specified as *a colon at the beginning of the
+value*, *two colons in a row*, or *a colon at the end of the value*.)
+
+  #+begin_quote
+  *There are security reasons for never including the current directory
+  in the search path*.  See /Garfinkel et al./ [2003].
+  #+end_quote
+
+**** How To Pass Arguments To The Executable: Letter =l= and =v=
+
+If either =execlp= or =execvp= finds an executable file using one of
+the path prefixes, but the file isn’t a machine executable that was
+generated by the link editor, the function assumes that the file is a
+shell script and tries to invoke =/bin/sh= with the /filename/ as
+input to the shell.
+
+With =fexecve=, we avoid the issue of finding the correct executable
+file altogether and rely on the caller to do this. By using a file
+descriptor, the caller can verify the file is in fact the intended
+file and execute it without a race. *Otherwise, a malicious user with
+appropriate privileges could replace the executable file* (or a
+portion of the path to the executable file) *after it has been located
+and verified, but before the caller can execute it* (recall the
+discussion of /TOCTTOU/ errors in [[file:../fileio/README.org::#section-3-3][Section 3.3]]).
+
+The next difference concerns the passing of the argument list (=l=
+stands for *list* and =v= stands for *vector*). The functions =execl=,
+=execlp=, and =execle= *require each of the command-line arguments to
+the new program* *to be specified as separate arguments*.  We mark the
+end of the arguments with a *null pointer*. For the other four
+functions (=execv=, =execvp=, =execve=, and =fexecve=), *we have to
+build an array of pointers to the arguments*, *and the address of this
+array is the argument to these three functions*.
+
+Before using *ISO C prototypes*, the normal way to show the
+command-line arguments for the three functions =execl=, =execle=, and
+=execlp= was
+
+#+begin_src c
+  char *arg0, char *arg1, ..., char *argn, (char *)0
+#+end_src
+
+This syntax explicitly shows that *the final command-line argument is
+followed by a null pointer*. *If this null pointer is specified by the
+constant* =0=, *we must cast it to a pointer*; if we don’t, it’s
+interpreted as an integer argument. If the size of an integer is
+different from the size of a =char *=, the actual arguments to the
+=exec= function will be wrong.
+
+**** Choosing default =evniron= or custom =envp[]=: Letter =e=
+
+The final difference is the passing of the *environment list* to the
+new program. The three functions whose names end in an =e= (=execle=,
+=execve=, and =fexecve=) allow us to pass a pointer to an array of
+pointers to the environment strings. The other four functions,
+however, use the =environ= variable in the calling process *to copy
+the existing environment for the new program*. (Recall our discussion
+of the environment strings in [[file:../environ/README.org::#section-7-9][Section 7.9]] and [[file:../environ/README.org::#figure-7-8][Figure 7.8]]. We mentioned
+that if the system supported such functions as =setenv= and =putenv=,
+we could change the current environment and the environment of any
+subsequent child processes, but we couldn’t affect the environment of
+the parent process.) *Normally*, *a process allows its environment to
+be propagated to its children*, *but in some cases*, *a process wants
+to specify a certain environment for a child*. One example of the
+latter is the login program when a new login shell is initiated.
+*Normally, login creates a specific environment* with only a few
+variables defined and lets us, through the shell start-up file, add
+variables to the environment when we log in.
+
+Before using *ISO C prototypes*, the arguments to =execle= were shown
+as
+
+#+begin_src c
+  char *pathname, char *arg0, ..., char *argn, (char *)0, char *envp[]
+#+end_src
+
+This syntax specifically shows that the final argument is the address
+of the array of character pointers to the environment strings. The ISO
+C prototype doesn’t show this, as all the command-line arguments, the
+null pointer, and the =envp= pointer are shown with the *ellipsis*
+notation (=...=).
+
+**** Figure 8.14 Mnemonic to differenciate seven =exec= functions
+:PROPERTIES:
+:CUSTOM_ID: figure-8-14
+:END:
+
+The arguments for these seven =exec= functions are difficult to
+remember. The letters in the function names help somewhat. The letter
+=p= means that *the function takes a filename argument* *and uses the*
+=PATH= *environment variable to find the executable file*.  The letter
+=l= means that *the function takes a list of arguments* *and is
+mutually exclusive with the letter* =v=, which means that *it takes
+an* =argv[]= *vector*. Finally, the letter =e= means that *the
+function takes an* =envp[]= *array instead of using the current
+environment*. Figure 8.14 shows the differences among these seven
+functions.
+
+| Function  | filename | pathname | fd | Arg list | argv[] | environ | envp[] |
+|-----------+----------+----------+----+----------+--------+---------+--------|
+| execlp    | •        |          |    | •        |        | •       |        |
+| execvp    | •        |          |    |          | •      | •       |        |
+| execl     |          | •        |    | •        |        | •       |        |
+| execv     |          | •        |    |          | •      | •       |        |
+| execle    |          | •        |    | •        |        |         | •      |
+| execve    |          | •        |    |          | •      |         | •      |
+| fexecve   |          |          | •  |          | •      |         | •      |
+|-----------+----------+----------+----+----------+--------+---------+--------|
+| (letters) | p        |          | f  | l        | v      |         | e      |
+
+Think of it like seven points in a three dimensional coordinate graph
+(Fucntion names are in *Regular Expression* pseudocode):
+
+1. *X axix* is the way to the executable:
+   - only know the =filename=: =exec?[p]= traces it through the =PATH=;
+   - =pathname= is known: =exec?+[^p]= or =[^f]exec??=;
+   - open it as /file descriptor/ for prior checks: =[f]exec??=;
+
+2. *Y axis* is how to provide arguments to the executable:
+   - through a string /list/: =exec[l]?=;
+   - through a vector of pointers: =exec[v]?=;
+
+3. *Z axis* is which environment to choose:
+   - the default =environ=: =exec?+[^e]=;
+   - a custom =envp[]=: =exec?+[e]=;
+
+** Resource Limitations and Program State across =exec=
+
+*** Watch out for =argv[]= and =envp[]= limitations
+
+Every system has a limit on the total size of the argument list and
+the environment list. From [[file:../standards/README.org::#section-2-5-2][Section 2.5.2]] and [[file:../standards/README.org::#figure-2-8][Figure 2.8]], this limit is
+given by =ARG_MAX=. This value must be at least 4,096 bytes on a
+POSIX.1 system. We sometimes encounter this limit when using the
+shell’s filename expansion feature to generate a list of filenames. On
+some systems, for example, the command
+
+#+begin_src sh
+  grep getrlimit /usr/share/man/*/*
+#+end_src
+
+can generate a shell error of the form
+
+#+begin_src sh
+  Argument list too long
+#+end_src
+
+  #+begin_quote
+  Historically, the limit in older *System V* implementations was
+  5,120 bytes. Older *BSD systems* had a limit of 20,480 bytes. The
+  limit in current systems is much higher. (See the output from the
+  program in Figure 2.14, which is summarized in Figure 2.15.)
+  #+end_quote
+
+To get around the limitation in argument list size, *we can use the*
+=xargs(1)= *command to break up long argument lists*. To look for all
+the occurrences of =getrlimit= in the man pages on our system, we
+could use
+
+#+begin_src sh
+  find /usr/share/man -type f -print | xargs grep getrlimit
+#+end_src
+
+If the man pages on our system are compressed, however, we could try
+
+#+begin_src sh
+  find /usr/share/man -type f -print | xargs bzgrep getrlimit
+#+end_src
+
+We use the type =-f= option to the find command to restrict the list
+so that it contains only regular files, because the grep commands
+can’t search for patterns in directories, and we want to avoid
+unnecessary error messages.
+
+*** Program new state across =exec=
+
+We’ve mentioned that the process ID does not change after an =exec=,
+but the new program inherits additional properties from the calling
+process:
+
+- Process ID and parent process ID
+- Real user ID and real group ID
+- Supplementary group IDs
+- Process group ID
+- Session ID
+- Controlling terminal
+- Time left until alarm clock
+- Current working directory
+- Root directory
+- File mode creation mask
+- File locks
+- Process signal mask
+- Pending signals
+- Resource limits
+- Nice value (on XSI-conformant systems; see [[#section-8-16][Section 8.16]])
+- Values for =tms_utime=, =tms_stime=, =tms_cutime=, and =tms_cstime=
+
+The handling of open files depends on the value of the close-on-exec
+flag for each descriptor. Recall from Figure 3.7 and our mention of
+the =FD_CLOEXEC= flag in [[file:../fileio/README.org::#section-3-14][Section 3.14]] that every open descriptor in a
+process has a close-on-exec flag. If this flag is set, the descriptor
+is closed across an =exec=. Otherwise, the descriptor is left open
+across the =exec=. *The default is to leave the descriptor open across
+the* =exec= *unless we specifically set the close-on-exec flag using*
+=fcntl=.
+
+*POSIX.1* specifically requires that open directory streams (recall
+the =opendir= function from [[file:../filedir/README.org::#section-4-22][Section 4.22]]) be closed across an
+=exec=. This is normally done by the =opendir= function calling
+=fcntl= to set the close-on-exec flag for the descriptor corresponding
+to the open directory stream.
+
+Note that the real user ID and the real group ID remain the same
+across the =exec=, but the effective IDs can change, depending on the
+status of the set-user-ID and the setgroup-ID bits for the program
+file that is executed. If the set-user-ID bit is set for the new
+program, the effective user ID becomes the owner ID of the program
+file.  Otherwise, the effective user ID is not changed (it’s not set
+to the real user ID). The group ID is handled in the same way.
+
+** System Call =execve= at the Core of =exec= API
+
+In many UNIX system implementations, only one of these seven
+functions, =execve=, *is a system call within the kernel*. *The other
+six are just library functions* *that eventually invoke this system
+call*. We can illustrate the relationship among these seven functions
+as shown in [[#figure-8-15][Figure 8.15]].
+
+*** Figure 8.15 Relationship of the seven exec functions
+:PROPERTIES:
+:CUSTOM_ID: figure-8-15
+:END:
+
+#+begin_example
+┏━━━━━━━━━━━━━━┓            ┏━━━━━━━━━━━━━━┓            ┏━━━━━━━━━━━━━━┓
+┃    execlp    ┃            ┃    execl     ┃            ┃    execle    ┃
+┃              ┃            ┃              ┃            ┃              ┃
+┗━━━━━━━━━━━━━━┛            ┗━━━━━━━━━━━━━━┛            ┗━━━━━━━━━━━━━━┛
+  │                           │                           │
+  │BUILD ARGV                 │build argv                 │build argv
+  │                           │                           │
+  ▼                           ▼                           ▼
+┏━━━━━━━━━━━━━━┓  try each  ┏━━━━━━━━━━━━━━┓    use     ┏━━━━━━━━━━━━━━┓
+┃    execvp    ┃ ─────────▶ ┃    execv     ┃ ─────────▶ ┃    execve    ┃
+┃              ┃ PATH prefix┃              ┃  environ   ┃ (system call)┃
+┗━━━━━━━━━━━━━━┛            ┗━━━━━━━━━━━━━━┛            ┗━━━━━━━━━━━━━━┛
+                                                          ▲
+                                                          │build path from
+                                                          │/proc/self/fd
+                                                          │alias
+                                                        ┏━━━━━━━━━━━━━━┓
+                                                        ┃   fexecve    ┃
+                                                        ┃              ┃
+                                                        ┗━━━━━━━━━━━━━━┛
+#+end_example
+
+In this arrangement, the library functions =execlp= and =execvp=
+process the =PATH= environment variable, looking for the first path
+prefix that contains an executable file named =filename=. The
+=fexecve= library function uses =/proc= to convert the file descriptor
+argument into a =pathname= that can be used by =execve= to execute the
+program.
+
+  #+begin_quote
+  This describes how =fexecve= is implemented in *FreeBSD 8.0* and
+  *Linux 3.2.0*. Other systems might take a different approach. For
+  example, a system without =/proc= or =/dev/fd= could implement
+  =fexecve= as a system call veneer that translates the file
+  descriptor argument into an /i-node/ pointer, implement =execve= as
+  a system call veneer that translates the =pathname= argument into an
+  /i-node/ pointer, and place all the rest of the =exec= code common
+  to both =execve= and =fexecve= in a separate function to be called
+  with an /i-node/ pointer for the file to be executed.
+  #+end_quote
+
+** Example
+
+The program in [[file:exec1.c][Figure 8.16]] (/exec1.c/) demonstrates the exec
+functions.
+
+We first call =execle=, which requires a =pathname= and a specific
+environment. The next call is to =execlp=, which uses a =filename= and
+passes the caller’s environment to the new program. The only reason
+the call to =execlp= works is that the directory =/home/sar/bin= is
+one of the current path prefixes. Note also that we set the first
+argument, =argv[0]= in the new program, to be the =filename= component
+of the =pathname=. Some shells set this argument to be the complete
+=pathname=. This is a convention only; we can set =argv[0]= to any
+string we like. The login command does this when it executes the
+shell. Before executing the shell, login adds a dash as a prefix to
+=argv[0]= to indicate to the shell that it is being invoked as a login
+shell. *A login shell will execute the start-up profile commands*,
+*whereas a nonlogin shell will not*.
+
+This test needs =~/bin/echoall= binary to work. Build it with the
+user-defined =Makefile= rule =make utility=.
+
+The program /echoall/ that is executed twice in the program in [[file:exec1.c][Figure
+8.16]] (/exec1.c/) is shown in [[file:echoall.c][Figure 8.17]] (/echoall.c/). It is a
+trivial program that echoes all its command-line arguments and its
+entire environment list.
+
+When we execute the program from in [[file:exec1.c][Figure 8.16]] (/exec1.c/), we get
+
+#+begin_src sh
+  $ ./exec1
+  argv[0]: echoall
+  argv[1]: myarg1
+  argv[2]: MY ARG2
+  USER=unknown
+  PATH=/tmp
+  $ argv[0]: echoall
+  argv[1]: only 1 arg
+  USER=sar
+  LOGNAME=sar
+  SHELL=/bin/bash
+  47 more lines that aren’t shown
+  HOME=/home/sar
+#+end_src
+
+Note that the shell prompt appeared before the printing of =argv[0]=
+from the second =exec=. This occurred because the parent did not wait
+for this child process to finish.
+
+#+begin_src sh
+  $ ./exec1
+  argv[0]: echoall
+  argv[1]: myarg1
+  argv[2]: MY ARG2
+  USER=unknown
+  PATH=/tmp
+  argv[0]: echoall
+  argv[1]: only 1 arg
+  SHELL=/usr/bin/bash
+  LOGNAME=owner
+  HOME=/home/owner
+                  # ... many lines of environment variables
+  LANG=C.UTF-8
+  OLDPWD=/home/owner/coding/c_prog/apue.3e/stdio
+  TERM_PROGRAM=tmux
+  _=./exec1
+#+end_src
+
+* 8.11 Changing User IDs and Group IDs
+:PROPERTIES:
+:CUSTOM_ID: section-8-11
+:END:
+
+In the UNIX System, privileges, such as being able to change the
+system’s notion of the current date, and access control, such as being
+able to read or write a particular file, are based on user and group
+IDs. When our programs need additional privileges or need to gain
+access to resources that they currently aren’t allowed to access, they
+need to change their user or group ID to an ID that has the
+appropriate privilege or access.  Similarly, when our programs need to
+lower their privileges or prevent access to certain resources, they do
+so by changing either their user ID or group ID to an ID without the
+privilege or ability access to the resource.
+
+*In general, we try to use the least-privilege model when we design
+our applications*.  According to this model, our programs should use
+the least privilege necessary to accomplish any given task. *This
+reduces the risk that security might be compromised* *by a malicious
+user trying to trick our programs* *into using their privileges in
+unintended ways*.
+
+We can set the real user ID and effective user ID with the =setuid=
+function.  Similarly, we can set the real group ID and the effective
+group ID with the =setgid= function.
+
+#+begin_src c
+  #include <unistd.h>
+  int setuid(uid_t uid);
+  int setgid(gid_t gid);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+There are rules for who can change the IDs. Let’s consider only the
+user ID for now. (*Everything we describe for the user ID also applies
+to the group ID*.)
+
+1. *If the process has superuser privileges*, the =setuid= function
+   sets the real user ID, effective user ID, and saved set-user-ID to
+   =uid=.
+
+2. *If the process does not have superuser privileges*, *but* =uid=
+   *equals either the real user ID or the saved set-user-ID*, =setuid=
+   sets only the effective user ID to =uid=. The real user ID and the
+   saved set-user-ID are not changed.
+
+3. *If neither of these two conditions is true*, =errno= is set to
+   =EPERM= and =−1= is returned.
+
+Here, we are assuming that =_POSIX_SAVED_IDS= is true. *If this
+feature isn’t provided*, *then delete all preceding references to the
+saved set-user-ID*.
+
+  #+begin_quote
+  The *saved IDs* are a mandatory feature in the 2001 version of
+  *POSIX.1*. They were optional in older versions of POSIX. To see
+  whether an implementation supports this feature, an application can
+  test for the constant =_POSIX_SAVED_IDS= at compile time or call
+  =sysconf= with the =_SC_SAVED_IDS= argument at runtime.
+  #+end_quote
+
+We can make a few statements about the three user IDs that the kernel
+maintains.
+
+1. *Only a superuser process can change the real user ID*. Normally,
+   the real user ID is set by the =login(1)= program when we log in
+   and never changes. Because login is a superuser process, it sets
+   all three user IDs when it calls =setuid=.
+
+2. The *effective user ID* is set by the =exec= functions *only if the
+   set-user-ID bit is set for the program file*. If the set-user-ID
+   bit is not set, the =exec= functions leave the effective user ID as
+   its current value. We can call =setuid= at any time to set the
+   effective user ID to either the real user ID or the saved
+   set-user-ID. Naturally, we can’t set the effective user ID to any
+   random value.
+
+3. *The saved set-user-ID is copied from the effective user ID by*
+   =exec=.  If the file’s set-user-ID bit is set, this copy is saved
+   after =exec= stores the effective user ID from the file’s user ID.
+
+Figure 8.18 summarizes the various ways these three user IDs can be changed.
+
+| ID                | =exec=                        | =exec=                           | =setuid(uid)= | =setuid(uid)=     |
+| ID                | set-user-ID bit off           | set-user-ID bit on               | superuser     | unprivileged user |
+|                   | <12>                          | <12>                             |               |                   |
+|-------------------+-------------------------------+----------------------------------+---------------+-------------------|
+| real user ID      | unchanged                     | unchanged                        | set to =uid=  | unchanged         |
+| effective user ID | unchanged                     | set from user ID of program file | set to =uid=  | set to =uid=      |
+| saved set-user ID | copied from effective user ID | copied from effective user ID    | set to =uid=  | unchanged         |
+
+Figure 8.18 Ways to change the three user IDs
+
+Note that we can obtain only the current value of the *real user ID*
+and the *effective user ID* with the functions =getuid= and =geteuid=
+from [[#section-8-2][Section 8.2]]. *We have no portable way to obtain the current value
+of the saved set-user-ID*.
+
+  #+begin_quote
+  *FreeBSD 8.0* and *LINUX 3.2.0* provide the =getresuid= and
+  =getresgid= functions, which can be used to get the saved
+  set-user-ID and saved set-group-ID, respectively.
+  #+end_quote
+
+** =setreuid= and =setregid= Functions
+
+Historically, BSD supported the swapping of the *real user ID* and the
+*effective user ID* with the =setreuid= function.
+
+#+begin_src c
+  #include <unistd.h>
+  int setreuid(uid_t ruid, uid_t euid);
+  int setregid(gid_t rgid, gid_t egid);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+*We can supply a value of* =−1= *for any of the arguments to indicate
+that the corresponding ID should remain unchanged*.
+
+The rule is simple: *an unprivileged user can always swap between the
+real user ID and the effective user ID*. This allows a set-user-ID
+program to swap to the user’s normal permissions and swap back again
+later for set-user-ID operations. When the saved set-user-ID feature
+was introduced with POSIX.1, the rule was enhanced to also allow an
+unprivileged user to set its effective user ID to its saved
+set-user-ID.
+
+  #+begin_quote
+  Both =setreuid= and =setregid= are included in the *XSI* option in
+  *POSIX.1*. As such, all UNIX System implementations are expected to
+  provide support for them.
+
+  *4.3BSD* didn’t have the saved set-user-ID feature described
+  earlier; it used =setreuid= and =setregid= instead. This allowed an
+  unprivileged user to swap back and forth between the two values. Be
+  aware, however, that when programs that used this feature spawned a
+  shell, they had to set the real user ID to the normal user ID before
+  the =exec=. If they didn’t do this, the real user ID could be
+  privileged (from the swap done by =setreuid=) and the shell process
+  could call =setreuid= to swap the two and assume the permissions of
+  the more privileged user.  *As a defensive programming measure to
+  solve this problem*, *programs set both the real user ID and the
+  effective user ID to the normal user ID* *before the call to* =exec=
+  *in the child*.
+  #+end_quote
+
+** =seteuid= and =setegid= Functions
+
+POSIX.1 includes the two functions =seteuid= and =setegid=. These
+functions are similar to =setuid= and =setgid=, but only the effective
+user ID or effective group ID is changed.
+
+#+begin_src c
+  #include <unistd.h>
+  int seteuid(uid_t uid);
+  int setegid(gid_t gid);
+  /* Both return: 0 if OK, −1 on error */
+#+end_src
+
+An unprivileged user can set its effective user ID to either its real
+user ID or its saved set-user-ID. For a privileged user, only the
+effective user ID is set to =uid=. (This behavior differs from that of
+the =setuid= function, which changes all three user IDs.)
+
+[[file:~/coding/c_prog/apue.3e/images/figure-8-19.jpeg][Figure 8.19]] summarizes all the functions that we’ve described here
+that modify the three user IDs.
+
+** Group IDs
+
+Everything that we’ve said so far in this section also applies in a
+similar fashion to group IDs.  The supplementary group IDs are not
+affected by =setgid=, =setregid=, or =setegid=.
+
+** Example
+
+To see the utility of the saved set-user-ID feature, let’s examine the
+operation of a program that uses it. *We’ll look at the* =at(1)=
+*program*, *which we can use to schedule commands to be run at some
+time in the future*.
+
+  #+begin_quote
+  On *Linux 3.2.0*, the =at= program is installed set-user-ID to user
+  daemon. On *FreeBSD 8.0*, *Mac OS X 10.6.8*, and *Solaris 10*, the
+  =at= program is installed set-user-ID to user =root=. This allows
+  the =at= command to write privileged files owned by the daemon that
+  will run the commands on behalf of the user running the =at=
+  command. On *Linux 3.2.0*, the programs are run by the =atd(8)=
+  daemon. On *FreeBSD 8.0* and *Solaris 10*, the programs are run by
+  the =cron(1M)= daemon. On *Mac OS X 10.6.8*, the programs are run by
+  the =launchd(8)= daemon.
+  #+end_quote
+
+To prevent being tricked into running commands that we aren’t allowed
+to run, or reading or writing files that we aren’t allowed to access,
+the =at= command and the daemon that ultimately runs the commands on
+our behalf have to switch between sets of privileges: ours and those
+of the daemon. The following steps take place.
+
+1. Assuming that the =at= program file is owned by =root= and has its
+   set-user-ID bit set, when we run it, we have
+
+   #+begin_quote
+   real user ID = our user ID (unchanged)
+   effective user ID = =root=
+   saved set-user-ID = =root=
+   #+end_quote
+
+2. The first thing the =at= command does is reduce its privileges so
+   that it runs with our privileges. It calls the =seteuid= function
+   to set the effective user ID to our real user ID. After this, we
+   have
+
+   #+begin_quote
+   real user ID = our user ID (unchanged)
+   effective user ID = our user ID
+   saved set-user-ID = =root= (unchanged)
+   #+end_quote
+
+3. The =at= program runs with our privileges until it needs to access
+   the configuration files that control which commands are to be run
+   and the time at which they need to run. These files are owned by
+   the daemon that will run the commands for us. The =at= command
+   calls =seteuid= to set the effective user ID to =root=. This call is
+   allowed because the argument to =seteuid= equals the saved
+   set-user-ID. (This is why we need the saved set-user-ID.) After
+   this, we have
+
+   #+begin_quote
+   real user ID = our user ID (unchanged)
+   effective user ID = =root=
+   saved set-user-ID = =root= (unchanged)
+   #+end_quote
+
+   Because the effective user ID is =root=, file access is allowed.
+
+4. After the files are modified to record the commands to be run and
+   the time at which they are to be run, the =at= command lowers its
+   privileges by calling =seteuid= to set its effective user ID to our
+   user ID. This prevents any accidental misuse of privilege. At this
+   point, we have
+
+   #+begin_quote
+   real user ID = our user ID (unchanged)
+   effective user ID = our user ID
+   saved set-user-ID = =root= (unchanged)
+   #+end_quote
+
+5. The daemon starts out running with =root= privileges. To run commands
+   on our behalf, the daemon calls =fork= and the child calls =setuid= to
+   change its user ID to our user ID. Because the child is running
+   with =root= privileges, this changes all of the IDs. We have
+
+   #+begin_quote
+   real user ID = our user ID
+   effective user ID = our user ID
+   saved set-user-ID = our user ID
+   #+end_quote
+
+   Now the daemon can safely execute commands on our behalf, because
+   it can access only the files to which we normally have access. We
+   have no additional permissions.
+
+By using the saved set-user-ID in this fashion, we can use the extra
+privileges granted to us by the set-user-ID of the program file only
+when we need elevated privileges. Any other time, however, the process
+runs with our normal permissions. If we weren’t able to switch back to
+the saved set-user-ID at the end, we might be tempted to retain the
+extra permissions the whole time we were running (which is asking for
+trouble).
+
+* 8.12 Interpreter Files
+:PROPERTIES:
+:CUSTOM_ID: section-8-12
+:END:
+
+All contemporary UNIX systems support *interpreter files*. These files
+are text files that begin with a line of the form
+
+#+begin_src sh
+  #! pathname [ optional-argument ]
+#+end_src
+
+*The space between the exclamation point and the pathname is
+optional*. The most common of these interpreter files begin with the
+line
+
+#+begin_src sh
+  #!/bin/sh
+#+end_src
+
+The =pathname= is normally an absolute =pathname=, since no special
+operations are performed on it (i.e., =PATH= is not used). The
+recognition of these files is done within the kernel as part of
+processing the =exec= system call. *The actual file that gets executed
+by the kernel is not the interpreter file*, *but rather the file
+specified by the* =pathname= *on the first line of the interpreter
+file*. Be sure to differentiate between the /interpreter file/ — *a
+text file that begins with* a /shebang/ (=#!=) — and the
+/interpreter/, which is specified by the =pathname= on the first line
+of the interpreter file.
+
+*Be aware that systems place a size limit on the first line of an
+interpreter file*. This limit includes the /shebang/, the =pathname=,
+the optional argument, the terminating newline, and any spaces.
+
+  #+begin_quote
+  On *FreeBSD 8.0*, this limit is 4,097 bytes. On *Linux 3.2.0*, the
+  limit is 128 bytes. *Mac OS X 10.6.8* supports a limit of 513 bytes,
+  whereas *Solaris 10* places the limit at 1,024 bytes.
+  #+end_quote
+
+** Example
+
+Let’s look at an example to see what the kernel does with the
+arguments to the =exec= function when the file being executed is an
+interpreter file and the optional argument on the first line of the
+interpreter file. The program in [[file:exec2.c][Figure 8.20]] (/exec2.c/) =execs= an
+interpreter file.
+
+This test needs =~/bin/testinterp= and =~/bin/echoarg= binaries to
+work. Build them with the user-defined =Makefile= rule =make utility=
+(see [[file:Makefile][Makefile]]).
+
+The following shows the contents of the one-line interpreter file that
+is executed and the result from running the program in [[file:exec2.c][Figure 8.20]]:
+
+#+begin_src sh
+  $ cat /home/owner/bin/testinterp
+  #!/home/owner/bin/echoarg foo
+  $ ./a.out
+  argv[0]: /home/owner/bin/echoarg
+  argv[1]: foo
+  argv[2]: /home/owner/bin/testinterp
+  argv[3]: myarg1
+  argv[4]: MY ARG2
+#+end_src
+
+The program =echoarg= (the interpreter) just echoes each of its
+command-line arguments. (This is the program from [[file:../environ/echoarg.c][Figure 7.4]]
+/echoarg.c/) Note that when the kernel =execs= the interpreter
+(=/home/owner/bin/echoarg=), =argv[0]= is the /pathname/ of the
+interpreter, =argv[1]= is the optional argument from the interpreter
+file, and the remaining arguments are the /pathname/
+(=/home/owner/bin/testinterp=) and the second and third arguments from
+the call to =execl= in the program shown in [[file:exec2.c][Figure 8.20]] (=myarg1= and
+=MY ARG2=). Both =argv[1]= and =argv[2]= from the call to =execl= have
+been shifted right two positions. Note that the kernel takes the
+/pathname/ from the =execl= call instead of the first argument
+(=testinterp=), on the assumption that the /pathname/ might contain
+more information than the first argument.
+
+** Example
+
+A common use for the optional argument following the interpreter
+=pathname= is to specify the =-f= option for programs that support
+this option. For example, an =awk(1)= program can be executed as
+
+#+begin_src sh
+  awk -f myfile
+#+end_src
+
+which tells =awk= to read the =awk= program from the file =myfile=.
+
+  #+begin_quote
+  Systems derived from *UNIX System V* often include two versions of
+  the =awk= language. On these systems, =awk= is often called “old
+  awk” and corresponds to the original version distributed with
+  *Version 7*. In contrast, =nawk= (new awk) contains numerous
+  enhancements and corresponds to the language described in /Aho,
+  Kernighan, and Weinberger/ [1988]. This newer version provides
+  access to the command-line arguments, which we need for the example
+  that follows. *Solaris 10* provides both versions.
+
+  The =awk= program is one of the utilities included by *POSIX* in its
+  *1003.2 standard*, which is now part of the base *POSIX.1*
+  specification in the *Single UNIX Specification*. This utility is
+  also based on the language described in /Aho, Kernighan, and
+  Weinberger/ [1988].
+
+  The version of =awk= in *Mac OS X 10.6.8* is based on the /Bell
+  Laboratories/ version, which has been placed in the public
+  domain. *FreeBSD 8.0* and some Linux distributions ship with *GNU*
+  =awk=, called =gawk=, which is linked to the name =awk=. =gawk=
+  conforms to the *POSIX standard*, but also includes other
+  extensions. Because they are more up-to-date, =gawk= and the version
+  of =awk= from /Bell Laboratories/ are preferred to either =nawk= or
+  old =awk=. (The /Bell Labs/ version of =awk= is available at
+  http://cm.bell-labs.com/cm/cs/awkbook/index.html.)
+  #+end_quote
+
+Using the =-f= option with an interpreter file lets us write
+
+#+begin_src sh
+#!/bin/awk -f
+(awk program follows in the interpreter file)
+#+end_src
+
+For example, [[file:awkexample][Figure 8.21]] (/awkexample/) shows
+=/usr/local/bin/awkexample= (an interpreter file).
+
+If one of the path prefixes is =/usr/local/bin=, we can execute the
+program in [[file:awkexample][Figure 8.21]] (assuming that we’ve turned on the execute bit
+for the file) as
+
+#+begin_src sh
+  $ awkexample file1 FILENAME2 f3
+  ARGV[0] = awk
+  ARGV[1] = file1
+  ARGV[2] = FILENAME2
+  ARGV[3] = f3
+#+end_src
+
+When =/bin/awk= is executed, its command-line arguments are
+
+#+begin_src sh
+  /bin/awk -f /usr/local/bin/awkexample file1 FILENAME2 f3
+#+end_src
+
+The /pathname/ of the interpreter file (=/usr/local/bin/awkexample=)
+is passed to the interpreter. The /filename/ portion of this
+/pathname/ (what we typed to the shell) isn’t adequate, because the
+interpreter (=/bin/awk= in this example) can’t be expected to use the
+=PATH= variable to locate files. When it reads the interpreter file,
+=awk= ignores the first line, *since the pound sign is awk’s comment
+character*.
+
+We can verify these command-line arguments with the following
+commands:
+
+#+begin_src sh
+$ /bin/su                                # become superuser
+Password:                                # enter superuser password
+$# mv /usr/bin/awk /usr/bin/awk.save     # save the original program
+$# cp /home/sar/bin/echoarg /usr/bin/awk # and replace it temporarily
+$# suspend                               # suspend the superuser shell
+[1] + Stopped /bin/su                    # using job control
+
+$ awkexample file1 FILENAME2 f3
+argv[0]: /bin/awk
+argv[1]: -f
+argv[2]: /usr/local/bin/awkexample
+argv[3]: file1
+argv[4]: FILENAME2
+argv[5]: f3
+
+$ fg                        # resume superuser shell using job control
+/bin/su
+$# mv /usr/bin/awk.save /usr/bin/awk    # restore the original program
+$# exit                                 # and exit the superuser shell
+#+end_src
+
+In this example, the =-f= option for the interpreter is required. As
+we said, this tells =awk= where to look for the =awk= program. If we
+remove the =-f= option from the interpreter file, an error message
+usually results when we try to run it. The exact text of the message
+varies, depending on where the interpreter file is stored and whether
+the remaining arguments represent existing files. This is because the
+command-line arguments in this case are
+
+#+begin_src sh
+  /bin/awk /usr/local/bin/awkexample file1 FILENAME2 f3
+#+end_src
+
+and =awk= is trying to interpret the string
+=/usr/local/bin/awkexample= as an =awk= program. If we couldn’t pass
+at least a single optional argument to the interpreter (=-f= in this
+case), these interpreter files would be usable only with the shells.
+
+*Are interpreter files required?* *Not really*. They provide an
+efficiency gain for the user at some expense in the kernel (since it’s
+the kernel that recognizes these files).  Interpreter files are useful
+for the following reasons.
+
+1. *They hide that certain programs are scripts in some other
+   language*. For example, to execute the program in [[file:awkexample][Figure 8.21]], we
+   just say
+
+   #+begin_src sh
+     awkexample optional-arguments
+   #+end_src
+
+   instead of needing to know that the program is really an =awk=
+   script that we would otherwise have to execute as
+
+   #+begin_src sh
+     awk -f awkexample optional-arguments
+   #+end_src
+
+2. *Interpreter scripts provide an efficiency gain*. Consider the
+   previous example again. We could still hide that the program is an
+   =awk= script, by wrapping it in a shell script:
+
+   #+begin_src sh
+     awk 'BEGIN {
+         for (i = 0; i < ARGC; i++)
+             printf "ARGV[%d] = %s\n", i, ARGV[i]
+             exit
+     }' $*
+   #+end_src
+
+   The problem with this solution is that more work is
+   required. First, the shell reads the command and tries to =execlp=
+   the /filename/. Because the shell script is an executable file but
+   isn’t a machine executable, an error is returned and =execlp=
+   assumes that the file is a shell script (which it is). Then
+   =/bin/sh= is executed with the /pathname/ of the shell script as
+   its argument. The shell correctly runs our script, but to run the
+   =awk= program, the shell does a =fork=, =exec=, and =wait=. Thus
+   there is more overhead involved in replacing an *interpreter
+   script* with a *shell script*.
+
+3. *Interpreter scripts let us write shell scripts using shells other
+   than* =/bin/sh=. When it finds an executable file that isn’t a
+   machine executable, =execlp= has to choose a shell to invoke, and
+   it always uses =/bin/sh=. Using an interpreter script, however, we
+   can simply write
+
+   #+begin_src sh
+   #!/bin/csh
+   (C-shell script follows in the interpreter file)
+   #+end_src
+
+   Again, we could wrap all of this in a =/bin/sh= script (that
+   invokes the C-shell), as we described earlier, *but more overhead
+   is required*.
+
+*None of this would work as we’ve shown here if the three shells and*
+=awk= *didn’t use the pound sign as their comment character*.
+
+* 8.13 =system= Function
+:PROPERTIES:
+:CUSTOM_ID: section-8-13
+:END:
+
+It is convenient to execute a command string from within a
+program. For example, assume that we want to put a time-and-date stamp
+into a certain file. We could use the functions described in [[file:../datafiles/README.org::#section-6-10][Section
+6.10]] to do this: call time to get the current calendar =time=, then
+call =localtime= to convert it to a /broken-down time/, then call
+=strftime= to format the result, and finally write the result to the
+file. It is much easier, however, to say
+
+#+begin_src c
+  system("date > file");
+#+end_src
+
+*ISO C* defines the =system= function, but its operation is strongly
+system dependent.  *POSIX.1* includes the =system= interface,
+expanding on the *ISO C* definition to describe its behavior in a
+*POSIX* environment.
+
+#+begin_src c
+  #include <stdlib.h>
+  int system(const char *cmdstring);
+  /* Returns: (see below) */
+#+end_src
+
+If =cmdstring= is a null pointer, =system= returns /nonzero/ only if a
+command processor is available. This feature determines whether the
+system function is supported on a given operating system. Under the
+*UNIX System*, =system= is always available.
+
+Because system is implemented by calling =fork=, =exec=, and
+=waitpid=, there are three types of return values.
+
+1. If either the =fork= fails or =waitpid= returns an error other than
+   =EINTR=, system returns =−1= with =errno= set to indicate the
+   error.
+
+2. If the =exec= fails, implying that the shell can’t be executed, the
+   return value is as if the shell had executed =exit(127)=.
+
+3. Otherwise, all three functions — =fork=, =exec=, and =waitpid= —
+   succeed, and the return value from =system= is the termination
+   status of the shell, in the format specified for =waitpid=.
+
+  #+begin_quote
+  Some older implementations of =system= returned an error (=EINTR=)
+  if =waitpid= was interrupted by a caught signal. Because there is no
+  strategy that an application can use to recover from this type of
+  error (the process ID of the child is hidden from the caller),
+  *POSIX* later added the requirement that =system= not return an
+  error in this case. (We discuss interrupted /system calls/ in
+  [[file:../signals/README.org::#section-10-5][Section 10.5]].)
+  #+end_quote
+
+*** Example
+
+[[file:system.c][Figure 8.22]] (/system.c/) shows an implementation of the =system=
+function. The one feature that it doesn’t handle is signals. *We’ll
+update this function with signal handling in* [[file:../signals/README.org::#section-10-18][Section 10.18]] (second
+example in [[file:~/coding/c_prog/apue.3e/signals/system.c][Figure 10.28]] /system.c/).
+
+The shell’s =-c= option tells it to take the next command-line
+argument — =cmdstring=, in this case — as its command input instead of
+reading from standard input or from a given file. The shell parses
+this null-terminated C string and breaks it up into separate
+command-line arguments for the command. The actual command string that
+is passed to the shell can contain any valid shell commands. For
+example, input and output redirection using =<= and =>= can be used.
+
+If we didn’t use the shell to execute the command, but tried to
+execute the command ourself, it would be more difficult. First, we
+would want to call =execlp=, instead of =execl=, to use the =PATH=
+variable, like the shell. We would also have to break up the
+null-terminated C string into separate command-line arguments for the
+call to =execlp=. *Finally, we wouldn’t be able to use any of the
+shell metacharacters*.
+
+Note that we call =_exit= instead of =exit=. We do this to prevent any
+standard I/O buffers, which would have been copied from the parent to
+the child across the =fork=, from being flushed in the child.
+
+**** Tets Run
+
+We can test this version of =system= from [[file:system.c][Figure 8.22]] (/system.c/)
+with the program shown in [[file:systest1.c][Figure 8.23]] (/systets1.c/). (The =pr_exit=
+function was defined in [[file:../lib/prexit.c][Figure 8.5]].)
+
+Running the program in [[file:systest1.c][Figure 8.23]] (/systets1.c/) gives us
+
+#+begin_src sh
+  $ ./systets1
+  Sat Feb 25 19:36:59 EST 2012
+  normal termination, exit status = 0 for date
+  sh: nosuchcommand: command not found
+  normal termination, exit status = 127 for nosuchcommand
+  sar console Jan 1 14:59
+  sar ttys000 Feb 7 19:08
+  sar ttys001 Jan 15 15:28
+  sar ttys002 Jan 15 21:50
+  sar ttys003 Jan 21 16:02
+  normal termination, exit status = 44 for exit
+#+end_src
+
+The advantage in using =system=, instead of using =fork= and =exec=
+directly, is that =system= *does all the required error handling*
+*and* (in our next version of this function in Section 10.18) *all the
+required signal handling*.
+
+Earlier systems, including *SVR3.2* and *4.3BSD*, didn’t have the
+=waitpid= function available. Instead, the parent waited for the
+child, using a statement such as
+
+#+begin_src c
+  while ((lastpid = wait(&status)) != pid && lastpid != -1)
+    ;
+#+end_src
+
+A problem occurs if the process that calls =system= has spawned its
+own children before calling =system=. Because the =while= statement
+above keeps looping until the child that was generated by =system=
+terminates, if any children of the process terminate before the
+process identified by =pid=, then the process ID and termination
+status of these other children are discarded by the while
+statement. Indeed, this inability to wait for a specific child is one
+of the reasons given in the *POSIX.1* Rationale for including the
+=waitpid= function. We’ll see in Section 15.3 that the same problem
+occurs with the =popen= and =pclose= functions if the system doesn’t
+provide a =waitpid= function.
+
+** Set-User-ID Programs
+
+What happens if we call system from a set-user-ID program? Doing so creates a
+security hole and should never be attempted. Figure 8.24 shows a simple program that
+just calls system for its command-line argument.
+
+
+
+
+* 8.14 Process Accounting
+:PROPERTIES:
+:CUSTOM_ID: section-8-14
+:END:
+
+* 8.15 User Identification
+:PROPERTIES:
+:CUSTOM_ID: section-8-15
+:END:
+
+* 8.16 Process Scheduling
+:PROPERTIES:
+:CUSTOM_ID: section-8-16
+:END:
+
+* 8.17 Process Times
+:PROPERTIES:
+:CUSTOM_ID: section-8-17
+:END:
+
+* 8.18 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-8-18
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-8
+:END:
+
+** Exercise 8.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-1
+:END:
+
+In Figure 8.3, we said that replacing the call to _exit with a call to
+exit might cause the standard output to be closed and printf to return
+−1. Modify the program to check whether your implementation behaves
+this way. If it does not, how can you simulate this behavior?
+
+** Exercise 8.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-2
+:END:
+
+Recall the typical arrangement of memory in Figure 7.6. Because the
+stack frames corresponding to each function call are usually stored in
+the stack, and because after a vfork the child runs in the address
+space of the parent, what happens if the call to vfork is from a
+function other than main and the child does a return from this
+function after the vfork? Write a test program to verify this, and
+draw a picture of what’s happening.
+
+*** Solution
+
+Consider [[file:../exercises/vfork3.c][Figure C.8]] (/vfork3.c/).
+
+When vfork is called, the parent’s stack pointer points to the stack
+frame for the f1 function that calls vfork. Figure C.9 shows
+this. vfork causes the child to execute first, and the child returns
+from f1. The child then calls f2, and its stack frame overwrites the
+previous stack frame for f1. The child then zeros out the automatic
+variable buf, setting 1,000 bytes of the stack frame to 0. The child
+returns from f2 and then calls _exit, but the contents of the stack
+beneath the stack frame for main have been changed. The parent then
+resumes after the call to vfork and does a return from f1. The return
+information is often stored in the stack frame, and that information
+has probably been modified by the child. After the parent resumes,
+what happens with this example depends on many implementation features
+of your UNIX system (where in the stack frame the return information
+is stored, what information in the stack frame is wiped out when the
+automatic variables are modified, and so on). The normal result is a
+core file, but your results may differ.
+
+**** Figure C.9 Stack frames when vfork is called
+:PROPERTIES:
+:CUSTOM_ID: figure-c-9
+:END:
+
+#+begin_example
+
+           bottom of stack ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
+                           ┃       stack frame       ┃
+                           ┃        for main         ┃
+                           ┃                         ┃
+                           ┃                         ┃
+                           ┣━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                           ┃       stack frame       ┃
+                           ┃        for f1           ┃
+                           ┃                         ┃
+direction of   │           ┃                         ┃
+stack growth   │           ┣━━━━━━━━━━━━━━━━━━━━━━━━━┫
+               ↓           ┃                         ┃
+
+#+end_example
+
+** Exercise 8.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-3
+:END:
+
+Rewrite the program in Figure 8.6 to use waitid instead of
+wait. Instead of calling pr_exit, determine the equivalent information
+from the siginfo structure.
+
+** Exercise 8.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-4
+:END:
+
+When we execute the program in Figure 8.13 one time, as in
+$ ./a.out
+the output is correct. But if we execute the program multiple times, one right after the
+other, as in
+$ ./a.out ; ./a.out ; ./a.out
+output from parent
+ooutput from parent
+ouotuptut from child
+put from parent
+output from child
+utput from child
+the output is not correct. What’s happening? How can we correct this? Can this problem
+happen if we let the child write its output first?
+
+** Exercise 8.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-5
+:END:
+
+In the program shown in Figure 8.20, we call execl, specifying the
+pathname of the interpreter file. If we called execlp instead,
+specifying a filename of testinterp, and if the directory
+/home/sar/bin was a path prefix, what would be printed as argv[2] when
+the program is run?
+
+** Exercise 8.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-6
+:END:
+
+Write a program that creates a zombie, and then call system to execute
+the ps(1) command to verify that the process is a zombie.
+
+*** Solution
+
+The program in [[file:../exercises/zombie.c][Figure C.10]] creates a zombie.
+
+#+begin_src sh
+Zombies are usually designated by ps(1) with a status of Z:
+$ ./a.out
+PID PPID S TT COMMAND
+2369 2208 S pts/2 -bash
+7230 2369 S pts/2 ./a.out
+7231 7230 Z pts/2 [a.out] <defunct>
+7232 7230 S pts/2 sh -c ps -o pid,ppid,state,tty,command
+7233 7232 R pts/2 ps -o pid,ppid,state,tty,command
+#+end_src
+
+** Exercise 8.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-8-7
+:END:
+
+We mentioned in Section 8.10 that POSIX.1 requires open directory
+streams to be closed across an exec. Verify this as follows: call
+opendir for the root directory, peek at your system’s implementation
+of the DIR structure, and print the close-on-exec flag. Then open the
+same directory for reading, and print the close-on-exec flag.

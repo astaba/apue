@@ -1,7 +1,12 @@
-/*
- * Error routines for programs that can run as a daemon.
- */
-
+/* =========================================================================
+ * Created on: <Thu Jul 16 01:02:58 +01 2026>
+ * Time-stamp: <Thu Jul 16 01:04:03 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/lib/errorlog.c -
+ *
+ * Figure B.4: Error routines for programs that can run as a daemon.
+ * ========================================================================= */
 #include "apue.h"
 #include <errno.h>  /* for definition of errno */
 #include <stdarg.h> /* ISO C variable arguments */

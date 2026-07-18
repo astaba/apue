@@ -8,7 +8,7 @@
  * Figure 3.1: This program tests its standard input to see whether it
  * is capable of seeking.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   if (lseek(STDIN_FILENO, 0, SEEK_CUR) == -1)

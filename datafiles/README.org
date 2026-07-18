@@ -1,0 +1,158 @@
+#+TITLE: System Data Files and Information
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 6 from “Advanced Programming in the UNIX® Environment” Third Edition by W. Richard Stevens and Stephen A. Rago
+#+STARTUP: showall
+
+* Table of Content                                                    :toc_2:
+- [[#61-introduction][6.1 Introduction]]
+- [[#62-password-file][6.2 Password File]]
+- [[#63-shadow-passwords][6.3 Shadow Passwords]]
+- [[#64-group-file][6.4 Group File]]
+- [[#65-supplementary-group-ids][6.5 Supplementary Group IDs]]
+- [[#66-implementation-differences][6.6 Implementation Differences]]
+- [[#67-other-data-files][6.7 Other Data Files]]
+- [[#68-login-accounting][6.8 Login Accounting]]
+- [[#69-system-identification][6.9 System Identification]]
+- [[#610-time-and-date-routines][6.10 Time and Date Routines]]
+- [[#611-summary][6.11 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-61][Exercise 6.1]]
+  - [[#exercise-62][Exercise 6.2]]
+  - [[#exercise-63][Exercise 6.3]]
+  - [[#exercise-64][Exercise 6.4]]
+  - [[#exercise-65][Exercise 6.5]]
+
+* 6.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-6-1
+:END:
+
+* 6.2 Password File
+:PROPERTIES:
+:CUSTOM_ID: section-6-2
+:END:
+
+* 6.3 Shadow Passwords
+:PROPERTIES:
+:CUSTOM_ID: section-6-3
+:END:
+
+* 6.4 Group File
+:PROPERTIES:
+:CUSTOM_ID: section-6-4
+:END:
+
+* 6.5 Supplementary Group IDs
+:PROPERTIES:
+:CUSTOM_ID: section-6-5
+:END:
+
+* 6.6 Implementation Differences
+:PROPERTIES:
+:CUSTOM_ID: section-6-6
+:END:
+
+* 6.7 Other Data Files
+:PROPERTIES:
+:CUSTOM_ID: section-6-7
+:END:
+
+* 6.8 Login Accounting
+:PROPERTIES:
+:CUSTOM_ID: section-6-8
+:END:
+
+* 6.9 System Identification
+:PROPERTIES:
+:CUSTOM_ID: section-6-9
+:END:
+
+* 6.10 Time and Date Routines
+:PROPERTIES:
+:CUSTOM_ID: section-6-10
+:END:
+
+* 6.11 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-6-11
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-6
+:END:
+
+** Exercise 6.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-6-1
+:END:
+
+If the system uses a shadow file and we need to obtain the encrypted
+password, how do we do so?
+
+** Exercise 6.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-6-2
+:END:
+
+If you have superuser access and your system uses shadow passwords,
+implement the previous exercise.
+
+*** Solution
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+The program in [[file:../exercises/getpwsvr4.c][Figure C.5]] prints the encrypted password on *Linux
+3.2.0* and *Solaris 10*. Unless this program is run with superuser
+permissions, the call to =getspnam= fails with an error of =EACCES=.
+
+Under *FreeBSD 8.0*, the program in [[file:../exercises/getpw44bsd.c][Figure C.6]] prints the encrypted
+password if the program is run with superuser permissions. Otherwise,
+the value returned in =pw_passwd= is an asterisk. On *Mac OS X
+10.6.8*, asterisks are printed regardless of the permissions with
+which it is run.
+
+** Exercise 6.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-6-3
+:END:
+
+Write a program that calls uname and prints all the fields in the
+utsname structure.  Compare the output to the output from the uname(1)
+command.
+
+** Exercise 6.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-6-4
+:END:
+
+Calculate the latest time that can be represented by the time_t data
+type. After it wraps around, what happens?
+
+** Exercise 6.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-6-5
+:END:
+
+Write a program to obtain the current time and print it using
+strftime, so that it looks like the default output from date(1). Set
+the TZ environment variable to different values and see what happens.
+
+*** Solution
+
+The program shown in [[file:../exercises/prtime.c][Figure C.7]] prints the date in a format similar to
+the date command.
+
+Running this program gives us
+
+#+begin_src sh
+$ ./a.out                       # author ’s default is US/Eastern
+Wed Jul 25 22:58:32 EDT 2012
+
+$ TZ=US/Mountain ./a.out        # U.S. Mountain time zone
+Wed Jul 25 20:58:32 MDT 2012
+
+$ TZ=Japan ./a.out              # Japan
+Thu Jul 26 11:58:32 JST 2012
+#+end_src

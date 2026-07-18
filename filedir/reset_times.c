@@ -11,7 +11,7 @@
  * obtains the times with the stat() function, truncates the file, and
  * then resets the times with the futimens() function.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {

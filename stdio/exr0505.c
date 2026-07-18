@@ -1,13 +1,13 @@
 /* =========================================================================
  * Created on: <Sat Jun 27 13:20:24 +01 2026>
- * Time-stamp: <Sat Jun 27 13:27:44 +01 2026 by owner>
+ * Time-stamp: <Sun Jun 28 04:12:47 +01 2026 by owner>
  * Author    : owner
  * Desc      : ~/coding/c_prog/apue.3e/stdio/exr0505.c -
  *
  * Exercise 5.5: How would you use the =fsync= function (Section 3.13)
  * with a standard I/O stream?
  * ========================================================================= */
-#include "../include/apue.h" /* IWYU pragma: keep */
+#include "apue.h" /* IWYU pragma: keep */
 
 int main(void) {
   FILE *fp;
@@ -25,10 +25,13 @@ int main(void) {
    * cache.  If you skip this, fsync() will run on an empty kernel
    * cache!
    */
+
+  /* abort(); */
   if (fflush(fp) != 0) {
     fclose(fp);
     err_sys("fflush() failed");
   }
+  /* abort(); */
 
   /* STEP 2: Extract the raw file descriptor from the FILE pointer. */
   fd = fileno(fp);
@@ -39,6 +42,7 @@ int main(void) {
 
   /* STEP 3: Force the kernel to commit dirty pages to persistent
    * hardware. */
+
   if (fsync(fd) == -1) {
     fclose(fp);
     err_sys("fsync() failed");

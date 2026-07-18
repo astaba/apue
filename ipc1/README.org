@@ -1,0 +1,304 @@
+#+TITLE: Interprocess Communication
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 15 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#151-introduction][15.1 Introduction]]
+- [[#152-pipes][15.2 Pipes]]
+- [[#153-popen-and-pclose-functions][15.3 =popen= and =pclose= Functions]]
+- [[#154-coprocesses][15.4 Coprocesses]]
+- [[#155-fifos][15.5 FIFOs]]
+- [[#156-xsi-ipc][15.6 XSI IPC]]
+  - [[#1561-identifiers-and-keys][15.6.1 Identifiers and Keys]]
+  - [[#1562-per-mission-str-ucture][15.6.2 Per mission Str ucture]]
+  - [[#1563-configuration-limits][15.6.3 Configuration Limits]]
+  - [[#1564-advantages-and-disadvantages][15.6.4 Advantages and Disadvantages]]
+- [[#157-message-queues][15.7 Message Queues]]
+- [[#158-semaphores][15.8 Semaphores]]
+- [[#159-shared-memory][15.9 Shared Memory]]
+- [[#1510-posix-semaphores][15.10 POSIX Semaphores]]
+- [[#1511-clientserver-properties][15.11 Client–Server Properties]]
+- [[#1512-summary][15.12 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-151][Exercise 15.1]]
+  - [[#exercise-152][Exercise 15.2]]
+  - [[#exercise-153][Exercise 15.3]]
+  - [[#exercise-154][Exercise 15.4]]
+  - [[#exercise-155][Exercise 15.5]]
+  - [[#exercise-156][Exercise 15.6]]
+  - [[#exercise-157][Exercise 15.7]]
+  - [[#exercise-158][Exercise 15.8]]
+  - [[#exercise-159][Exercise 15.9]]
+  - [[#exercise-1510][Exercise 15.10]]
+  - [[#exercise-1511][Exercise 15.11]]
+  - [[#exercise-1512][Exercise 15.12]]
+  - [[#exercise-1513][Exercise 15.13]]
+  - [[#exercise-1514][Exercise 15.14]]
+  - [[#exercise-1515][Exercise 15.15]]
+  - [[#exercise-1516][Exercise 15.16]]
+  - [[#exercise-1517][Exercise 15.17]]
+  - [[#exercise-1518][Exercise 15.18]]
+
+* 15.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-15-1
+:END:
+
+* 15.2 Pipes
+:PROPERTIES:
+:CUSTOM_ID: section-15-2
+:END:
+
+* 15.3 =popen= and =pclose= Functions
+:PROPERTIES:
+:CUSTOM_ID: section-15-3
+:END:
+
+* 15.4 Coprocesses
+:PROPERTIES:
+:CUSTOM_ID: section-15-4
+:END:
+
+* 15.5 FIFOs
+:PROPERTIES:
+:CUSTOM_ID: section-15-5
+:END:
+
+* 15.6 XSI IPC
+:PROPERTIES:
+:CUSTOM_ID: section-15-6
+:END:
+
+** 15.6.1 Identifiers and Keys
+:PROPERTIES:
+:CUSTOM_ID: section-15-6-1
+:END:
+
+** 15.6.2 Per mission Str ucture
+:PROPERTIES:
+:CUSTOM_ID: section-15-6-2
+:END:
+
+** 15.6.3 Configuration Limits
+:PROPERTIES:
+:CUSTOM_ID: section-15-6-3
+:END:
+
+** 15.6.4 Advantages and Disadvantages
+:PROPERTIES:
+:CUSTOM_ID: section-15-6-4
+:END:
+
+* 15.7 Message Queues
+:PROPERTIES:
+:CUSTOM_ID: section-15-7
+:END:
+
+* 15.8 Semaphores
+:PROPERTIES:
+:CUSTOM_ID: section-15-8
+:END:
+
+* 15.9 Shared Memory
+:PROPERTIES:
+:CUSTOM_ID: section-15-9
+:END:
+
+* 15.10 POSIX Semaphores
+:PROPERTIES:
+:CUSTOM_ID: section-15-10
+:END:
+
+* 15.11 Client–Server Properties
+:PROPERTIES:
+:CUSTOM_ID: section-15-11
+:END:
+
+* 15.12 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-15-12
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-15
+:END:
+
+** Exercise 15.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-1
+:END:
+
+In the program shown in Figure 15.6, remove the close right before the waitpid at the
+end of the parent code. Explain what happens.
+
+** Exercise 15.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-2
+:END:
+
+In the program in Figure 15.6, remove the waitpid at the end of the parent code. Explain
+what happens.
+
+** Exercise 15.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-3
+:END:
+
+What happens if the argument to popen is a nonexistent command? Write a small
+program to test this.
+
+** Exercise 15.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-4
+:END:
+
+In the program shown in Figure 15.18, remove the signal handler, execute the program,
+and then terminate the child. After entering a line of input, how can you tell that the
+parent was terminated by SIGPIPE?
+
+** Exercise 15.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-5
+:END:
+
+In the program in Figure 15.18, use the standard I/O library for reading and writing the
+pipes instead of read and write.
+
+** Exercise 15.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-6
+:END:
+
+The Rationale for POSIX.1 gives as one of the reasons for adding the waitpid function
+that most pre-POSIX.1 systems can’t handle the following:
+if ((fp = popen("/bin/true", "r")) == NULL)
+...
+if ((rc = system("sleep 100")) == -1)
+...
+if (pclose(fp) == -1)
+...
+What happens in this code if waitpid isn’t available and wait is used instead?
+
+** Exercise 15.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-7
+:END:
+
+Explain how select and poll handle an input descriptor that is a pipe, when the pipe is
+closed by the writer. To determine the answer, write two small test programs: one using
+select and one using poll.
+Redo this exercise, looking at an output descriptor that is a pipe, when the read end is
+closed.
+
+** Exercise 15.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-8
+:END:
+
+What happens if the cmdstring executed by popen with a type of "r" writes to its standard
+error?
+
+** Exercise 15.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-9
+:END:
+
+Since popen invokes a shell to execute its cmdstring argument, what happens when
+cmdstring terminates? (Hint: Draw all the processes involved.)
+
+** Exercise 15.10
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-10
+:END:
+
+POSIX.1 specifically states that opening a FIFO for read–write is undefined. Although
+most UNIX systems allow this, show another method for opening a FIFO for both reading
+and writing, without blocking.
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-15-10
+:END:
+
+The trick is to open the FIFO twice: once for reading and once for
+writing. We never use the descriptor that is opened for writing, but
+leaving that descriptor open prevents an end of file from being
+generated when the number of clients goes from 1 to 0. Opening the
+FIFO twice requires some care, as a nonblocking open is required. We
+have to do a nonblocking, read-only open first, followed by a blocking
+open for write-only. (If we tried a nonblocking open for writeonly
+first, it would return an error.) We then turn off nonblocking for the
+read descriptor. [[file:../exercises/fifo1.c][Figure C.20]] shows the code for this.
+
+** Exercise 15.11
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-11
+:END:
+
+Unless a file contains sensitive or confidential data, allowing other users to read the file
+causes no harm. (It is usually considered antisocial, however, to go snooping around in
+other people’s files.) But what happens if a malicious process reads a message from a
+message queue that is being used by a server and several clients? What information does
+the malicious process need to know to read the message queue?
+
+** Exercise 15.12
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-12
+:END:
+
+Write a program that does the following. Execute a loop five times: create a message
+queue, print the queue identifier, delete the message queue. Then execute the next loop
+five times: create a message queue with a key of IPC_PRIVATE, and place a message on
+the queue. After the program terminates, look at the message queues using ipcs(1).
+Explain what is happening with the queue identifiers.
+
+** Exercise 15.13
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-13
+:END:
+
+Describe how to build a linked list of data objects in a shared memory segment. What
+would you store as the list pointers?
+
+** Exercise 15.14
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-14
+:END:
+
+Draw a timeline of the program in Figure 15.33 showing the value of the variable i in both
+the parent and child, the value of the long integer in the shared memory region, and the
+value returned by the update function. Assume that the child runs first after the fork.
+
+** Exercise 15.15
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-15
+:END:
+
+Redo the program in Figure 15.33 using the XSI shared memory functions from
+Section 15.9 instead of the shared memory-mapped region.
+
+** Exercise 15.16
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-16
+:END:
+
+Redo the program in Figure 15.33 using the XSI semaphore functions from Section 15.8 to
+alternate between the parent and the child.
+
+** Exercise 15.17
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-17
+:END:
+
+Redo the program in Figure 15.33 using advisory record locking to alternate between the
+parent and the child.
+
+** Exercise 15.18
+:PROPERTIES:
+:CUSTOM_ID: exercise-15-18
+:END:
+
+Redo the program in Figure 15.33 using the POSIX semaphore functions from Section 15.10
+to alternate between the parent and the child.

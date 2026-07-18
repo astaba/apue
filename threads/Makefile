@@ -12,7 +12,8 @@ else
 endif
 ifeq "$(PLATFORM)" "linux"
   BAR = barrier
-  EXTRALIBS=-pthread -lrt -lbsd
+  EXTRALIBS=-pthread -lrt
+#  EXTRALIBS=-pthread -lrt -lbsd
 endif
 ifeq "$(PLATFORM)" "freebsd"
   BAR = barrier

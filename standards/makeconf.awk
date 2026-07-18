@@ -1,4 +1,14 @@
 #!/usr/bin/awk -f
+# =========================================================================
+# Created on: <Fri Jul 17 14:20:55 +01 2026>
+# Time-stamp: <Fri Jul 17 14:51:23 +01 2026 by owner>
+# Author    : W. Richard Stevens and Stephen A. Rago from
+#             "Advanced Programming in the UNIX® Environment" Third Edition
+# Desc      : ~/coding/c_prog/apue.3e/standards/makeconf.awk -
+#
+# Figure 2.13 Build C program to print all supported configuration
+# limits
+# =========================================================================
 BEGIN	{
 	printf("#include \"apue.h\"\n")
 	printf("#include <errno.h>\n")

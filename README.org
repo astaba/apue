@@ -1,0 +1,451 @@
+#+TITLE: Advanced Programming in the UNIX Environment third Edition 2013
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Contents of the book authored by W. Richard Stevens and Stephen A. Rago.
+#+STARTUP: showall
+
+* Table of Contents                                                   :toc_2:
+- [[#contents][Contents]]
+- [[#list-of-figures][List of Figures]]
+  - [[#chapter-1-unix-system-overview][Chapter 1 UNIX System Overview]]
+  - [[#chapter-2-unix-standardization-and-implementations][Chapter 2 UNIX Standardization and Implementations]]
+  - [[#chapter-3-file-io][Chapter 3 File I/O]]
+  - [[#chapter-4-files-and-directories][Chapter 4 Files and Directories]]
+  - [[#chapter-5-standard-io-library][Chapter 5 Standard I/O Library]]
+  - [[#chapter-6-system-data-files-and-information][Chapter 6 System Data Files and Information]]
+  - [[#chapter-7-process-environment][Chapter 7 Process Environment]]
+  - [[#chapter-8-process-control][Chapter 8 Process Control]]
+  - [[#chapter-9-process-relationships][Chapter 9 Process Relationships]]
+  - [[#chapter-10-signals][Chapter 10 Signals]]
+  - [[#chapter-11-threads][Chapter 11 Threads]]
+  - [[#chapter-12-thread-control][Chapter 12 Thread Control]]
+  - [[#chapter-13-daemon-processes][Chapter 13 Daemon Processes]]
+  - [[#chapter-14-advanced-io][Chapter 14 Advanced I/O]]
+  - [[#chapter-15-interprocess-communication][Chapter 15 Interprocess Communication]]
+  - [[#chapter-16-network-ipc-sockets][Chapter 16 Network IPC: Sockets]]
+  - [[#chapter-17-advanced-ipc][Chapter 17 Advanced IPC]]
+  - [[#chapter-18-terminal-io][Chapter 18 Terminal I/O]]
+  - [[#chapter-19-pseudo-terminals][Chapter 19 Pseudo Terminals]]
+  - [[#chapter-20-a-database-library][Chapter 20 A Database Library]]
+  - [[#chapter-21-communicating-with-a-network-printer][Chapter 21 Communicating with a Network Printer]]
+  - [[#appendix-b-miscellaneous-source-code][Appendix B Miscellaneous Source Code]]
+  - [[#appendix-c-solutions-to-selected-exercises][Appendix C Solutions to Selected Exercises]]
+- [[#from-the-author][From The Author]]
+
+* Contents
+
+Mapping code base directories to book chapters.
+
+- [[file:./][APUE]]:
+- Foreword to the Second Edition
+- Preface
+- Preface to the Second Edition
+- Preface to the First Edition
+- [[file:figlinks][figlinks]]:      Symbolic links to all source code /Figure.X.X/.
+- [[file:intro/][intro]]:         [[file:intro/README.org][Chapter 1]]  UNIX System Overview
+- [[file:standards/][standards]]:     [[file:standards/README.org][Chapter 2]]  UNIX Standardization and Implementations
+- [[file:fileio/][fileio]]:        [[file:fileio/README.org][Chapter 3]]  File I/O
+- [[file:filedir/][filedir]]:       [[file:filedir/README.org][Chapter 4]]  Files and Directories
+- [[file:stdio/][stdio]]:         [[file:stdio/README.org][Chapter 5]]  Standard I/O Library
+- [[file:datafiles/][datafiles]]:     [[file:datafiles/README.org][Chapter 6]]  System Data Files and Information
+- [[file:environ/][environ]]:       [[file:environ/README.org][Chapter 7]]  Process Environment
+- [[file:proc/][proc]]:          [[file:proc/README.org][Chapter 8]]  Process Control
+- [[file:relation/][relation]]:      [[file:relation/README.org][Chapter 9]]  Process Relationships
+- [[file:signals/][signals]]:       [[file:signals/README.org][Chapter 10]] Signals
+- [[file:threads/][threads]]:       [[file:threads/README.org][Chapter 11]] Threads
+- [[file:threadctl/][threadctl]]:     [[file:threadctl/README.org][Chapter 12]] Thread Control
+- [[file:daemons/][daemons]]:       [[file:daemons/README.org][Chapter 13]] Daemon Processes
+- [[file:advio/][advio]]:         [[file:advio/README.org][Chapter 14]] Advanced I/O
+- [[file:ipc1/][ipc1]]:          [[file:ipc1/README.org][Chapter 15]] Interprocess Communication
+- [[file:sockets/][sockets]]:       [[file:sockets/README.org][Chapter 16]] Network IPC: Sockets
+- [[file:ipc2/][ipc2]]:          [[file:ipc2/README.org][Chapter 17]] Advanced IPC
+- [[file:termios/][termios]]:       [[file:termios/README.org][Chapter 18]] Terminal I/O
+- [[file:pty/][pty]]:           [[file:pty/README.org][Chapter 19]] Pseudo Terminals
+- [[file:db/][db]]:            [[file:db/README.org][Chapter 20]] A Database Library
+- [[file:printer/][printer]]:       [[file:printer/README.org][Chapter 21]] Communicating with a Network Printer
+- Appendix A.    Function Prototypes
+- [[file:lib/][lib]]:           [[file:lib/README.org][Appendix B]] Miscellaneous Source Code
+- [[file:include/][include]]:       The [[file:include/apue.h][apue.h]] header file
+- [[file:exercises/][exercises]]:     [[file:exercises/README.org][Appendix C]] Solutions to Selected Exercises
+- Bibliography
+- Index
+
+* List of Figures
+
+** Chapter 1 UNIX System Overview
+*** Examples Source Codes
+- [[file:./intro/ls1.c][Figure 1.3]] List all the files in a directory
+- [[file:./intro/mycat.c][Figure 1.4]] Copy standard input to standard output
+- [[file:intro/getcputc.c][Figure 1.5]] Copy standard input to standard output, using standard
+  I/O
+- [[file:intro/hello.c][Figure 1.6]] Print the process ID
+- [[file:./intro/shell1.c][Figure 1.7]] Read commands from standard input and execute them
+- [[file:intro/testerror.c][Figure 1.8]] Demonstrate strerror and perror
+- [[file:intro/uidgid.c][Figure 1.9]] Print user ID and group ID
+- [[file:./intro/shell2.c][Figure 1.10]] Read commands from standard input and execute them
+
+** Chapter 2 UNIX Standardization and Implementations
+*** Examples Source Codes
+- [[file:./standards/makeconf.awk][Figure 2.13]] Build C program to print all supported configuration
+  limits
+- [[file:./standards/conf.c.modified][Figure 2.14]] Print all possible sysconf and pathconf values
+- [[file:lib/pathalloc.c][Figure 2.16]] Dynamically allocate space for a pathname
+- [[file:./lib/openmax.c][Figure 2.17]] Determine the number of file descriptors
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-2
+:END:
+- [[file:./exercises/openmax.c][Figure C.1]] *Solution 2.3*: Alternative method for identifying the
+  largest possible file descriptor
+
+** Chapter 3 File I/O
+*** Examples Source Codes
+- [[file:fileio/lseek_stdin.c][Figure 3.1]] Test whether standard input is capable of seeking
+- [[file:fileio/lseek_hole.c][Figure 3.2]] Create a file with a hole in it
+- [[file:fileio/copy_inout.c][Figure 3.5]] Copy standard input to standard output
+- [[file:fileio/print_flags.c][Figure 3.11]] Print file flags for specified descriptor
+- [[file:fileio/set_flags.c][Figure 3.12]] Turn on one or more of the file status flags for a
+  descriptor
+
+** Chapter 4 Files and Directories
+*** Examples Source Codes
+- [[file:filedir/file_types.c][Figure 4.3]] Print type of file for each command-line argument
+- [[file:./filedir/access_file.c][Figure 4.8]] Example of access function
+- [[file:./filedir/mode_mask.c][Figure 4.9]] Example of umask function
+- [[file:./filedir/change_mode.c][Figure 4.12]] Example of chmod function
+- [[file:./filedir/unlink_file.c][Figure 4.16]] Open a file and then unlink it
+- [[file:./filedir/reset_times.c][Figure 4.21]] Example of futimens function
+- [[file:./filedir/ftree_walk.c][Figure 4.22]] Recursively descend a directory hierarchy, counting file
+  types
+- [[file:./filedir/change_dir.c][Figure 4.23]] Example of chdir function
+- [[file:./filedir/get_cwd.c][Figure 4.24]] Example of getcwd function
+- [[file:./filedir/device_num.c][Figure 4.25]] Print st_dev and st_rdev values
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-4
+:END:
+- [[file:./exercises/longpath.c][Figure C.3]] *Solution 4.16*: Create a deep directory tree
+
+** Chapter 5 Standard I/O Library
+*** Examples Source Codes
+- [[file:./stdio/getcputc.c][Figure 5.4]] Copy standard input to standard output using getc and
+  putc
+- [[file:./stdio/fgetsfputs.c][Figure 5.5]] Copy standard input to standard output using fgets and
+  fputs
+- [[file:./stdio/buf.c][Figure 5.11]] Print buffering for various standard I/O streams
+- [[file:./stdio/tempfiles.c][Figure 5.12]] Demonstrate tmpnam and tmpfile functions
+- [[file:./stdio/mkstemp.c][Figure 5.13]] Demonstrate mkstemp function
+- [[file:./stdio/memstr.c][Figure 5.15]] Investigate memory stream write behavior
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-5
+:END:
+- [[file:./exercises/fmemopen.c][Figure C.4]] *Solution 5.7*: Implementation of fmemopen for BSD
+  systems
+
+** Chapter 6 System Data Files and Information
+*** Examples Source Codes
+- [[file:./datafiles/getpwnam.c][Figure 6.2]] The getpwnam function
+- [[file:./datafiles/strftime.c][Figure 6.11]] Using the strftime function
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-6
+:END:
+- [[file:./exercises/getpwsvr4.c][Figure C.5]] *Solution 6.2*: Print encrypted password under Linux and
+  Solaris
+- [[file:./exercises/getpw44bsd.c][Figure C.6]] *Solution 6.2*: Print encrypted password under FreeBSD
+  and Mac OS X
+- [[file:./exercises/prtime.c][Figure C.7]] *Solution 6.5*: Print the time and date in a format
+  similar to date(1)
+
+** Chapter 7 Process Environment
+*** Examples Source Codes
+- [[file:./environ/hello1.c][Figure 7.1]] Classic C program
+- [[file:./environ/doatexit.c][Figure 7.3]] Example of exit handlers
+- [[file:./environ/echoarg.c][Figure 7.4]] Echo all command-line arguments to standard output
+- [[file:./environ/cmd1.c][Figure 7.9]] Typical program skeleton for command processing
+- [[file:./environ/cmd2.c][Figure 7.11]] Example of setjmp and longjmp
+- [[file:./environ/testjmp.c][Figure 7.13]] Effect of longjmp on various types of variables
+- [[file:./environ/opendata.c][Figure 7.14]] Incorrect usage of an automatic variable
+- [[file:./environ/getrlimit.c][Figure 7.16]] Print the current resource limits
+
+** Chapter 8 Process Control
+*** Examples Source Codes
+- [[file:./proc/fork1.c][Figure 8.1]] Example of fork function
+- [[file:./proc/vfork1.c][Figure 8.3]] Example of vfork function
+- [[file:./lib/prexit.c][Figure 8.5]] Print a description of the exit status
+- [[file:./proc/wait1.c][Figure 8.6]] Demonstrate various exit statuses
+- [[file:./proc/fork2.c][Figure 8.8]] Avoid zombie processes by calling fork twice
+- [[file:./proc/tellwait1.c][Figure 8.12]] Program with a race condition
+- [[file:./proc/tellwait2.c][Figure 8.13]] Modification of Figure 8.12 to avoid race condition
+- [[file:./proc/exec1.c][Figure 8.16]] Example of exec functions
+- [[file:./proc/echoall.c][Figure 8.17]] Echo all command-line arguments and all environment
+  strings
+- [[file:./proc/exec2.c][Figure 8.20]] A program that execs an interpreter file
+- [[file:./proc/awkexample][Figure 8.21]] An awk program as an interpreter file
+- [[file:./proc/system.c][Figure 8.22]] The system function, without signal handling
+- [[file:./proc/systest1.c][Figure 8.23]] Calling the system function
+- [[file:./proc/systest3.c][Figure 8.24]] Execute the command-line argument using system
+- [[file:./proc/pruids.c][Figure 8.25]] Print real and effective user IDs
+- [[file:./proc/test1.c][Figure 8.28]] Program to generate accounting data
+- [[file:./proc/pracct.c][Figure 8.29]] Print selected fields from system’s accounting file
+- [[file:./proc/nice.c][Figure 8.30]] Evaluate the effect of changing the nice value
+- [[file:./proc/times1.c][Figure 8.31]] Time and execute all command-line arguments
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-8
+:END:
+- [[file:./exercises/vfork3.c][Figure C.8]] *Solution 8.2*: Incorrect use of vfork
+- [[file:./exercises/zombie.c][Figure C.10]] *Solution 8.6*: Create a zombie and look at its status
+  with ps
+
+** Chapter 9 Process Relationships
+*** Examples Source Codes
+- [[file:./relation/orphan3.c][Figure 9.12]] Creating an orphaned process group
+
+** Chapter 10 Signals
+*** Examples Source Codes
+- [[file:./signals/sigusr.c][Figure 10.2]] Simple program to catch SIGUSR1 and SIGUSR2
+- [[file:./signals/reenter.c][Figure 10.5]] Call a nonreentrant function from a signal handler
+- [[file:./signals/child.c][Figure 10.6]] System V SIGCLD handler that doesn’t work
+- [[file:./signals/sleep1.c][Figure 10.7]] Simple, incomplete implementation of sleep
+- [[file:./signals/sleep2.c][Figure 10.8]] Another (imperfect) implementation of sleep
+- [[file:./signals/tsleep2.c][Figure 10.9]] Calling sleep2 from a program that catches other signals
+- [[file:./signals/read1.c][Figure 10.10]] Calling read with a timeout
+- [[file:./signals/read2.c][Figure 10.11]] Calling read with a timeout, using longjmp
+- [[file:./signals/setops.c][Figure 10.12]] An implementation of sigaddset, sigdelset, and
+  sigismember
+- [[file:./lib/prmask.c][Figure 10.14]] Print the signal mask for the process
+- [[file:./signals/critical.c][Figure 10.15]] Example of signal sets and sigprocmask
+- [[file:./lib/signal.c][Figure 10.18]] An implementation of signal using sigaction
+- [[file:./lib/signalintr.c][Figure 10.19]] The signal_intr function
+- [[file:./signals/mask.c][Figure 10.20]] Example of signal masks, sigsetjmp, and siglongjmp
+- [[file:./signals/suspend1.c][Figure 10.22]] Protecting a critical region from a signal
+- [[file:./signals/suspend2.c][Figure 10.23]] Using sigsuspend to wait for a global variable to be
+  set
+- [[file:./lib/tellwait.c][Figure 10.24]] Routines to allow a parent and child to synchronize
+- [[file:./signals/abort.c][Figure 10.25]] Implementation of POSIX.1 abort
+- [[file:./signals/systest2.c][Figure 10.26]] Using system to invoke the ed editor
+- [[file:./signals/system.c][Figure 10.28]] Correct POSIX.1 implementation of system function
+- [[file:./lib/sleep.c][Figure 10.29]] Reliable implementation of sleep
+- [[file:./signals/sigtstp.c][Figure 10.31]] How to handle SIGTSTP
+
+** Chapter 11 Threads
+*** Examples Source Codes
+- [[file:./threads/threadid.c][Figure 11.2]] Printing thread IDs
+- [[file:./threads/exitstatus.c][Figure 11.3]] Fetching the thread exit status
+- [[file:./threads/badexit2.c][Figure 11.4]] Incorrect use of pthread_exit argument
+- [[file:./threads/cleanup.c][Figure 11.5]] Thread cleanup handler
+- [[file:./threads/mutex1.c][Figure 11.10]] Using a mutex to protect a data structure
+- [[file:./threads/mutex2.c][Figure 11.11]] Using two mutexes
+- [[file:./threads/mutex3.c][Figure 11.12]] Simplified locking
+- [[file:threads/timedlock.c][Figure 11.13]] Using pthread_mutex_timedlock
+- [[file:./threads/rwlock.c][Figure 11.14]] Using reader–writer locks
+- [[file:./threads/condvar.c][Figure 11.15]] Using a condition variable
+- [[file:./threads/barrier.c][Figure 11.16]] Using a barrier
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-11
+:END:
+- [[file:./exercises/goodexit.c][Figure C.12]] *Solution 11.1*: Correct use of thread return value
+
+** Chapter 12 Thread Control
+*** Examples Source Codes
+- [[file:./threadctl/detach.c][Figure 12.4]] Creating a thread in the detached state
+- [[file:./threadctl/timeout.c][Figure 12.8]] Using a recursive mutex
+- [[file:./threadctl/getenv1.c][Figure 12.11]] A nonreentrant version of getenv
+- [[file:./threadctl/getenv2.c][Figure 12.12]] A reentrant (thread-safe) version of getenv
+- [[file:./threadctl/getenv3.c][Figure 12.13]] A thread-safe, compatible version of getenv
+- [[file:./threadctl/suspend.c][Figure 12.16]] Synchronous signal handling
+- [[file:./threadctl/atfork.c][Figure 12.17]] pthread_atfork example
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-12
+:END:
+- [[file:./exercises/sleep.c][Figure C.13]] *Solution 12.6*: A thread-safe implementation of sleep
+
+** Chapter 13 Daemon Processes
+*** Examples Source Codes
+- [[file:./daemons/init.c][Figure 13.1]] Initialize a daemon process
+- [[file:./daemons/single.c][Figure 13.6]] Ensure that only one copy of a daemon is running
+- [[file:./daemons/reread.c][Figure 13.7]] Daemon rereading configuration files
+- [[file:./daemons/reread2.c][Figure 13.8]] Alternative implementation of daemon rereading
+  configuration files
+- [[file:./lib/setfd.c][Figure 13.9]] Set close-on-exec flag
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-13
+:END:
+- [[file:./exercises/getlogin.c][Figure C.14]] *Solution 13.3*: Call daemonize and then obtain login
+  name
+
+** Chapter 14 Advanced I/O
+*** Examples Source Codes
+- [[file:./advio/nonblockw.c][Figure 14.1]] Large nonblocking write
+- [[file:./lib/lockreg.c][Figure 14.5]] Function to lock or unlock a region of a file
+- [[file:./lib/locktest.c][Figure 14.6]] Function to test for a locking condition
+- [[file:./advio/deadlock.c][Figure 14.7]] Example of deadlock detection
+- [[file:./advio/lockfile.c][Figure 14.9]] Place a write lock on an entire file
+- [[file:./advio/mandatory.c][Figure 14.12]] Determine whether mandatory locking is supported
+- [[file:./advio/rot13a.c][Figure 14.20]] Translate a file using ROT-13
+- [[file:advio/rot13c2.c.in][Figure 14.21]] Translate a file using ROT-13 and asynchronous I/O
+- [[file:./advio/writen.c][Figure 14.24]] The readn and writen functions
+- [[file:./advio/mcopy2.c][Figure 14.27]] Copy a file using memory-mapped I/O
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-14
+:END:
+- [[file:./exercises/pendlock.c][Figure C.15]] *Solution 14.1*: Determine record-locking behavior
+- [[file:./exercises/sleepus_select.c][Figure C.16]] *Solution 14.5*: Implementation of sleep_us using select
+- [[file:./exercises/sleepus_poll.c][Figure C.17]] *Solution 14.5*: Implementation of sleep_us using poll
+- [[file:./exercises/sizepipe.c][Figure C.18]] *Solution 14.7*: Calculation of pipe capacity using
+  nonblocking writes
+
+** Chapter 15 Interprocess Communication
+*** Examples Source Codes
+- [[file:./ipc1/pipe1.c][Figure 15.5]] Send data from parent to child over a pipe
+- [[file:./ipc1/pipe2.c][Figure 15.6]] Copy file to pager program
+- [[file:./ipc1/tellwait.c][Figure 15.7]] Routines to let a parent and child synchronize
+- [[file:./ipc1/popen2.c][Figure 15.11]] Copy file to pager program using popen
+- [[file:./ipc1/popen.c][Figure 15.12]] The popen and pclose functions
+- [[file:./ipc1/myuclc.c][Figure 15.14]] Filter to convert uppercase characters to lowercase
+- [[file:./ipc1/popen1.c][Figure 15.15]] Invoke uppercase/lowercase filter to read commands
+- [[file:./ipc1/add2.c][Figure 15.17]] Simple filter to add two numbers
+- [[file:./ipc1/pipe4.c][Figure 15.18]] Program to drive the add2 filter
+- [[file:./ipc1/add2stdio.c][Figure 15.19]] Filter to add two numbers, using standard I/O
+- [[file:./ipc1/tshm.c][Figure 15.31]] Print where various types of data are stored
+- [[file:./ipc1/devzero.c][Figure 15.33]] IPC between parent and child using memory mapped I/O of
+  /dev/zero
+- [[file:./ipc1/slock.c][Figure 15.35]] Mutual exclusion using a POSIX semaphore
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-15
+:END:
+- [[file:./exercises/fifo1.c][Figure C.20]] *Solution 15.10*: Opening a FIFO for reading and
+  writing, without blocking
+
+** Chapter 16 Network IPC: Sockets
+*** Examples Source Codes
+- [[file:./sockets/findsvc.c][Figure 16.9]] Print host and service information
+- [[file:./sockets/clconn.c][Figure 16.10]] Connect with retry
+- [[file:./sockets/clconn2.c][Figure 16.11]] Portable connect with retry
+- [[file:./sockets/initsrv1.c][Figure 16.12]] Initialize a socket endpoint for use by a server
+- [[file:./sockets/ruptime.c][Figure 16.16]] Client command to get uptime from server
+- [[file:./sockets/ruptimed.c][Figure 16.17]] Server program to provide system uptime
+- [[file:./sockets/ruptimed-fd.c][Figure 16.18]] Server program illustrating command writing directly to
+  socket
+- [[file:./sockets/ruptime-dg.c][Figure 16.19]] Client command using datagram service
+- [[file:./sockets/ruptimed-dg.c][Figure 16.20]] Server providing system uptime over datagrams
+- [[file:./sockets/initsrv2.c][Figure 16.22]] Initialize a socket endpoint for use by a server with
+  address reuse
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-16
+:END:
+- [[file:./exercises/bo.c][Figure C.22]] *Solution 16.1*: Determine byte order on system
+- [[file:./exercises/asyncsocket.c][Figure C.23]] *Solution 16.6*: Enable and disable asynchronous socket
+  I/O
+
+** Chapter 17 Advanced IPC
+*** Examples Source Codes
+- [[file:./lib/spipe.c][Figure 17.2]] Creating a full-duplex pipe
+- [[file:./ipc2/pollmsg.c][Figure 17.3]] Poll for XSI messages using UNIX domain sockets
+- [[file:./ipc2/sendmsg.c][Figure 17.4]] Post a message to an XSI message queue
+- [[file:./ipc2/bindunix.c][Figure 17.5]] Binding an address to a UNIX domain socket
+- [[file:./lib/servlisten.c][Figure 17.8]] The serv_listen function
+- [[file:./lib/servaccept.c][Figure 17.9]] The serv_accept function
+- [[file:./lib/cliconn.c][Figure 17.10]] The cli_conn function
+- [[file:./lib/senderr.c][Figure 17.12]] The send_err function
+- [[file:./lib/sendfd.c][Figure 17.13]] Sending a file descriptor over a UNIX domain socket
+- [[file:./lib/recvfd.c][Figure 17.14]] Receiving a file descriptor over a UNIX domain socket
+- [[file:./ipc2/sendfd2.c][Figure 17.15]] Sending credentials over UNIX domain sockets
+- [[file:./ipc2/recvfd2.c][Figure 17.16]] Receiving credentials over UNIX domain sockets
+- [[file:./ipc2/open.fe/open.h][Figure 17.17]] The open.h header
+- [[file:ipc2/open/open.h][Figure 17.17.alt]] The open.h header
+- [[file:./ipc2/open.fe/main.c][Figure 17.18]] The client main function, version 1
+- [[file:ipc2/open/main.c][Figure 17.18.alt]] The client main function, version 1
+- [[file:./ipc2/open.fe/open.c][Figure 17.19]] The csopen function, version 1
+- [[file:./ipc2/opend.fe/opend.h][Figure 17.20]] The opend.h header, version 1
+- [[file:./ipc2/opend.fe/main.c][Figure 17.21]] The server main function, version 1
+- [[file:./ipc2/opend.fe/request.c][Figure 17.22]] The handle_request function, version 1
+- [[file:./lib/bufargs.c][Figure 17.23]] The buf_args function
+- [[file:./ipc2/opend.fe/cliargs.c][Figure 17.24]] The cli_args function
+- [[file:ipc2/opend/cliargs.c][Figure 17.24.alt]] The cli_args function
+- [[file:./ipc2/open/open.c][Figure 17.25]] The csopen function, version 2
+- [[file:./ipc2/opend/opend.h][Figure 17.26]] The opend.h header, version 2
+- [[file:./ipc2/opend/client.c][Figure 17.27]] Functions to manipulate client array
+- [[file:./ipc2/opend/main.c][Figure 17.28]] The server main function, version 2
+- [[file:./ipc2/opend/loop.select.c][Figure 17.29]] The loop function using select
+- [[file:./ipc2/opend/loop.poll.c][Figure 17.30]] The loop function using poll
+- [[file:./ipc2/opend/request.c][Figure 17.31]] The request function, version 2
+*** Solutions Source Codes
+:PROPERTIES:
+:CUSTOM_ID: solutions-source-codes-17
+:END:
+- [[file:./exercises/pollmsg2.c][Figure C.24]] *Solution 17.1*: Poll for XSI messages using pipes
+
+** Chapter 18 Terminal I/O
+*** Examples Source Codes
+- [[file:./termios/settty.c][Figure 18.10]] Disable interrupt character and change end-of-file
+  character
+- [[file:./termios/csize.c][Figure 18.11]] Example of tcgetattr and tcsetattr
+- [[file:./termios/ctermid.c][Figure 18.12]] Implementation of POSIX.1 ctermid function
+- [[file:./termios/isatty.c][Figure 18.13]] Implementation of POSIX.1 isatty function
+- [[file:./termios/t_isatty.c][Figure 18.14]] Test the isatty function
+- [[file:./termios/ttyname.c][Figure 18.15]] Implementation of POSIX.1 ttyname function
+- [[file:./termios/t_ttyname.c][Figure 18.16]] Test the ttyname function
+- [[file:./termios/getpass.c][Figure 18.17]] Implementation of getpass function
+- [[file:./termios/t_getpass.c][Figure 18.18]] Call the getpass function
+- [[file:./lib/ttymodes.c][Figure 18.20]] Set terminal mode to cbreak or raw
+- [[file:./termios/t_raw.c][Figure 18.21]] Test raw and cbreak terminal modes
+- [[file:./termios/winch.c][Figure 18.22]] Print window size
+
+** Chapter 19 Pseudo Terminals
+*** Examples Source Codes
+- [[file:./lib/ptyopen.c][Figure 19.9]] Pseudo-terminal open functions
+- [[file:./lib/ptyfork.c][Figure 19.10]] The pty_fork function
+- [[file:./pty/main.c][Figure 19.11]] The main function for the pty program
+- [[file:./pty/loop.c][Figure 19.12]] The loop function
+- [[file:./pty/driver.c][Figure 19.16]] The do_driver function for the pty program
+
+** Chapter 20 A Database Library
+- [[file:./db/t4.c][Figure 20.3]] Create a database and write three records to it
+
+** Chapter 21 Communicating with a Network Printer
+
+These source codes are listed in the book but not referenced as
+“Figures”:
+
+*** Examples Source Codes
+- [[file:printer/ipp.h][ipp.h]] Header file containing IPP definitions
+- [[file:printer/print.h][print.h]] Header containing common constants, data structure
+  definitions, and utility routine declarations
+- [[file:printer/util.c][util.c]] Utility routines used by the two programs
+- [[file:printer/print.c][print.c]] The C source file for the command used to print a file
+- [[file:printer/printd.c][printd.c]] The C source file for the printer spooling daemon
+
+** Appendix B Miscellaneous Source Code
+- [[file:./include/apue.h][Figure B.1]]: Our own header, to be included before all standard
+  system headers.
+- [[file:./lib/error.c][Figure B.3]] Error functions that output to standard error
+- [[file:./lib/errorlog.c][Figure B.4]]: Error routines for programs that can run as a daemon.
+
+** Appendix C Solutions to Selected Exercises
+To locate the searched figure refer to the specific chapter in the
+preceding sections.  *Not all exercises have solutions* *neither do
+all solutions come with source code figures*.
+
+* From The Author
+
+Read the file called [[file:DISCLAIMER][DISCLAIMER]].
+
+On Freebsd, type =gmake=.  On other platforms, type =make= (as
+long as this is /gnu/ =make=).
+
+For FAQs, updated source code, and the lost chapter, see
+http://www.apuebook.com.  Please direct questions, suggestions, and
+bug reports to /sar@apuebook.com/.
+
+#+begin_quote
+Steve Rago
+January 2013
+#+end_quote

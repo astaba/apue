@@ -1,0 +1,37 @@
+#+TITLE: Solutions to Selected Exercises
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Appendix C from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#suggestion][Suggestion]]
+- [[#chapter-5-standard-io-library][Chapter 5: Standard I/O Library]]
+
+* TODO Suggestion
+
+Make this file a listing of the links to solutions in their original
+chapters to keep solutions right after each exercise.
+
+* Chapter 5: Standard I/O Library
+
+*** Solution 5.2
+
+The =fgets= function reads up through and including the next newline
+or until the buffer is full (leaving room, of course, for the
+terminating null). Also, =fputs= writes everything in the buffer until
+it hits a null byte; it doesn’t care whether a newline is in the
+buffer. So, if =MAXLINE= is too small, both functions still work;
+they’re just called more often than they would be if the buffer were
+larger.
+
+If either of these functions removed or added the newline (as =gets=
+and =puts= do), we would have to ensure that our buffer was big enough
+for the largest line.
+
+*** Solution 5.7
+
+An implementation of =fmemopen= for *BSD-based* systems is shown in
+[[file:fmemopen.c][Figure C.4]].
+
+
+

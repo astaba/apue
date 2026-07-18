@@ -1,0 +1,261 @@
+#+TITLE: Advanced I/O
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 14 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#141-introduction][14.1 Introduction]]
+- [[#142-nonblocking-io][14.2 Nonblocking I/O]]
+- [[#143-record-locking][14.3 Record Locking]]
+- [[#144-io-multiplexing][14.4 I/O Multiplexing]]
+  - [[#1441-select-and-pselect-functions][14.4.1 select and pselect Functions]]
+  - [[#1442-poll-function][14.4.2 poll Function]]
+- [[#145-asynchronous-io][14.5 Asynchronous I/O]]
+  - [[#1451-system-v-asynchronous-io][14.5.1 System V Asynchronous I/O]]
+  - [[#1452-bsd-asynchronous-io][14.5.2 BSD Asynchronous I/O]]
+  - [[#1453-posix-asynchronous-io][14.5.3 POSIX Asynchronous I/O]]
+- [[#146-readv-and-writev-functions][14.6 readv and writev Functions]]
+- [[#147-readn-and-writen-functions][14.7 readn and writen Functions]]
+- [[#148-memory-mapped-io][14.8 Memory-Mapped I/O]]
+- [[#149-summary][14.9 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-141][Exercise 14.1]]
+  - [[#exercise-142][Exercise 14.2]]
+  - [[#exercise-143][Exercise 14.3]]
+  - [[#exercise-144][Exercise 14.4]]
+  - [[#exercise-145][Exercise 14.5]]
+  - [[#exercise-146][Exercise 14.6]]
+  - [[#exercise-147][Exercise 14.7]]
+  - [[#exercise-148][Exercise 14.8]]
+  - [[#exercise-149][Exercise 14.9]]
+  - [[#exercise-1410][Exercise 14.10]]
+  - [[#exercise-1411][Exercise 14.11]]
+
+* 14.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-14-1
+:END:
+
+* 14.2 Nonblocking I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-2
+:END:
+
+* 14.3 Record Locking
+:PROPERTIES:
+:CUSTOM_ID: section-14-3
+:END:
+
+* 14.4 I/O Multiplexing
+:PROPERTIES:
+:CUSTOM_ID: section-14-4
+:END:
+
+** 14.4.1 select and pselect Functions
+:PROPERTIES:
+:CUSTOM_ID: section-14-4-1
+:END:
+
+** 14.4.2 poll Function
+:PROPERTIES:
+:CUSTOM_ID: section-14-4-2
+:END:
+
+* 14.5 Asynchronous I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-5
+:END:
+
+** 14.5.1 System V Asynchronous I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-5-1
+:END:
+
+** 14.5.2 BSD Asynchronous I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-5-2
+:END:
+
+** 14.5.3 POSIX Asynchronous I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-5-3
+:END:
+
+* 14.6 readv and writev Functions
+:PROPERTIES:
+:CUSTOM_ID: section-14-6
+:END:
+
+* 14.7 readn and writen Functions
+:PROPERTIES:
+:CUSTOM_ID: section-14-7
+:END:
+
+* 14.8 Memory-Mapped I/O
+:PROPERTIES:
+:CUSTOM_ID: section-14-8
+:END:
+
+* 14.9 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-14-9
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-14
+:END:
+
+** Exercise 14.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-1
+:END:
+
+Write a test program that illustrates your system’s behavior when a process is blocked
+while trying to write lock a range of a file and additional read-lock requests are made. Is
+the process requesting a write lock starved by the processes read locking the file?
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-14-1
+:END:
+
+The test program is shown in [[file:../exercises/pendlock.c][Figure C.15]].
+
+On FreeBSD 8.0, Linux 3.2.0, and Mac OS X 10.6.8, the behavior is the same:
+additional readers can starve pending writers. Running the program gives us
+
+#+begin_src sh
+child 1: obtained read lock on file
+child 2: obtained read lock on file
+child 3: can’t set write lock: Resource temporarily unavailable
+child 3 about to block in write-lock...
+parent: obtained additional read lock while write lock is pending
+killing child 1...
+child 1: exit after pause
+killing child 2...
+child 2: exit after pause
+killing child 3...
+child 3: can’t write-lock file: Interrupted system call
+#+end_src
+
+On Solaris 10, readers don’t starve waiting writers. In this case, the parent is
+unable to obtain a read lock because there is a process waiting for a write lock.
+
+** Exercise 14.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-2
+:END:
+
+Take a look at your system’s headers and examine the implementation of select and the
+four FD_ macros.
+
+** Exercise 14.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-3
+:END:
+
+The system headers usually have a built-in limit on the maximum number of descriptors
+that the fd_set data type can handle. Assume that we need to increase this limit to
+handle up to 2,048 descriptors. How can we do this?
+
+** Exercise 14.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-4
+:END:
+
+Compare the functions provided for signal sets (Section 10.11) and the fd_set descriptor
+sets. Also compare the implementation of the two on your system.
+
+** Exercise 14.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-5
+:END:
+
+Implement the function sleep_us, which is similar to sleep, but waits for a specified
+number of microseconds. Use either select or poll. Compare this function to the BSD
+usleep function.
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-14-5
+:END:
+
+[[file:../exercises/sleepus_select.c][Figure C.16]] shows an implementation using select.
+
+[[file:../exercises/sleepus_poll.c][Figure C.17]] shows an implementation using poll.
+
+As the BSD usleep(3) manual page states, usleep uses the nanosleep
+function, which doesn’t interfere with timers set by the calling
+process.
+
+** Exercise 14.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-6
+:END:
+
+Can you implement the functions TELL_WAIT, TELL_PARENT, TELL_CHILD,
+WAIT_PARENT, and WAIT_CHILD from Figure 10.24 using advisory record locking instead
+of signals? If so, code and test your implementation.
+
+** Exercise 14.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-7
+:END:
+
+Determine the capacity of a pipe using nonblocking writes. Compare this value with the
+value of PIPE_BUF from Chapter 2.
+
+*** Solution
+:PROPERTIES:
+:CUSTOM_ID: solution-14-7
+:END:
+
+A solution is shown in [[file:../exercises/sizepipe.c][Figure C.18]].
+The following table shows the values calculated for our four platforms.
+
+| Platform        | Pipe Capacity (bytes) |
+|-----------------+-----------------------|
+| FreeBSD 8.0     | 65,536                |
+| Linux 3.2.0     | 65,536                |
+| Mac OS X 10.6.8 | 16,384                |
+| Solaris 10      | 16,384                |
+
+These values can differ from the corresponding PIPE_BUF values, because
+PIPE_BUF is defined to be the maximum amount of data that can be written to a
+pipe atomically. Here, we calculate the amount of data that a pipe can hold
+independent of any atomicity constraints.
+
+** Exercise 14.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-8
+:END:
+
+Rewrite the program in Figure 14.21 to make it a filter: read from the standard input and
+write to the standard output, but use the asynchronous I/O interfaces. What must you
+change to make it work properly? Keep in mind that you should get the same results
+whether the standard output is attached to a terminal, a pipe, or a regular file.
+
+** Exercise 14.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-9
+:END:
+
+Recall Figure 14.23. Determine the break-even point on your system where using writev
+is faster than copying the data yourself and using a single write.
+
+** Exercise 14.10
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-10
+:END:
+
+Run the program in Figure 14.27 to copy a file and determine whether the last-access time
+for the input file is updated.
+
+** Exercise 14.11
+:PROPERTIES:
+:CUSTOM_ID: exercise-14-11
+:END:
+
+In the program from Figure 14.27, close the input file after calling mmap to verify that
+closing the descriptor does not invalidate the memory-mapped I/O.

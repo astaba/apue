@@ -1,6 +1,6 @@
 /* =========================================================================
  * Created on: <Tue Jun 23 13:00:58 +01 2026>
- * Time-stamp: <Tue Jun 23 13:02:30 +01 2026 by owner>
+ * Time-stamp: <Mon Jul 13 12:37:25 +01 2026 by owner>
  * Author    : W. Richard Stevens and Stephen A. Rago from
  *             "Advanced Programming in the UNIX® Environment" Third Edition
  * Desc      : ~/coding/c_prog/apue.3e/stdio/getcputc.c -
@@ -8,7 +8,7 @@
  * Figure 5.4: Copy standard input to standard output using getc and
  * putc
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   int c;

@@ -1,0 +1,166 @@
+#+TITLE: Pseudo Terminals
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 19 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#191-introduction][19.1 Introduction]]
+- [[#192-over-view][19.2 Over view]]
+- [[#193-opening-pseudo-ter-minal-devices][19.3 Opening Pseudo-Ter minal Devices]]
+- [[#194-pty_fork-function][19.4 pty_fork Function]]
+- [[#195-pty-program][19.5 pty Program]]
+- [[#196-using-the-pty-program][19.6 Using the pty Program]]
+- [[#197-advanced-features][19.7 Advanced Features]]
+- [[#198-summary][19.8 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-191][Exercise 19.1]]
+  - [[#exercise-192][Exercise 19.2]]
+  - [[#exercise-193][Exercise 19.3]]
+  - [[#exercise-194][Exercise 19.4]]
+  - [[#exercise-195][Exercise 19.5]]
+  - [[#exercise-196][Exercise 19.6]]
+  - [[#exercise-197][Exercise 19.7]]
+  - [[#exercise-198][Exercise 19.8]]
+  - [[#exercise-199][Exercise 19.9]]
+
+* 19.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-19-1
+:END:
+
+* 19.2 Over view
+:PROPERTIES:
+:CUSTOM_ID: section-19-2
+:END:
+
+* 19.3 Opening Pseudo-Ter minal Devices
+:PROPERTIES:
+:CUSTOM_ID: section-19-3
+:END:
+
+[[file:../lib/ptyopen.c][Figure 19.9]] (/ptyopen.c/) Pseudo-terminal open functions.
+
+* 19.4 pty_fork Function
+:PROPERTIES:
+:CUSTOM_ID: section-19-4
+:END:
+
+[[file:../lib/ptyfork.c][Figure 19.10]] (/ptyfork.c/) The =pty_fork= function.
+
+* 19.5 pty Program
+:PROPERTIES:
+:CUSTOM_ID: section-19-5
+:END:
+
+[[file:main.c][Figure 19.11]] (/main.c/) The main function for the =pty= program.
+
+* 19.6 Using the pty Program
+:PROPERTIES:
+:CUSTOM_ID: section-19-6
+:END:
+
+* 19.7 Advanced Features
+:PROPERTIES:
+:CUSTOM_ID: section-19-7
+:END:
+
+* 19.8 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-19-8
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-19
+:END:
+
+** Exercise 19.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-1
+:END:
+
+When we remotely log in to a BSD system using either telnet or rlogin, the ownership
+of the PTY slave and its permissions are set, as we described in Section 19.3. How does
+this happen?
+
+** Exercise 19.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-2
+:END:
+
+Use the pty program to determine the values used by your system to initialize a slave
+PTY’s termios structure and winsize structure.
+
+** Exercise 19.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-3
+:END:
+
+Recode the loop function (Figure 19.12) as a single process using either select or poll.
+
+** Exercise 19.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-4
+:END:
+
+In the child process after pty_fork returns, standard input, standard output, and
+standard error are all open for read–write. Can you change standard input to be read-only
+and the other two to be write-only?
+
+** Exercise 19.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-5
+:END:
+
+In Figure 19.13, identify which process groups are in the foreground and which are in the
+background, and identify the session leaders.
+
+** Exercise 19.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-6
+:END:
+
+In Figure 19.13, in what order do the processes terminate when we type the end-of-file
+character? Verify this with process accounting, if possible.
+
+** Exercise 19.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-7
+:END:
+
+The script(1) program normally adds to the beginning of the output file a line with the
+starting time, and to the end of the output file another line with the ending time. Add
+these features to the simple shell script that we showed.
+
+** Exercise 19.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-8
+:END:
+
+Explain why the contents of the file data are output to the terminal in the following
+example, even though the program ttyname (Figure 18.16) only generates output and
+never reads its input.
+$ cat data a file with two lines
+hello,
+world
+$ pty -i < data ttyname -i says ignore eof on stdin
+hello, where did these two lines come from?
+world
+fd 0: /dev/ttys005 we expect these three lines from ttyname
+fd 1: /dev/ttys005
+fd 2: /dev/ttys005
+
+** Exercise 19.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-19-9
+:END:
+
+Write a program that calls pty_fork and have the child exec another program that you
+will write. The new program that the child execs must catch SIGTERM and SIGWINCH.
+When it catches a signal, the program should print that it did; for the latter signal, it should
+also print the terminal’s window size. Then have the parent process send the SIGTERM
+signal to the process group of the PTY slave with the ioctl command we described in
+Section 19.7. Read back from the slave to verify that the signal was caught. Follow this
+with the parent setting the window size of the PTY slave, and then read back the slave’s
+output again. Have the parent exit and determine whether the slave process also
+terminates; if so, how does it terminate?

@@ -1,5 +1,12 @@
-/* Figure 1.4: Unbuffered I/O */
-
+/* =========================================================================
+ * Created on: <Fri Jul 17 14:18:53 +01 2026>
+ * Time-stamp: <Fri Jul 17 14:22:20 +01 2026 by owner>
+ * Author    : W. Richard Stevens and Stephen A. Rago from
+ *             "Advanced Programming in the UNIX® Environment" Third Edition
+ * Desc      : ~/coding/c_prog/apue.3e/intro/mycat.c -
+ *
+ * Figure 1.4: Unbuffered I/O
+ * ========================================================================= */
 #include "apue.h"
 
 #define BUFFSIZE 4096

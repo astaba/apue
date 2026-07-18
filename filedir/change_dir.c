@@ -14,7 +14,7 @@
  * path of the process but cannot affect the processes that invoke the
  * process that executes the `chdir`.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   if (chdir("/tmp") < 0)

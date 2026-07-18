@@ -7,7 +7,7 @@
  *
  * Figure 5.12 Demonstrate tmpnam and tmpfile functions
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   char name[L_tmpnam], line[MAXLINE];

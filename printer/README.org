@@ -1,0 +1,136 @@
+#+TITLE: Communicating with a Network Printer
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 21 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#211-introduction][21.1 Introduction]]
+- [[#212-the-internet-printing-protocol][21.2 The Internet Printing Protocol]]
+- [[#213-the-hypertext-transfer-protocol][21.3 The Hypertext Transfer Protocol]]
+- [[#214-printer-spooling][21.4 Printer Spooling]]
+- [[#215-source-code][21.5 Source Code]]
+- [[#216-summary][21.6 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-211][Exercise 21.1]]
+  - [[#exercise-212][Exercise 21.2]]
+  - [[#exercise-213][Exercise 21.3]]
+  - [[#exercise-214][Exercise 21.4]]
+  - [[#exercise-215][Exercise 21.5]]
+  - [[#exercise-216][Exercise 21.6]]
+  - [[#exercise-217][Exercise 21.7]]
+  - [[#exercise-218][Exercise 21.8]]
+  - [[#exercise-219][Exercise 21.9]]
+
+* 21.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-21-1
+:END:
+
+* 21.2 The Internet Printing Protocol
+:PROPERTIES:
+:CUSTOM_ID: section-21-2
+:END:
+
+* 21.3 The Hypertext Transfer Protocol
+:PROPERTIES:
+:CUSTOM_ID: section-21-3
+:END:
+
+* 21.4 Printer Spooling
+:PROPERTIES:
+:CUSTOM_ID: section-21-4
+:END:
+
+* 21.5 Source Code
+:PROPERTIES:
+:CUSTOM_ID: section-21-5
+:END:
+
+* 21.6 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-21-6
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-21
+:END:
+
+** Exercise 21.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-1
+:END:
+
+Translate the IPP error code values listed in ipp.h into error messages. Then modify the
+print spooler daemon to log a message at the end of the printer_status function when
+the IPP header indicates a printer error.
+
+** Exercise 21.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-2
+:END:
+
+Add support to the print command and the printd daemon to allow users to request
+double-sided printing. Do the same for landscape and portrait page orientation.
+
+** Exercise 21.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-3
+:END:
+
+Modify the print spooler daemon so that when it starts, it contacts the printer to find out
+which features are supported by the printer so that the daemon doesn’t request an option
+that isn’t supported.
+
+** Exercise 21.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-4
+:END:
+
+Write a command to report on the status of pending print jobs.
+
+** Exercise 21.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-5
+:END:
+
+Write a command to cancel a pending print job. Use the job ID as the argument to the
+command to specify which job to cancel. How can you prevent one user from canceling
+another user’s print jobs?
+
+** Exercise 21.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-6
+:END:
+
+Add support for multiple printers to the printer spooler. Include a way to move print jobs
+from one printer to another.
+
+** Exercise 21.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-7
+:END:
+
+In the printer daemon, explain why we don’t need to prod the printer thread when the
+signal handling thread catches SIGHUP and sets reread to 1.
+
+** Exercise 21.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-8
+:END:
+
+In the printer_status function, we search for the length of the IPP message by looking
+for the Content-Length HTTP attribute. This technique won’t work with a printer that
+responds using a chunked transfer encoding. Check RFC 2616 to see how a chunked
+message is formatted and then modify printer_status to support this form of response
+as well.
+
+** Exercise 21.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-21-9
+:END:
+
+In the update_jobno function, when the next job number wraps around from the
+maximum positive value to 1 (see get_newjobno to see how this can happen), we can
+write a smaller number over a larger one. This can result in the daemon reading an
+incorrect number when it restarts. What is a simple solution to this problem?

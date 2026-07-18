@@ -7,7 +7,7 @@
  *
  * Figure 4.12 Example of chmod function
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(void) {
   struct stat statbuf;

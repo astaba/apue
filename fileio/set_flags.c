@@ -8,7 +8,7 @@
  * Figure 3.12 Turn on one or more of the file status flags for a
  * descriptor.
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 #include <fcntl.h>
 
 /* @param flags are file status flags to turn on */

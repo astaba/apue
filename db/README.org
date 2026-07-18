@@ -1,0 +1,173 @@
+#+TITLE: A Database Library
+#+AUTHOR: Astar Bahouidi
+#+DESCRIPTION: Chapter 20 from “Advanced Programming in the UNIX® Environment” Third Edition by W.  Richard Stevens and Stephen A.  Rago
+#+STARTUP: showall
+
+* Table Of Contents                                                   :toc_2:
+- [[#201-introduction][20.1 Introduction]]
+- [[#202-history][20.2 History]]
+- [[#203-the-library][20.3 The Library]]
+- [[#204-implementation-over-view][20.4 Implementation Over view]]
+- [[#205-centralized-or-decentralized][20.5 Centralized or Decentralized?]]
+- [[#206-concurrency][20.6 Concurrency]]
+- [[#207-building-the-library][20.7 Building the Library]]
+- [[#208-source-code][20.8 Source Code]]
+- [[#209-perfor-mance][20.9 Perfor mance]]
+- [[#2010-summary][20.10 Summary]]
+- [[#exercises][Exercises]]
+  - [[#exercise-201][Exercise 20.1]]
+  - [[#exercise-202][Exercise 20.2]]
+  - [[#exercise-203][Exercise 20.3]]
+  - [[#exercise-204][Exercise 20.4]]
+  - [[#exercise-205][Exercise 20.5]]
+  - [[#exercise-206][Exercise 20.6]]
+  - [[#exercise-207][Exercise 20.7]]
+  - [[#exercise-208][Exercise 20.8]]
+  - [[#exercise-209][Exercise 20.9]]
+  - [[#exercise-2010][Exercise 20.10]]
+
+* 20.1 Introduction
+:PROPERTIES:
+:CUSTOM_ID: section-20-1
+:END:
+
+* 20.2 History
+:PROPERTIES:
+:CUSTOM_ID: section-20-2
+:END:
+
+* 20.3 The Library
+:PROPERTIES:
+:CUSTOM_ID: section-20-3
+:END:
+
+* 20.4 Implementation Over view
+:PROPERTIES:
+:CUSTOM_ID: section-20-4
+:END:
+
+[[file:t4.c][Figure 20.3]] (/t4.c/) Create a database and write three records to it.
+
+* 20.5 Centralized or Decentralized?
+:PROPERTIES:
+:CUSTOM_ID: section-20-5
+:END:
+
+* 20.6 Concurrency
+:PROPERTIES:
+:CUSTOM_ID: section-20-6
+:END:
+
+* 20.7 Building the Library
+:PROPERTIES:
+:CUSTOM_ID: section-20-7
+:END:
+
+* 20.8 Source Code
+:PROPERTIES:
+:CUSTOM_ID: section-20-8
+:END:
+
+* 20.9 Perfor mance
+:PROPERTIES:
+:CUSTOM_ID: section-20-9
+:END:
+
+* 20.10 Summary
+:PROPERTIES:
+:CUSTOM_ID: section-20-10
+:END:
+
+* Exercises
+:PROPERTIES:
+:CUSTOM_ID: exercises-20
+:END:
+
+** Exercise 20.1
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-1
+:END:
+
+The locking in _db_dodelete is somewhat conservative. For example, we could allow
+more concurrency by not write locking the free list until we really need to; that is, the call
+to writew_lock could be moved between the calls to _db_writedat and
+_db_readptr. What happens if we do this?
+
+** Exercise 20.2
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-2
+:END:
+
+If db_nextrec did not read lock the free list and a record that it was reading was also in
+the process of being deleted, describe how db_nextrec could return the correct key but
+an all-blank (hence incorrect) data record. (Hint: Look at _db_dodelete.)
+
+** Exercise 20.3
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-3
+:END:
+
+At the end of Section 20.8, we described the locking performed by _db_writeidx and
+_db_writedat. We said that this locking didn’t interfere with other readers and writers
+except those making calls to db_store. Is this true if mandatory locking is being used?
+
+** Exercise 20.4
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-4
+:END:
+
+How would you integrate the fsync function into this database library?
+
+** Exercise 20.5
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-5
+:END:
+
+In db_store, we write the data record before the index record. What happens if you do it
+in the opposite order?
+
+** Exercise 20.6
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-6
+:END:
+
+Create a new database and write some number of records to the database. Write a
+program that calls db_nextrec to read each record in the database, and call _db_hash to
+calculate the hash value for each record. Print a histogram of the number of records on
+each hash chain. Is the hashing function in _db_hash adequate?
+
+** Exercise 20.7
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-7
+:END:
+
+Modify the database functions so that the number of hash chains in the index file can be
+specified when the database is created.
+
+** Exercise 20.8
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-8
+:END:
+
+Compare the performance of the database functions when the database is (a) on the same
+host as the test program and (b) on a different host accessed via NFS. Does the record
+locking provided by the database library still work?
+
+** Exercise 20.9
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-9
+:END:
+
+The database reuses free list records only if the sizes of the key buffer and data buffer
+match the needed sizes exactly. Modify the database to allow larger buffer sizes on the free
+list to satisfy the request. How do you have to change the persistent format of the database
+to support this feature?
+
+** Exercise 20.10
+:PROPERTIES:
+:CUSTOM_ID: exercise-20-10
+:END:
+
+After implementing a solution to Exercise 20.9, write a tool to convert one database format
+to the other.
+www

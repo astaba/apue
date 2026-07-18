@@ -8,7 +8,7 @@
  * Figure 4.3 Print type of file for each command-line argument.
  * See also [[file:../fileio/print_flags.c]]
  * ========================================================================= */
-#include "../include/apue.h"
+#include "apue.h"
 
 int main(int argc, char *argv[]) {
   int i;
